@@ -1,29 +1,29 @@
 node_modules/
 
-auth/dist/
-components/dist/
-components/www/
-components/loader/
+packages/auth/dist/
+packages/components/dist/
+packages/components/www/
+packages/components/loader/
 
-components/*~
-components/*.sw[mnpcod]
-components/*.log
-components/*.lock
-components/*.tmp
-components/*.tmp.*
-components/log.txt
-components/*.sublime-project
-components/*.sublime-workspace
+packages/components/*~
+packages/components/*.sw[mnpcod]
+packages/components/*.log
+packages/components/*.lock
+packages/components/*.tmp
+packages/components/*.tmp.*
+packages/components/log.txt
+packages/components/*.sublime-project
+packages/components/*.sublime-workspace
 
-components/.stencil/
-components/.idea/
-components/.vscode/
-components/.sass-cache/
-components/.versions/
+packages/components/.stencil/
+packages/components/.idea/
+packages/components/.vscode/
+packages/components/.sass-cache/
+packages/components/.versions/
 
-components/$RECYCLE.BIN/
+packages/components/$RECYCLE.BIN/
 
-components/.DS_Store
-components/Thumbs.db
-components/UserInterfaceState.xcuserstate
-components/.env
+packages/components/.DS_Store
+packages/components/Thumbs.db
+packages/components/UserInterfaceState.xcuserstate
+packages/components/.env
