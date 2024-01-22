@@ -2,22 +2,11 @@ import { Config } from '@stencil/core';
 import tailwind, { tailwindHMR } from 'stencil-tailwind-plugin';
 
 export const config: Config = {
-  namespace: 'modal-auth',
+  namespace: 'components',
   outputTargets: [
     {
-      type: 'dist',
-      esmLoaderPath: '../loader',
-    },
-    {
       type: 'dist-custom-elements',
-      customElementsExportBehavior: 'single-export-module',
-    },
-    {
-      type: 'docs-readme',
-    },
-    {
-      type: 'www',
-      serviceWorker: null, // disable service workers
+      customElementsExportBehavior: 'auto-define-custom-elements',
     },
   ],
   testing: {

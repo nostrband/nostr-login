@@ -1,41 +1,14 @@
 {
-  "name": "nostr-login",
-  "version": "0.0.1",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.js",
-  "es2015": "dist/esm/index.js",
-  "es2017": "dist/esm/index.js",
-  "types": "dist/types/index.d.ts",
-  "collection": "dist/collection/collection-manifest.json",
-  "collection:main": "dist/collection/index.js",
-  "unpkg": "dist/modal-auth/modal-auth.esm.js",
-  "files": [
-    "dist/",
-    "loader/"
-  ],
+  "name": "@nostr-login/root",
+  "private": true,
+  "workspaces": {
+    "packages": ["packages/**"]
+  },
   "scripts": {
-    "build": "stencil build --docs",
-    "start": "stencil build --dev --watch --serve",
-    "test": "stencil test --spec --e2e",
-    "test.watch": "stencil test --spec --e2e --watchAll",
-    "generate": "stencil generate",
-    "format": "npx prettier --write src"
+    "build": "lerna run build"
   },
-  "dependencies": {
-    "@nostr-dev-kit/ndk": "^2.3.1",
-    "@stencil/core": "^4.7.0",
-    "nostr-tools": "^1.17.0",
-    "tailwindcss": "^3.4.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@types/jest": "^29.5.6",
-    "@types/node": "^16.18.11",
-    "jest": "^29.7.0",
-    "jest-cli": "^29.7.0",
-    "puppeteer": "21.1.1",
-    "stencil-tailwind-plugin": "^1.8.0",
-    "typescript": "^5.3.3",
-    "prettier": "^3.2.2"
-  },
-  "license": "MIT"
+    "lerna": "^8.0.2"
+  }
 }
