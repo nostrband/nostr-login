@@ -1,6 +1,6 @@
 {
   "name": "nostr-login",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "",
   "main": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
@@ -17,7 +17,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "nostr-login-components": "^0.0.5",
+    "nostr-login-components": "^0.0.6",
     "rollup": "^4.9.6",
     "rollup-plugin-typescript2": "^0.36.0"
   }
