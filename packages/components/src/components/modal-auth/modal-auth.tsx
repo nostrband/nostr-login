@@ -44,6 +44,7 @@ export class ModalAuth {
     const classWrapper = `relative z-10 ${this.showModal ? '' : 'hidden'}`;
 
     return (
+        <dialog open={this.showModal}>
       <div class={classWrapper} aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition duration-150 ease-in-out"></div>
 
@@ -98,6 +99,7 @@ export class ModalAuth {
           </div>
         </div>
       </div>
+        </dialog>
     );
   }
 }
