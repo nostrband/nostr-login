@@ -1,6 +1,6 @@
 {
   "name": "@nostr-login/auth",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "type": "module",
@@ -14,7 +14,7 @@
     "nostr-tools": "^1.17.0"
   },
   "devDependencies": {
-    "@nostr-login/components": "^0.0.2",
+    "@nostr-login/components": "^0.0.3",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "rollup": "^4.9.6",
