@@ -33,10 +33,10 @@
     "@types/node": "^16.18.11",
     "jest": "^29.7.0",
     "jest-cli": "^29.7.0",
+    "prettier": "^3.2.2",
     "puppeteer": "21.1.1",
     "stencil-tailwind-plugin": "^1.8.0",
-    "typescript": "^5.3.3",
-    "prettier": "^3.2.2"
+    "typescript": "^5.3.3"
   },
   "license": "MIT"
 }
