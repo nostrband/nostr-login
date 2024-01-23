@@ -5,7 +5,8 @@
     "packages": ["packages/**"]
   },
   "scripts": {
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "publish": "lerna publish --no-private"
   },
   "dependencies": {},
   "devDependencies": {
