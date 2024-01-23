@@ -1,6 +1,6 @@
 /* eslint-disable */
 // @ts-nocheck
-import '@nostr-login/components'
+import 'nostr-login-components'
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { getEventHash, generatePrivateKey } from 'nostr-tools';
 

@@ -1,5 +1,5 @@
 {
-  "name": "@nostr-login/root",
+  "name": "nostr-login-workspace",
   "private": true,
   "workspaces": {
     "packages": ["packages/**"]

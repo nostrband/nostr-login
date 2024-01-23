@@ -1,8 +1,8 @@
 {
-  "name": "@nostr-login/auth",
+  "name": "nostr-login",
   "version": "0.0.3",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/bundle.esm.js",
   "type": "module",
   "scripts": {
     "build": "rollup -c"
@@ -14,11 +14,10 @@
     "nostr-tools": "^1.17.0"
   },
   "devDependencies": {
-    "@nostr-login/components": "^0.0.3",
+    "nostr-login-components": "^0.0.3",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "rollup": "^4.9.6",
     "rollup-plugin-typescript2": "^0.36.0"
-  },
-  "gitHead": "56cca6657841580ed4aa55e50467f1d03f32a312"
+  }
 }
