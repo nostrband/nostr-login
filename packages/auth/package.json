@@ -2,7 +2,8 @@
   "name": "nostr-login",
   "version": "0.0.5",
   "description": "",
-  "main": "./dist/bundle.esm.js",
+  "main": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "rollup -c"
