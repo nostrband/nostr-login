@@ -8,8 +8,7 @@
   "scripts": {
     "build": "rollup -c"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "a-fralou",
   "dependencies": {
     "@nostr-dev-kit/ndk": "^2.3.1",
     "nostr-tools": "^1.17.0"
@@ -20,5 +19,6 @@
     "nostr-login-components": "^0.0.9",
     "rollup": "^4.9.6",
     "rollup-plugin-typescript2": "^0.36.0"
-  }
+  },
+  "license": "MIT"
 }

@@ -1,0 +1,70 @@
+:host {
+  display: block;
+}
+
+/*Theme ocean*/
+.nl-bg-ocean {
+  @apply bg-blue-200 dark:bg-sky-950 shadow-sm dark:shadow-slate-700/[.7];
+}
+
+.nl-logo-ocean,
+.nl-title-ocean,
+.nl-description-ocean {
+  @apply text-sky-950 dark:text-sky-200;
+}
+
+.nl-action-button-ocean {
+  @apply text-sky-950 hover:bg-sky-100 dark:text-sky-200 dark:hover:bg-sky-900;
+}
+
+.nl-button-ocean {
+  @apply border border-sky-200 bg-sky-100 text-sky-950 shadow-sm hover:bg-sky-50 dark:bg-sky-800 dark:border-sky-950 dark:text-sky-200 dark:hover:bg-sky-900;
+}
+
+.nl-divider-ocean {
+  @apply text-sky-950 dark:text-sky-200 after:border-sky-950 dark:before:border-sky-200 dark:after:border-sky-200 before:border-sky-950;
+}
+
+.nl-footer-ocean {
+  @apply text-sky-950 dark:text-sky-200;
+}
+
+.nl-input-ocean {
+  @apply bg-sky-100 focus:border-sky-500 focus:ring-sky-500 dark:bg-sky-900 dark:text-sky-400 dark:focus:ring-sky-600;
+}
+
+/*Theme default*/
+
+.nl-bg-default {
+  @apply bg-white dark:bg-gray-800 shadow-sm dark:shadow-slate-700/[.7];
+}
+
+.nl-logo-default,
+.nl-title-default,
+.nl-description-default {
+  @apply text-gray-800 dark:text-white;
+}
+
+.nl-action-button-default {
+  @apply text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700;
+}
+
+.nl-title-default {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+.nl-button-default {
+  @apply border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800;
+}
+
+.nl-divider-default {
+  @apply text-gray-400 before:border-t before:border-gray-200 after:border-gray-200 dark:text-gray-500 dark:before:border-gray-600 dark:after:border-gray-600;
+}
+
+.nl-footer-default {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+.nl-input-default {
+  @apply bg-gray-100 focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:text-gray-400 dark:focus:ring-gray-600;
+}

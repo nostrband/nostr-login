@@ -4,7 +4,43 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
     <title>Modal Auth Develop</title>
+    <script type="module">
+      import './build/components.esm.js';
 
+      export const launch = opt => {
+        console.log('launch');
+        const dialog = document.createElement('dialog');
+        const modal = document.createElement('nl-auth');
+
+        dialog.appendChild(modal);
+        document.body.appendChild(dialog);
+
+        modal.addEventListener('handleCloseModal', () => {
+          dialog.close();
+        });
+
+        return new Promise(resolve => {
+          modal.addEventListener('handleGetValue', event => {
+            const inputValue = event.detail;
+
+            resolve(inputValue);
+          });
+
+          setTimeout(() => {
+            dialog.showModal();
+            if (opt.theme) {
+              modal.setAttribute('theme', opt.theme);
+            }
+          }, 1000);
+        });
+      };
+
+      launch({
+        theme: 'ocean',
+      });
+    </script>
   </head>
-  <body></body>
+  <body>
+    <!--<nl-auth is-open="true"></nl-auth>-->
+  </body>
 </html>

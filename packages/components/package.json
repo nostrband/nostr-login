@@ -8,24 +8,26 @@
   "types": "dist/types/index.d.ts",
   "collection": "dist/collection/collection-manifest.json",
   "collection:main": "dist/collection/index.js",
-  "unpkg": "dist/components/modal-auth.js",
+  "author": "a-fralou",
   "files": [
     "dist/",
     "loader/"
   ],
   "exports": {
-    ".": "./dist/components/modal-auth.js"
+    ".": "./dist/components/nl-auth.js"
   },
   "scripts": {
     "build": "stencil build --docs",
-    "start": "stencil build --dev --watch --serve",
+    "dev": "stencil build --dev --watch --serve",
     "test": "stencil test --spec --e2e",
     "test.watch": "stencil test --spec --e2e --watchAll",
     "generate": "stencil generate",
     "format": "npx prettier --write src"
   },
   "dependencies": {
-    "@stencil/core": "^4.7.0",
+    "@stencil/core": "^4.11.0",
+    "@stencil/sass": "^3.0.8",
+    "@tailwindcss/forms": "^0.5.7",
     "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
@@ -36,7 +38,8 @@
     "prettier": "^3.2.2",
     "puppeteer": "21.1.1",
     "stencil-tailwind-plugin": "^1.8.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "workbox-build": "^4.3.1"
   },
   "license": "MIT"
 }

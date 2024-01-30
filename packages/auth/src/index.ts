@@ -4,12 +4,16 @@ import 'nostr-login-components'
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { getEventHash, generatePrivateKey } from 'nostr-tools';
 
-export const launch = () => {
-    console.log('launch');
+export const launch = (opt: {theme?: string}) => {
+    const dialog = document.createElement('dialog');
+    const modal = document.createElement('nl-auth');
 
-    const modal = document.createElement('modal-auth');
-    modal.setAttribute('is-open', 'false');
-    document.body.insertBefore(modal, document.body.firstChild);
+    dialog.appendChild(modal);
+    document.body.appendChild(dialog);
+
+    modal.addEventListener('handleCloseModal', () => {
+        dialog.close();
+    });
 
     return new Promise(resolve => {
         modal.addEventListener('handleGetValue', event => {
@@ -19,8 +23,11 @@ export const launch = () => {
         });
 
         setTimeout(() => {
-            modal.setAttribute('is-open', 'true');
-        }, 1500);
+            dialog.showModal();
+            if (opt.theme) {
+                modal.setAttribute('theme', opt.theme);
+            }
+        }, 1000);
     });
 };
 

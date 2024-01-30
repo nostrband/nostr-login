@@ -1,1 +1,1 @@
-export * from './components';
+export { NlAuth } from './components/nl-auth/nl-auth';
