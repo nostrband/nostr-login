@@ -6,7 +6,8 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "format": "npx prettier --write src"
   },
   "author": "a-fralou",
   "dependencies": {
@@ -18,7 +19,8 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "nostr-login-components": "^1.0.0",
     "rollup": "^4.9.6",
-    "rollup-plugin-typescript2": "^0.36.0"
+    "rollup-plugin-typescript2": "^0.36.0",
+    "prettier": "^3.2.2"
   },
   "license": "MIT"
 }

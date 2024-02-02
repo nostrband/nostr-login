@@ -18,14 +18,23 @@ enum CURRENT_MODULE {
 })
 export class NlAuth {
   @State() darkMode: boolean = false;
-  @State() themeState: 'default' | 'ocean' = 'default';
-  @Prop() theme: 'default' | 'ocean' = 'default';
+  @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
+  @Prop() theme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
+  @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
+
   @Watch('theme')
-  watchPropHandler(newValue: 'default' | 'ocean') {
+  watchPropHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
+    console.log(newValue);
     this.themeState = newValue;
   }
+  // @Watch('startScreen')
+  // watchPropHandler(newValue: CURRENT_MODULE) {
+  //   console.log(newValue);
+  //   this.themeState = newValue;
+  // }
 
   @State() isFetchToCreateAccaunt: boolean = false;
+  @State() isFetchLogin: boolean = false;
 
   @State() currentModule: CURRENT_MODULE = CURRENT_MODULE.WELCOME;
   @State() prevModule: CURRENT_MODULE = CURRENT_MODULE.WELCOME;
@@ -39,14 +48,19 @@ export class NlAuth {
     this.bunkerUrl = (event.target as HTMLInputElement).value;
   }
 
-  handleOkClick(e: MouseEvent) {
-    e.preventDefault();
-    this.handleGetValue.emit(this.bunkerUrl);
-    // this.showModal = !this.showModal;
+  handleClose(value: string = '') {
+    this.handleCloseModal.emit(value);
   }
 
-  handleClose() {
-    this.handleCloseModal.emit();
+  handleLogin(e: MouseEvent) {
+    e.preventDefault();
+
+    this.isFetchLogin = true;
+
+    setTimeout(() => {
+      this.isFetchLogin = false;
+      this.handleClose(this.bunkerUrl);
+    }, 1500);
   }
 
   onClickToSignIn() {
@@ -75,6 +89,11 @@ export class NlAuth {
   }
 
   componentWillLoad() {
+    console.log(this.startScreen);
+    this.themeState = this.theme;
+    this.currentModule = this.startScreen as CURRENT_MODULE;
+    this.prevModule = this.startScreen as CURRENT_MODULE;
+
     const getDarkMode = localStorage.getItem('nl-dark-mode');
 
     if (getDarkMode) {
@@ -97,35 +116,36 @@ export class NlAuth {
   }
 
   render() {
-    const classWrapper = `w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto ${this.darkMode ? 'dark' : ''}`;
+    const classWrapper = `w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto flex items-center ${this.darkMode ? 'dark' : ''}`;
 
     const renderModule = () => {
       switch (this.currentModule) {
         case CURRENT_MODULE.WELCOME:
-          return <NlWelcomeThemplate theme={this.themeState} onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
+          return <NlWelcomeThemplate onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
         case CURRENT_MODULE.SIGNIN:
-          return <NlSigninThemplate theme={this.themeState} onClickToSignUp={() => this.onClickToSignUp()} />;
-        case CURRENT_MODULE.SIGNUP:
           return (
-            <NlSignupThemplate
-              theme={this.themeState}
-              isFetching={this.isFetchToCreateAccaunt}
-              onCreateAccount={() => this.onCreateAccount()}
-              onClickToSignIn={() => this.onClickToSignIn()}
+            <NlSigninThemplate
+              handleInputChange={e => this.handleInputChange(e)}
+              isFetchLogin={this.isFetchLogin}
+              onClickToSignUp={() => this.onClickToSignUp()}
+              onLogin={e => this.handleLogin(e)}
             />
           );
+        case CURRENT_MODULE.SIGNUP:
+          return <NlSignupThemplate isFetching={this.isFetchToCreateAccaunt} onCreateAccount={() => this.onCreateAccount()} onClickToSignIn={() => this.onClickToSignIn()} />;
         case CURRENT_MODULE.INFO:
-          return <NlInfoThemplate theme={this.themeState} onClickToBack={() => this.onClickToBack()} />;
+          return <NlInfoThemplate onClickToBack={() => this.onClickToBack()} />;
         default:
-          return <NlWelcomeThemplate theme={this.themeState} onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
+          return <NlWelcomeThemplate onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
       }
     };
 
     return (
-      <div class={classWrapper}>
-        <div onClick={() => this.handleClose()} class="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-75 z-[80]" />
-        <div class="z-[81] relative duration-500 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto min-h-[calc(100%-3.5rem)] flex items-center">
-          <div class={`nl-bg-${this.themeState} w-full flex flex-col rounded-xl`}>
+      <div class={`theme-${this.themeState}`}>
+        <div class={classWrapper}>
+          <div onClick={() => this.handleClose()} class="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-75 z-[80]" />
+
+          <div class="nl-bg relative z-[81] w-full flex flex-col rounded-xl sm:max-w-lg sm:w-full sm:mx-auto">
             <div class="flex justify-between items-center py-3 px-4">
               <div class="flex gap-2 items-center">
                 <svg class="w-7 h-7" width="225" height="224" viewBox="0 0 225 224" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -135,7 +155,7 @@ export class NlAuth {
                     fill="white"
                   />
                 </svg>
-                <p class={`font-bold nl-logo-${this.themeState}`}>
+                <p class="font-bold nl-logo">
                   Nostr <span class="font-light">login</span>
                 </p>
               </div>
@@ -144,7 +164,7 @@ export class NlAuth {
                 <button
                   onClick={() => this.onChangeTheme()}
                   type="button"
-                  class={`nl-action-button-${this.themeState} flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600`}
+                  class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
                 >
                   <span class="sr-only">Change theme</span>
                   {this.darkMode ? (
@@ -168,7 +188,7 @@ export class NlAuth {
                 <button
                   onClick={() => this.onClickToInfo()}
                   type="button"
-                  class={`nl-action-button-${this.themeState} flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600`}
+                  class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
                 >
                   <span class="sr-only">Info</span>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5">
@@ -182,7 +202,7 @@ export class NlAuth {
                 <button
                   onClick={() => this.handleClose()}
                   type="button"
-                  class={`nl-action-button-${this.themeState} flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600`}
+                  class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
                 >
                   <span class="sr-only">Close</span>
                   <svg

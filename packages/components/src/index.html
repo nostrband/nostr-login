@@ -8,16 +8,11 @@
       import './build/components.esm.js';
 
       export const launch = opt => {
-        console.log('launch');
         const dialog = document.createElement('dialog');
         const modal = document.createElement('nl-auth');
 
         dialog.appendChild(modal);
         document.body.appendChild(dialog);
-
-        modal.addEventListener('handleCloseModal', () => {
-          dialog.close();
-        });
 
         return new Promise(resolve => {
           modal.addEventListener('handleGetValue', event => {
@@ -26,21 +21,48 @@
             resolve(inputValue);
           });
 
-          setTimeout(() => {
-            dialog.showModal();
-            if (opt.theme) {
-              modal.setAttribute('theme', opt.theme);
-            }
-          }, 1000);
+          modal.addEventListener('handleCloseModal', event => {
+            dialog.close();
+            const inputValue = event.detail;
+
+            resolve(inputValue);
+          });
+
+          dialog.showModal();
+          if (opt && opt.theme) {
+            modal.setAttribute('theme', opt.theme);
+          }
+
+          if (opt && opt.startScreen) {
+            modal.setAttribute('start-screen', opt.startScreen);
+          }
         });
       };
 
-      launch({
-        theme: 'ocean',
-      });
+      const initialModals = async opt => {
+        const bunkerUrl = await launch(opt);
+
+        console.log({ bunkerUrl });
+      };
+
+      const nlElements = document.getElementsByTagName('nl-button');
+
+      for (let i = 0; i < nlElements.length; i++) {
+        const theme = nlElements[i].getAttribute('nl-theme');
+        const startScreen = nlElements[i].getAttribute('start-screen');
+
+        nlElements[i].addEventListener('click', function () {
+          initialModals({
+            theme,
+            startScreen,
+          });
+        });
+      }
     </script>
   </head>
   <body>
-    <!--<nl-auth is-open="true"></nl-auth>-->
+    <nl-button title-btn="Sign in" start-screen="signin" nl-theme="lemonade"></nl-button>
+    <!--  <nl-button title-btn="Sign up" start-screen="signup"></nl-button>-->
+    <!--  <nl-button nl-theme="ocean"></nl-button>-->
   </body>
 </html>

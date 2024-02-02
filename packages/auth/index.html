@@ -8,8 +8,24 @@
     <script type="module">
         import { launch } from './dist/index.esm.js';
 
-        launch({ theme: 'ocean' });
+        const test = async () => {
+            const bunkerUrl = await launch();
+
+            console.log(bunkerUrl);
+        };
+
+        const nlElements = document.getElementsByTagName('nl-button');
+
+        for (var i = 0; i < nlElements.length; i++) {
+            nlElements[i].addEventListener('click', function () {
+                test();
+            });
+        }
+
     </script>
 </head>
-<body></body>
+<body>
+
+<nl-button></nl-button>
+</body>
 </html>

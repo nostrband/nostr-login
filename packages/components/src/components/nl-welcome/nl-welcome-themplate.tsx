@@ -2,7 +2,6 @@ import { FunctionalComponent, h } from '@stencil/core';
 
 interface NlWelcomeThemplateProps {
   title?: string;
-  theme: string;
   description?: string;
   onClickToSignIn: () => void;
   onClickToSignUp: () => void;
@@ -11,22 +10,21 @@ interface NlWelcomeThemplateProps {
 export const NlWelcomeThemplate: FunctionalComponent<NlWelcomeThemplateProps> = ({
   onClickToSignIn,
   onClickToSignUp,
-  theme,
   title = 'Welcome!',
   description = 'Quick login using Nostr login. You can quickly create an account or log in with one click.',
 }) => {
   return (
     <div>
       <div class="p-4 overflow-y-auto">
-        <h1 class={`nl-title-${theme}  font-bold text-center text-4xl`}>{title}</h1>
-        <p class={`nl-description-${theme} font-light text-center text-lg pt-2 max-w-96 mx-auto`}>{description}</p>
+        <h1 class="nl-title  font-bold text-center text-4xl">{title}</h1>
+        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{description}</p>
       </div>
 
       <div class="max-w-52 mx-auto pb-5">
         <button
           onClick={() => onClickToSignIn()}
           type="button"
-          class={`nl-button-${theme} py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600`}
+          class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4">
             <path
@@ -38,14 +36,12 @@ export const NlWelcomeThemplate: FunctionalComponent<NlWelcomeThemplateProps> = 
           Sign in
         </button>
 
-        <div class={`nl-divider-${theme} py-3 flex items-center text-xs uppercase before:flex-[1_1_0%] before:border-t before:me-6 after:flex-[1_1_0%] after:border-t  after:ms-6`}>
-          Or
-        </div>
+        <div class="nl-divider py-3 flex items-center text-xs uppercase before:flex-[1_1_0%] before:border-t before:me-6 after:flex-[1_1_0%] after:border-t  after:ms-6">Or</div>
 
         <button
           onClick={() => onClickToSignUp()}
           type="button"
-          class={`nl-button-${theme} py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600`}
+          class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4">
             <path

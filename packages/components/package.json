@@ -14,7 +14,7 @@
     "loader/"
   ],
   "exports": {
-    ".": "./dist/components/nl-auth.js"
+    ".": "./dist/components/index.js"
   },
   "scripts": {
     "build": "stencil build --docs",

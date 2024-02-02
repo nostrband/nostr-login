@@ -2,7 +2,6 @@ import { FunctionalComponent, h } from '@stencil/core';
 
 interface NlSignupThemplateProps {
   title?: string;
-  theme: string;
   description?: string;
   onClickToSignIn: () => void;
   onCreateAccount: () => void;
@@ -15,13 +14,12 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
   onCreateAccount,
   title = 'Sign up',
   description = 'Create an account in one click',
-  theme,
 }) => {
   return (
     <div>
       <div class="p-4 overflow-y-auto">
-        <h1 class={`nl-title-${theme} font-bold text-center text-2xl`}>{title}</h1>
-        <p class={`nl-description-${theme} font-light text-center text-sm pt-2 max-w-96 mx-auto`}>{description}</p>
+        <h1 class="nl-title font-bold text-center text-2xl">{title}</h1>
+        <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">{description}</p>
       </div>
 
       <div class="max-w-52 mx-auto pb-5">
@@ -29,11 +27,11 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
           disabled={isFetching}
           onClick={() => onCreateAccount()}
           type="button"
-          class={`nl-button-${theme} py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600`}
+          class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         >
           {isFetching ? (
             <span
-              class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300  rounded-full"
+              class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"
               role="status"
               aria-label="loading"
             ></span>
@@ -51,7 +49,7 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
       </div>
 
       <div class="p-4 overflow-y-auto">
-        <p class={`nl-footer-${theme} font-light text-center text-sm pt-2 max-w-96 mx-auto`}>
+        <p class="nl-footer font-light text-center text-sm pt-2 max-w-96 mx-auto">
           If you have an account you can{' '}
           <span onClick={() => onClickToSignIn()} class="cursor-pointer text-blue-400">
             login

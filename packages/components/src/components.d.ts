@@ -7,7 +7,12 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface NlAuth {
-        "theme": 'default' | 'ocean';
+        "startScreen": string;
+        "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
+    }
+    interface NlButton {
+        "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
+        "titleBtn": string;
     }
     interface NlSignin {
         "isOpen": boolean;
@@ -56,6 +61,12 @@ declare global {
     var HTMLNlAuthElement: {
         prototype: HTMLNlAuthElement;
         new (): HTMLNlAuthElement;
+    };
+    interface HTMLNlButtonElement extends Components.NlButton, HTMLStencilElement {
+    }
+    var HTMLNlButtonElement: {
+        prototype: HTMLNlButtonElement;
+        new (): HTMLNlButtonElement;
     };
     interface HTMLNlSigninElementEventMap {
         "handleGetValue": string;
@@ -110,6 +121,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "nl-auth": HTMLNlAuthElement;
+        "nl-button": HTMLNlButtonElement;
         "nl-signin": HTMLNlSigninElement;
         "nl-signup": HTMLNlSignupElement;
         "nl-welcome": HTMLNlWelcomeElement;
@@ -119,7 +131,12 @@ declare namespace LocalJSX {
     interface NlAuth {
         "onHandleCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
         "onHandleGetValue"?: (event: NlAuthCustomEvent<string>) => void;
-        "theme"?: 'default' | 'ocean';
+        "startScreen"?: string;
+        "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+    }
+    interface NlButton {
+        "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+        "titleBtn"?: string;
     }
     interface NlSignin {
         "isOpen"?: boolean;
@@ -135,6 +152,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "nl-auth": NlAuth;
+        "nl-button": NlButton;
         "nl-signin": NlSignin;
         "nl-signup": NlSignup;
         "nl-welcome": NlWelcome;
@@ -145,6 +163,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "nl-auth": LocalJSX.NlAuth & JSXBase.HTMLAttributes<HTMLNlAuthElement>;
+            "nl-button": LocalJSX.NlButton & JSXBase.HTMLAttributes<HTMLNlButtonElement>;
             "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;
             "nl-signup": LocalJSX.NlSignup & JSXBase.HTMLAttributes<HTMLNlSignupElement>;
             "nl-welcome": LocalJSX.NlWelcome & JSXBase.HTMLAttributes<HTMLNlWelcomeElement>;

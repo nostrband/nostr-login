@@ -5,9 +5,10 @@
 
 ## Properties
 
-| Property | Attribute | Description | Type                   | Default     |
-| -------- | --------- | ----------- | ---------------------- | ----------- |
-| `theme`  | `theme`   |             | `"default" \| "ocean"` | `'default'` |
+| Property      | Attribute      | Description | Type                                             | Default                  |
+| ------------- | -------------- | ----------- | ------------------------------------------------ | ------------------------ |
+| `startScreen` | `start-screen` |             | `string`                                         | `CURRENT_MODULE.WELCOME` |
+| `theme`       | `theme`        |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
 
 
 ## Events

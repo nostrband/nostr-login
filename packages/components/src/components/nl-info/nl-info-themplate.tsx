@@ -2,16 +2,15 @@ import { FunctionalComponent, h } from '@stencil/core';
 
 interface NlInfoThemplateProps {
   onClickToBack: () => void;
-  theme: string;
 }
 
-export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ onClickToBack, theme }) => {
+export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ onClickToBack }) => {
   return (
     <div class="p-4">
       <button
         onClick={() => onClickToBack()}
         type="button"
-        class={`nl-action-button-${theme} flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600`}
+        class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         data-hs-overlay="#hs-vertically-centered-modal"
       >
         <span class="sr-only">Back</span>
@@ -27,10 +26,10 @@ export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ onC
             fill="white"
           />
         </svg>
-        <h1 class={`nl-title-${theme} font-bold text-center text-4xl`}>
+        <h1 class="nl-title font-bold text-center text-4xl">
           Nostr <span class="font-light">login</span>
         </h1>
-        <p class={`nl-description-${theme} font-light text-center text-lg pt-2 max-w-96 mx-auto`}>About some text and some link</p>
+        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">About some text and some link</p>
         <p class="text-green-800 dark:text-green-200 font-light text-center text-lg pt-2 max-w-96 mx-auto">Version: 0.1.1</p>
       </div>
     </div>

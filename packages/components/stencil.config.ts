@@ -18,6 +18,7 @@ setPluginConfigurationDefaults({
 
 export const config: Config = {
   namespace: 'components',
+  globalStyle: 'src/styles/tailwind.css',
   outputTargets: [
     {
       type: 'dist-custom-elements',
