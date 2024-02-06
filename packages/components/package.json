@@ -28,6 +28,7 @@
     "@stencil/core": "^4.11.0",
     "@stencil/sass": "^3.0.8",
     "@tailwindcss/forms": "^0.5.7",
+    "i18n-js": "^4.3.2",
     "tailwindcss": "^3.4.0"
   },
   "devDependencies": {

@@ -3,6 +3,7 @@ import { NlWelcomeThemplate } from '../nl-welcome/nl-welcome-themplate';
 import { NlSignupThemplate } from '../nl-signup/nl-signup-themplate';
 import { NlInfoThemplate } from '../nl-info/nl-info-themplate';
 import { NlSigninThemplate } from '../nl-signin/nl-signin-themplate';
+import {i18n} from "../../utils/internationalization";
 
 enum CURRENT_MODULE {
   WELCOME = 'welcome',
@@ -27,11 +28,6 @@ export class NlAuth {
     console.log(newValue);
     this.themeState = newValue;
   }
-  // @Watch('startScreen')
-  // watchPropHandler(newValue: CURRENT_MODULE) {
-  //   console.log(newValue);
-  //   this.themeState = newValue;
-  // }
 
   @State() isFetchToCreateAccaunt: boolean = false;
   @State() isFetchLogin: boolean = false;
@@ -58,11 +54,6 @@ export class NlAuth {
 
     this.isFetchLogin = true;
     this.handleGetValue.emit(this.bunkerUrl);
-
-    // setTimeout(() => {
-    //   this.isFetchLogin = false;
-    //   this.handleClose(this.bunkerUrl);
-    // }, 1500);
   }
 
   onClickToSignIn() {
@@ -91,7 +82,19 @@ export class NlAuth {
   }
 
   componentWillLoad() {
-    console.log(this.startScreen);
+    const htmlElement = document.documentElement;
+    const lang = htmlElement.getAttribute("lang");
+
+    if (lang) {
+      i18n.locale = lang;
+    } else {
+      i18n.locale = "en";
+    }
+
+    // вытягиваем из системы ???
+    // const userLanguages = navigator.language;
+    // console.log("Предпочтительный язык пользователя: " + userLanguages);
+
     this.themeState = this.theme;
     this.currentModule = this.startScreen as CURRENT_MODULE;
     this.prevModule = this.startScreen as CURRENT_MODULE;
@@ -123,7 +126,7 @@ export class NlAuth {
     const renderModule = () => {
       switch (this.currentModule) {
         case CURRENT_MODULE.WELCOME:
-          return <NlWelcomeThemplate onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
+          return <NlWelcomeThemplate title={i18n.t("welcome")} onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
         case CURRENT_MODULE.SIGNIN:
           return (
             <NlSigninThemplate
@@ -146,7 +149,7 @@ export class NlAuth {
         case CURRENT_MODULE.INFO:
           return <NlInfoThemplate onClickToBack={() => this.onClickToBack()} />;
         default:
-          return <NlWelcomeThemplate onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
+          return <NlWelcomeThemplate title={i18n.t("welcome")} onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
       }
     };
 
