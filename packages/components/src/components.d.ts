@@ -6,51 +6,167 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
-    interface ModalAuth {
+    interface NlAuth {
+        "startScreen": string;
+        "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
+    }
+    interface NlButton {
+        "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
+        "titleBtn": string;
+    }
+    interface NlSignin {
+        "isOpen": boolean;
+        "openModal": () => Promise<void>;
+    }
+    interface NlSignup {
+        "isOpen": boolean;
+        "openModal": () => Promise<void>;
+    }
+    interface NlWelcome {
         "isOpen": boolean;
         "openModal": () => Promise<void>;
     }
 }
-export interface ModalAuthCustomEvent<T> extends CustomEvent<T> {
+export interface NlAuthCustomEvent<T> extends CustomEvent<T> {
     detail: T;
-    target: HTMLModalAuthElement;
+    target: HTMLNlAuthElement;
+}
+export interface NlSigninCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlSigninElement;
+}
+export interface NlSignupCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlSignupElement;
+}
+export interface NlWelcomeCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlWelcomeElement;
 }
 declare global {
-    interface HTMLModalAuthElementEventMap {
+    interface HTMLNlAuthElementEventMap {
         "handleGetValue": string;
+        "handleCloseModal": any;
     }
-    interface HTMLModalAuthElement extends Components.ModalAuth, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLModalAuthElementEventMap>(type: K, listener: (this: HTMLModalAuthElement, ev: ModalAuthCustomEvent<HTMLModalAuthElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+    interface HTMLNlAuthElement extends Components.NlAuth, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlAuthElementEventMap>(type: K, listener: (this: HTMLNlAuthElement, ev: NlAuthCustomEvent<HTMLNlAuthElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLModalAuthElementEventMap>(type: K, listener: (this: HTMLModalAuthElement, ev: ModalAuthCustomEvent<HTMLModalAuthElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlAuthElementEventMap>(type: K, listener: (this: HTMLNlAuthElement, ev: NlAuthCustomEvent<HTMLNlAuthElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
-    var HTMLModalAuthElement: {
-        prototype: HTMLModalAuthElement;
-        new (): HTMLModalAuthElement;
+    var HTMLNlAuthElement: {
+        prototype: HTMLNlAuthElement;
+        new (): HTMLNlAuthElement;
+    };
+    interface HTMLNlButtonElement extends Components.NlButton, HTMLStencilElement {
+    }
+    var HTMLNlButtonElement: {
+        prototype: HTMLNlButtonElement;
+        new (): HTMLNlButtonElement;
+    };
+    interface HTMLNlSigninElementEventMap {
+        "handleGetValue": string;
+    }
+    interface HTMLNlSigninElement extends Components.NlSignin, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlSigninElementEventMap>(type: K, listener: (this: HTMLNlSigninElement, ev: NlSigninCustomEvent<HTMLNlSigninElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlSigninElementEventMap>(type: K, listener: (this: HTMLNlSigninElement, ev: NlSigninCustomEvent<HTMLNlSigninElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlSigninElement: {
+        prototype: HTMLNlSigninElement;
+        new (): HTMLNlSigninElement;
+    };
+    interface HTMLNlSignupElementEventMap {
+        "handleGetValue": string;
+    }
+    interface HTMLNlSignupElement extends Components.NlSignup, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlSignupElementEventMap>(type: K, listener: (this: HTMLNlSignupElement, ev: NlSignupCustomEvent<HTMLNlSignupElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlSignupElementEventMap>(type: K, listener: (this: HTMLNlSignupElement, ev: NlSignupCustomEvent<HTMLNlSignupElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlSignupElement: {
+        prototype: HTMLNlSignupElement;
+        new (): HTMLNlSignupElement;
+    };
+    interface HTMLNlWelcomeElementEventMap {
+        "handleGetValue": string;
+    }
+    interface HTMLNlWelcomeElement extends Components.NlWelcome, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlWelcomeElementEventMap>(type: K, listener: (this: HTMLNlWelcomeElement, ev: NlWelcomeCustomEvent<HTMLNlWelcomeElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlWelcomeElementEventMap>(type: K, listener: (this: HTMLNlWelcomeElement, ev: NlWelcomeCustomEvent<HTMLNlWelcomeElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlWelcomeElement: {
+        prototype: HTMLNlWelcomeElement;
+        new (): HTMLNlWelcomeElement;
     };
     interface HTMLElementTagNameMap {
-        "modal-auth": HTMLModalAuthElement;
+        "nl-auth": HTMLNlAuthElement;
+        "nl-button": HTMLNlButtonElement;
+        "nl-signin": HTMLNlSigninElement;
+        "nl-signup": HTMLNlSignupElement;
+        "nl-welcome": HTMLNlWelcomeElement;
     }
 }
 declare namespace LocalJSX {
-    interface ModalAuth {
+    interface NlAuth {
+        "onHandleCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
+        "onHandleGetValue"?: (event: NlAuthCustomEvent<string>) => void;
+        "startScreen"?: string;
+        "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+    }
+    interface NlButton {
+        "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+        "titleBtn"?: string;
+    }
+    interface NlSignin {
         "isOpen"?: boolean;
-        "onHandleGetValue"?: (event: ModalAuthCustomEvent<string>) => void;
+        "onHandleGetValue"?: (event: NlSigninCustomEvent<string>) => void;
+    }
+    interface NlSignup {
+        "isOpen"?: boolean;
+        "onHandleGetValue"?: (event: NlSignupCustomEvent<string>) => void;
+    }
+    interface NlWelcome {
+        "isOpen"?: boolean;
+        "onHandleGetValue"?: (event: NlWelcomeCustomEvent<string>) => void;
     }
     interface IntrinsicElements {
-        "modal-auth": ModalAuth;
+        "nl-auth": NlAuth;
+        "nl-button": NlButton;
+        "nl-signin": NlSignin;
+        "nl-signup": NlSignup;
+        "nl-welcome": NlWelcome;
     }
 }
 export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
-            "modal-auth": LocalJSX.ModalAuth & JSXBase.HTMLAttributes<HTMLModalAuthElement>;
+            "nl-auth": LocalJSX.NlAuth & JSXBase.HTMLAttributes<HTMLNlAuthElement>;
+            "nl-button": LocalJSX.NlButton & JSXBase.HTMLAttributes<HTMLNlButtonElement>;
+            "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;
+            "nl-signup": LocalJSX.NlSignup & JSXBase.HTMLAttributes<HTMLNlSignupElement>;
+            "nl-welcome": LocalJSX.NlWelcome & JSXBase.HTMLAttributes<HTMLNlWelcomeElement>;
         }
     }
 }

@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*Theme default*/
+.theme-default .nl-bg {
+  @apply bg-white shadow-sm;
+}
+
+.theme-default .dark .nl-bg {
+  @apply bg-gray-800 shadow-slate-700/[.7];
+}
+
+.theme-default .nl-logo,
+.theme-default .nl-title,
+.theme-default .nl-description {
+  @apply text-gray-800;
+}
+
+.theme-default .dark .nl-logo,
+.theme-default .dark .nl-title,
+.theme-default .dark .nl-description {
+  @apply text-white;
+}
+
+.theme-default .nl-action-button {
+  @apply text-gray-800 hover:bg-gray-100 outline-none;
+}
+
+.theme-default .dark .nl-action-button {
+  @apply text-white hover:bg-gray-700 outline-none;
+}
+
+.theme-default .nl-title {
+  @apply text-gray-800;
+}
+
+.theme-default .dark .nl-title {
+  @apply text-gray-200;
+}
+
+.theme-default .nl-button {
+  @apply border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50;
+}
+
+.theme-default .dark .nl-button {
+  @apply bg-slate-900 border-gray-700 text-gray-300 hover:bg-gray-800;
+}
+
+.theme-default .nl-divider {
+  @apply text-gray-400 before:border-t before:border-gray-200 after:border-gray-200;
+}
+
+.theme-default .dark .nl-divider {
+  @apply text-gray-500 before:border-gray-600 after:border-gray-600;
+}
+
+.theme-default .nl-footer {
+  @apply text-gray-800;
+}
+
+.theme-default .dark .nl-footer {
+  @apply text-gray-200;
+}
+
+.theme-default .nl-input {
+  @apply bg-gray-100 focus:border-purple-500 focus:ring-purple-500;
+}
+
+.theme-default .dark .nl-input {
+  @apply bg-gray-700 text-gray-400 focus:ring-gray-600;
+}
+
+/*Theme ocean*/
+.theme-ocean .nl-bg {
+  @apply bg-blue-200 shadow-sm;
+}
+
+.theme-ocean .dark .nl-bg {
+  @apply bg-sky-950 shadow-slate-700/[.7];
+}
+
+.theme-ocean .nl-logo,
+.theme-ocean .nl-title,
+.theme-ocean .nl-description {
+  @apply text-sky-950;
+}
+
+.theme-ocean .dark .nl-logo,
+.theme-ocean .dark .nl-title,
+.theme-ocean .dark .nl-description {
+  @apply text-sky-200;
+}
+
+.theme-ocean .nl-action-button {
+  @apply text-sky-950 hover:bg-sky-100 outline-none;
+}
+
+.theme-ocean .dark .nl-action-button {
+  @apply text-sky-200 hover:bg-sky-900 outline-none;
+}
+
+.theme-ocean .nl-button {
+  @apply border border-sky-200 bg-sky-100 text-sky-950 shadow-sm hover:bg-sky-50;
+}
+
+.theme-ocean .dark .nl-button {
+  @apply bg-sky-800 border-sky-950 text-sky-200 hover:bg-sky-900;
+}
+
+.theme-ocean .nl-divider {
+  @apply text-sky-950 after:border-sky-950 before:border-sky-950;
+}
+
+.theme-ocean .dark .nl-divider {
+  @apply text-sky-200 before:border-sky-200 after:border-sky-200;
+}
+
+.theme-ocean .nl-footer {
+  @apply text-sky-950;
+}
+
+.theme-ocean .dark .nl-footer {
+  @apply text-sky-200;
+}
+
+.theme-ocean .nl-input {
+  @apply bg-sky-100 focus:border-sky-500 focus:ring-sky-500;
+}
+
+.theme-ocean .dark .nl-input {
+  @apply bg-sky-900 text-sky-400 focus:ring-sky-600;
+}
+
+/*Theme lemonade*/
+.theme-lemonade .nl-bg {
+  @apply bg-green-200 shadow-sm;
+}
+
+.theme-lemonade .dark .nl-bg {
+  @apply bg-green-950 shadow-slate-700/[.7];
+}
+
+.theme-lemonade .nl-logo,
+.theme-lemonade .nl-title,
+.theme-lemonade .nl-description {
+  @apply text-green-950;
+}
+
+.theme-lemonade .dark .nl-logo,
+.theme-lemonade .dark .nl-title,
+.theme-lemonade .dark .nl-description {
+  @apply text-green-200;
+}
+
+.theme-lemonade .nl-action-button {
+  @apply text-green-950 hover:bg-green-100 outline-none;
+}
+
+.theme-lemonade .dark .nl-action-button {
+  @apply text-green-200 hover:bg-green-900 outline-none;
+}
+
+.theme-lemonade .nl-button {
+  @apply border border-green-200 bg-green-100 text-green-950 shadow-sm hover:bg-green-50;
+}
+
+.theme-lemonade .dark .nl-button {
+  @apply bg-green-800 border-green-950 text-green-200 hover:bg-green-900;
+}
+
+.theme-lemonade .nl-divider {
+  @apply text-green-950 after:border-green-950 before:border-green-950;
+}
+
+.theme-lemonade .dark .nl-divider {
+  @apply text-green-200 before:border-green-200 after:border-green-200;
+}
+
+.theme-lemonade .nl-footer {
+  @apply text-green-950;
+}
+
+.theme-lemonade .dark .nl-footer {
+  @apply text-green-200;
+}
+
+.theme-lemonade .nl-input {
+  @apply bg-green-100 focus:border-green-500 focus:ring-green-500;
+}
+
+.theme-lemonade .dark .nl-input {
+  @apply bg-green-900 text-green-400 focus:ring-green-600;
+}
+
+/*Theme purple*/
+.theme-purple .nl-bg {
+  @apply bg-purple-200 shadow-sm;
+}
+
+.theme-purple .dark .nl-bg {
+  @apply bg-purple-950 shadow-slate-700/[.7];
+}
+
+.theme-purple .nl-logo,
+.theme-purple .nl-title,
+.theme-purple .nl-description {
+  @apply text-purple-950;
+}
+
+.theme-purple .dark .nl-logo,
+.theme-purple .dark .nl-title,
+.theme-purple .dark .nl-description {
+  @apply text-purple-200;
+}
+
+.theme-purple .nl-action-button {
+  @apply text-purple-950 hover:bg-purple-100 outline-none;
+}
+
+.theme-purple .dark .nl-action-button {
+  @apply text-purple-200 hover:bg-purple-900 outline-none;
+}
+
+.theme-purple .nl-button {
+  @apply border border-purple-200 bg-purple-100 text-purple-950 shadow-sm hover:bg-purple-50;
+}
+
+.theme-purple .dark .nl-button {
+  @apply bg-purple-800 border-purple-950 text-purple-200 hover:bg-purple-900;
+}
+
+.theme-purple .nl-divider {
+  @apply text-purple-950 after:border-purple-950 before:border-purple-950;
+}
+
+.theme-purple .dark .nl-divider {
+  @apply text-purple-200 before:border-purple-200 after:border-purple-200;
+}
+
+.theme-purple .nl-footer {
+  @apply text-purple-950;
+}
+
+.theme-purple .dark .nl-footer {
+  @apply text-purple-200;
+}
+
+.theme-purple .nl-input {
+  @apply bg-purple-100 focus:border-purple-500 focus:ring-purple-500;
+}
+
+.theme-purple .dark .nl-input {
+  @apply bg-purple-900 text-purple-400 focus:ring-purple-600;
+}
