@@ -2,14 +2,12 @@
 
 <!-- Auto Generated Below -->
 
-
 ## Properties
 
 | Property      | Attribute      | Description | Type                                             | Default                  |
 | ------------- | -------------- | ----------- | ------------------------------------------------ | ------------------------ |
 | `startScreen` | `start-screen` |             | `string`                                         | `CURRENT_MODULE.WELCOME` |
 | `theme`       | `theme`        |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
-
 
 ## Events
 
@@ -18,7 +16,6 @@
 | `handleCloseModal` |             | `CustomEvent<any>`    |
 | `handleGetValue`   |             | `CustomEvent<string>` |
 
+---
 
-----------------------------------------------
-
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

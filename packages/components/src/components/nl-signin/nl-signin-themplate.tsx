@@ -17,7 +17,7 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
   description = 'Please enter your user name.',
   onClickToSignUp,
   isFetchLogin = false,
-  error = ''
+  error = '',
 }) => {
   return (
     <div>
@@ -63,9 +63,7 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
       </div>
 
       <div class="ps-4 pe-4 overflow-y-auto">
-        <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">
-          {error}
-        </p>
+        <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{error}</p>
       </div>
 
       <div class="p-4 overflow-y-auto">
@@ -73,7 +71,8 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
           If you don't have an account please{' '}
           <span onClick={() => onClickToSignUp()} class="cursor-pointer text-blue-400">
             sign up
-          </span>.
+          </span>
+          .
         </p>
       </div>
     </div>

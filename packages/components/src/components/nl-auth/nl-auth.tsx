@@ -1,4 +1,4 @@
-import { Component, h, State, Event, EventEmitter, Prop, Watch } from '@stencil/core';
+import { Component, h, State, Event, EventEmitter, Prop, Watch, Listen } from '@stencil/core';
 import { NlWelcomeThemplate } from '../nl-welcome/nl-welcome-themplate';
 import { NlSignupThemplate } from '../nl-signup/nl-signup-themplate';
 import { NlInfoThemplate } from '../nl-info/nl-info-themplate';
@@ -58,11 +58,6 @@ export class NlAuth {
 
     this.isFetchLogin = true;
     this.handleGetValue.emit(this.bunkerUrl);
-
-    // setTimeout(() => {
-    //   this.isFetchLogin = false;
-    //   this.handleClose(this.bunkerUrl);
-    // }, 1500);
   }
 
   onClickToSignIn() {
@@ -117,6 +112,11 @@ export class NlAuth {
     }, 1500);
   }
 
+  @Listen('onChangeOption', { target: 'window' })
+  handleChangeOption(event: CustomEvent<string>) {
+    console.log('Получено значение:', event.detail);
+  }
+
   render() {
     const classWrapper = `w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto flex items-center ${this.darkMode ? 'dark' : ''}`;
 
@@ -141,6 +141,8 @@ export class NlAuth {
               onCreateAccount={() => this.onCreateAccount()}
               onClickToSignIn={() => this.onClickToSignIn()}
               error={this.error}
+              theme={this.themeState}
+              darkMode={this.darkMode}
             />
           );
         case CURRENT_MODULE.INFO:

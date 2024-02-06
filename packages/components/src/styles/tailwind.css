@@ -196,8 +196,6 @@
   @apply text-teal-400;
 }
 
-
-
 /*Theme lemonade*/
 .theme-lemonade .nl-bg {
   @apply bg-green-200 shadow-sm;

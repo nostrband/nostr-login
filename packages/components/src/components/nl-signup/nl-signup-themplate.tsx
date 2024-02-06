@@ -7,6 +7,8 @@ interface NlSignupThemplateProps {
   onCreateAccount: () => void;
   isFetching: boolean;
   error?: string;
+  theme: 'default' | 'ocean' | 'lemonade' | 'purple';
+  darkMode: boolean;
 }
 
 export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
@@ -15,11 +17,13 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
   onCreateAccount,
   title = 'Sign up',
   description = 'Join the Nostr network in one click.',
-  error = ''
+  error = '',
+  theme,
+  darkMode,
 }) => {
-  const isAvailable = true
-  const classError = ` text-sm ${isAvailable ? 'nl-text-success' : 'nl-text-error'} mb-2`
-  const textError  = isAvailable ? 'Available' : 'Already taken'
+  const isAvailable = true;
+  const classError = ` text-sm ${isAvailable ? 'nl-text-success' : 'nl-text-error'} mb-2`;
+  const textError = isAvailable ? 'Available' : 'Already taken';
   return (
     <div>
       <div class="p-4 overflow-y-auto">
@@ -28,7 +32,7 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
       </div>
 
       <div class="max-w-52 mx-auto">
-        <div class="relative mb-2">
+        <div class="relative mb-0.5">
           <input
             type="text"
             class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
@@ -36,15 +40,36 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
           />
           <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4 text-gray-500">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+              />
             </svg>
           </div>
         </div>
-       <p class={classError}>{textError}</p>
+        <p class={classError}>{textError}</p>
         <div class="mb-2">
-          <select class="nl-select border-transparent py-3 px-4 pe-9 block w-full rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none">
-            <option selected value="@nsec.app">@nsec.app</option>
-          </select>
+          {/*<select class="nl-select border-transparent py-3 px-4 pe-9 block w-full rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none">*/}
+          {/*  <option selected value="@nsec.app">*/}
+          {/*    @nsec.app*/}
+          {/*  </option>*/}
+          {/*</select>*/}
+          <nl-select
+            theme={theme}
+            darkMode={darkMode}
+            selected={0}
+            options={[
+              {
+                name: '@nsec.app',
+                value: '@nsec.app',
+              },
+              {
+                name: 'test',
+                value: '111111',
+              },
+            ]}
+          ></nl-select>
         </div>
         <button
           disabled={isFetching}
@@ -72,9 +97,7 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
       </div>
 
       <div class="ps-4 pe-4 overflow-y-auto">
-        <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">
-          {error}
-        </p>
+        <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{error}</p>
       </div>
 
       <div class="p-4 overflow-y-auto">
@@ -82,7 +105,8 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
           If you already have an account please{' '}
           <span onClick={() => onClickToSignIn()} class="cursor-pointer text-blue-400">
             log in
-          </span>.
+          </span>
+          .
         </p>
       </div>
     </div>
