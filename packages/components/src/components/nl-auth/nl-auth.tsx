@@ -40,6 +40,7 @@ export class NlAuth {
   @State() prevModule: CURRENT_MODULE = CURRENT_MODULE.WELCOME;
 
   @State() bunkerUrl: string = '';
+  @State() error: string = '';
 
   @Event() handleGetValue: EventEmitter<string>;
   @Event() handleCloseModal: EventEmitter;
@@ -48,19 +49,20 @@ export class NlAuth {
     this.bunkerUrl = (event.target as HTMLInputElement).value;
   }
 
-  handleClose(value: string = '') {
-    this.handleCloseModal.emit(value);
+  handleClose() {
+    this.handleCloseModal.emit();
   }
 
   handleLogin(e: MouseEvent) {
     e.preventDefault();
 
     this.isFetchLogin = true;
+    this.handleGetValue.emit(this.bunkerUrl);
 
-    setTimeout(() => {
-      this.isFetchLogin = false;
-      this.handleClose(this.bunkerUrl);
-    }, 1500);
+    // setTimeout(() => {
+    //   this.isFetchLogin = false;
+    //   this.handleClose(this.bunkerUrl);
+    // }, 1500);
   }
 
   onClickToSignIn() {
@@ -129,10 +131,18 @@ export class NlAuth {
               isFetchLogin={this.isFetchLogin}
               onClickToSignUp={() => this.onClickToSignUp()}
               onLogin={e => this.handleLogin(e)}
+              error={this.error}
             />
           );
         case CURRENT_MODULE.SIGNUP:
-          return <NlSignupThemplate isFetching={this.isFetchToCreateAccaunt} onCreateAccount={() => this.onCreateAccount()} onClickToSignIn={() => this.onClickToSignIn()} />;
+          return (
+            <NlSignupThemplate
+              isFetching={this.isFetchToCreateAccaunt}
+              onCreateAccount={() => this.onCreateAccount()}
+              onClickToSignIn={() => this.onClickToSignIn()}
+              error={this.error}
+            />
+          );
         case CURRENT_MODULE.INFO:
           return <NlInfoThemplate onClickToBack={() => this.onClickToBack()} />;
         default:
@@ -156,7 +166,7 @@ export class NlAuth {
                   />
                 </svg>
                 <p class="font-bold nl-logo">
-                  Nostr <span class="font-light">login</span>
+                  Nostr <span class="font-light">Login</span>
                 </p>
               </div>
 

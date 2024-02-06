@@ -23,6 +23,14 @@
   @apply text-white;
 }
 
+.theme-default .nl-description a {
+  @apply underline text-blue-800;
+}
+
+.theme-default .dark .nl-description a {
+  @apply underline text-blue-200;
+}
+
 .theme-default .nl-action-button {
   @apply text-gray-800 hover:bg-gray-100 outline-none;
 }
@@ -61,6 +69,14 @@
 
 .theme-default .dark .nl-footer {
   @apply text-gray-200;
+}
+
+.theme-default .nl-error {
+  @apply text-red-800;
+}
+
+.theme-default .dark .nl-error {
+  @apply text-red-200;
 }
 
 .theme-default .nl-input {
@@ -124,6 +140,14 @@
   @apply text-sky-200;
 }
 
+.theme-ocean .nl-error {
+  @apply text-red-800;
+}
+
+.theme-ocean .dark .nl-error {
+  @apply text-red-200;
+}
+
 .theme-ocean .nl-input {
   @apply bg-sky-100 focus:border-sky-500 focus:ring-sky-500;
 }
@@ -185,6 +209,14 @@
   @apply text-green-200;
 }
 
+.theme-lemonade .nl-error {
+  @apply text-red-800;
+}
+
+.theme-lemonade .dark .nl-error {
+  @apply text-red-200;
+}
+
 .theme-lemonade .nl-input {
   @apply bg-green-100 focus:border-green-500 focus:ring-green-500;
 }
@@ -244,6 +276,14 @@
 
 .theme-purple .dark .nl-footer {
   @apply text-purple-200;
+}
+
+.theme-purple .nl-error {
+  @apply text-red-800;
+}
+
+.theme-purple .dark .nl-error {
+  @apply text-red-200;
 }
 
 .theme-purple .nl-input {

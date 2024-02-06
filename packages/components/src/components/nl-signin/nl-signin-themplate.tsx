@@ -6,16 +6,18 @@ interface NlSigninThemplateProps {
   onClickToSignUp: () => void;
   onLogin: (e: MouseEvent) => void;
   isFetchLogin: boolean;
+  error?: string;
   handleInputChange: (event: Event) => void;
 }
 
 export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
   handleInputChange,
   onLogin,
-  title = 'Sign In',
+  title = 'Log in',
   description = 'Please enter nip46 bunker url',
   onClickToSignUp,
   isFetchLogin = false,
+  error = ''
 }) => {
   return (
     <div>
@@ -24,7 +26,7 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
         <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">{description}</p>
       </div>
 
-      <div class="max-w-72 mx-auto pb-5">
+      <div class="max-w-72 mx-auto">
         <div class="relative mb-2">
           <input
             onChange={e => handleInputChange(e)}
@@ -60,12 +62,18 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
         </button>
       </div>
 
+      <div class="ps-4 pe-4 overflow-y-auto">
+        <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">
+          {error}
+        </p>
+      </div>
+
       <div class="p-4 overflow-y-auto">
-        <p class="nl-footer font-light text-center text-sm pt-2 max-w-96 mx-auto">
-          If you don't have an account, you can{' '}
+        <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+          If you don't have an account please{' '}
           <span onClick={() => onClickToSignUp()} class="cursor-pointer text-blue-400">
-            create
-          </span>
+            sign up
+          </span>.
         </p>
       </div>
     </div>

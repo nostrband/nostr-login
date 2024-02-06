@@ -4,59 +4,11 @@ import 'nostr-login-components';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { getEventHash, generatePrivateKey } from 'nostr-tools';
 
-export const launch = opt => {
-  const dialog = document.createElement('dialog');
-  const modal = document.createElement('nl-auth');
-
-  dialog.appendChild(modal);
-  document.body.appendChild(dialog);
-
-  return new Promise(resolve => {
-    modal.addEventListener('handleGetValue', event => {
-      const inputValue = event.detail;
-
-      resolve(inputValue);
-    });
-
-    modal.addEventListener('handleCloseModal', event => {
-      dialog.close();
-      const inputValue = event.detail;
-
-      resolve(inputValue);
-    });
-
-    dialog.showModal();
-    if (opt && opt.theme) {
-      modal.setAttribute('theme', opt.theme);
-    }
-
-    if (opt && opt.startScreen) {
-      modal.setAttribute('start-screen', opt.startScreen);
-    }
-  });
-};
-
-const connectModals = () => {
-  const initialModals = async opt => {
-    const bunkerUrl = await launch(opt);
-
-    console.log({ bunkerUrl });
-  };
-
-  const nlElements = document.getElementsByTagName('nl-button');
-
-  for (let i = 0; i < nlElements.length; i++) {
-    const theme = nlElements[i].getAttribute('nl-theme');
-    const startScreen = nlElements[i].getAttribute('start-screen');
-
-    nlElements[i].addEventListener('click', function () {
-      initialModals({
-        theme,
-        startScreen,
-      });
-    });
-  }
-};
+export interface NostrLoginOptions {
+  // optional
+  theme?: string;
+  startScreen?: string;
+}
 
 const LOCALSTORE_KEY = '__nostrlogin_nip46';
 const ndk = new NDK({
@@ -64,7 +16,7 @@ const ndk = new NDK({
 });
 let signer = null;
 let signerPromise = null;
-let optionsModal = {
+let optionsModal: NostrLoginOptions = {
   theme: 'default',
   startScreen: 'welcome',
 };
@@ -81,6 +33,10 @@ const nostr = {
     event.sig = signer.sign(event);
     return event;
   },
+  async getRelays() {
+    // FIXME implement!
+    return {}
+  },
   nip04: {
     async encrypt(pubkey, plaintext) {
       await ensureSigner();
@@ -93,15 +49,82 @@ const nostr = {
   },
 };
 
+export const launch = (opt: NostrLoginOptions) => {
+
+  const dialog = document.createElement('dialog');
+  const modal = document.createElement('nl-auth');
+
+  if (opt.theme) {
+    modal.setAttribute('theme', opt.theme);
+  }
+
+  if (opt.startScreen) {
+    modal.setAttribute('start-screen', opt.startScreen);
+  }
+
+  dialog.appendChild(modal);
+  document.body.appendChild(dialog);
+
+  return new Promise((ok) => {
+    const handleBunkerUrl = (url: string) => {
+      modal.error = 'Please confirm in your key storage app.';
+      authNip46(url)
+        .then(() => {
+          modal.isFetchLogin = false;
+          dialog.close();
+          ok();
+        })
+        .catch(e => {
+          console.log('error', e);
+          modal.isFetchLogin = false;
+          modal.error = e.toString();
+        });
+    };
+
+    modal.addEventListener('handleGetValue', event => {
+      handleBunkerUrl(event.detail);
+    });
+
+    modal.addEventListener('handleCloseModal', () => {
+      handleBunkerUrl();
+    });
+
+    dialog.showModal();
+  });
+};
+
+const connectModals = (defaultOpt: NostrLoginOptions) => {
+  const initialModals = async (opt: NostrLoginOptions) => {
+    await launch(opt);
+  };
+
+  const nlElements = document.getElementsByTagName('nl-button');
+
+  for (let i = 0; i < nlElements.length; i++) {
+    const theme = nlElements[i].getAttribute('nl-theme');
+    const startScreen = nlElements[i].getAttribute('start-screen');
+
+    const elementOpt = {
+      ...defaultOpt,
+    };
+    if (theme) elementOpt.theme = theme;
+    if (startScreen) elementOpt.startScreen = startScreen;
+
+    nlElements[i].addEventListener('click', function () {
+      initialModals(elementOpt);
+    });
+  }
+};
+
 async function ensureSigner() {
   // wait until competing request is finished
   if (signerPromise) await signerPromise;
 
   // still no signer? request auth from user
   if (!signer) {
-    // FIXME show the signup/login modal
-    const bunkerUrl = await launch(optionsModal);
-    await authNip46(bunkerUrl);
+    await launch({
+      ...optionsModal
+    });
   }
 
   // give up
@@ -119,6 +142,19 @@ async function initSigner(info) {
 
       // create and prepare the signer
       signer = new NDKNip46Signer(ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
+
+      // pre-open the popup to make sure it's not blocked by browser
+      const popup = window.open('about:blank', '_blank', 'width=100,height=50');
+      popup.document.write("Loading...");
+
+      // OAuth flow
+      signer.on('authUrl', url => {
+        popup.location.href = url;
+        popup.resizeTo(600, 600);
+        //window.open(url, 'auth', 'width=600,height=600');
+      });
+
+      // connect
       await signer.blockUntilReady();
 
       ok();
@@ -135,14 +171,14 @@ async function initSigner(info) {
   return signerPromise;
 }
 
-export async function init(opt) {
+export async function init(opt: NostrLoginOptions) {
   // skip if it's already started or
   // if there is nip07 extension
   if (window.nostr) return;
 
   window.nostr = nostr;
 
-  connectModals();
+  connectModals(opt);
 
   if (opt) {
     optionsModal = { ...opt };
@@ -173,10 +209,16 @@ export async function authNip46(bunkerUrl) {
     console.log('nostr login auth info', info);
     if (!info.pubkey || !info.sk || !info.relays[0]) throw new Error(`Bad bunker url ${bunkerUrl}`);
 
+    const r = await initSigner(info);
+
+    // only save after successfull login
     window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info));
-    return initSigner(info);
+
+    // result
+    return r;
   } catch (e) {
     console.log('nostr login auth failed', e);
+    throw e;
   }
 }
 

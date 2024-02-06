@@ -2,13 +2,17 @@
   "name": "nostr-login-workspace",
   "private": true,
   "workspaces": {
-    "packages": ["packages/**"]
+    "packages": [
+      "packages/**"
+    ]
   },
   "scripts": {
     "build": "lerna run build",
     "publish": "lerna publish --no-private"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@nostr-dev-kit/ndk": "^2.4.0"
+  },
   "devDependencies": {
     "lerna": "^8.0.2"
   }

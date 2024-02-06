@@ -6,6 +6,7 @@ interface NlSignupThemplateProps {
   onClickToSignIn: () => void;
   onCreateAccount: () => void;
   isFetching: boolean;
+  error?: string;
 }
 
 export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
@@ -13,7 +14,8 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
   isFetching = false,
   onCreateAccount,
   title = 'Sign up',
-  description = 'Create an account in one click',
+  description = 'Join the Nostr network in one click.',
+  error = ''
 }) => {
   return (
     <div>
@@ -22,7 +24,7 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
         <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">{description}</p>
       </div>
 
-      <div class="max-w-52 mx-auto pb-5">
+      <div class="max-w-52 mx-auto">
         <button
           disabled={isFetching}
           onClick={() => onCreateAccount()}
@@ -48,12 +50,18 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
         </button>
       </div>
 
+      <div class="ps-4 pe-4 overflow-y-auto">
+        <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">
+          {error}
+        </p>
+      </div>
+
       <div class="p-4 overflow-y-auto">
-        <p class="nl-footer font-light text-center text-sm pt-2 max-w-96 mx-auto">
-          If you have an account you can{' '}
+        <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+          If you already have an account please{' '}
           <span onClick={() => onClickToSignIn()} class="cursor-pointer text-blue-400">
-            login
-          </span>
+            log in
+          </span>.
         </p>
       </div>
     </div>
