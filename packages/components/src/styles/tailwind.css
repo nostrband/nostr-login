@@ -95,6 +95,22 @@
   @apply bg-gray-700 text-gray-400 focus:ring-gray-600;
 }
 
+.theme-default .nl-select-list {
+  @apply bg-gray-100;
+}
+
+.theme-default .dark .nl-select-list {
+  @apply bg-gray-700;
+}
+
+.theme-default .nl-select-option {
+  @apply text-gray-800 hover:bg-gray-200;
+}
+
+.theme-default .dark .nl-select-option {
+  @apply text-gray-400 hover:bg-gray-800 hover:text-gray-300;
+}
+
 .theme-default .nl-text-error {
   @apply text-red-400;
 }
@@ -178,6 +194,23 @@
 
 .theme-ocean .dark .nl-select {
   @apply bg-sky-900 text-sky-400 focus:ring-sky-600;
+}
+
+
+.theme-ocean .nl-select-list {
+  @apply bg-sky-100;
+}
+
+.theme-ocean .dark .nl-select-list {
+  @apply bg-sky-700;
+}
+
+.theme-ocean .nl-select-option {
+  @apply text-sky-800 hover:bg-sky-200;
+}
+
+.theme-ocean .dark .nl-select-option {
+  @apply text-sky-400 hover:bg-sky-800 hover:text-sky-300;
 }
 
 .theme-ocean .nl-text-error {
@@ -273,6 +306,22 @@
   @apply bg-green-900 text-green-400 focus:ring-green-600;
 }
 
+.theme-lemonade .nl-select-list {
+  @apply bg-green-100;
+}
+
+.theme-lemonade .dark .nl-select-list {
+  @apply bg-green-700;
+}
+
+.theme-lemonade .nl-select-option {
+  @apply text-green-800 hover:bg-green-200;
+}
+
+.theme-lemonade .dark .nl-select-option {
+  @apply text-green-400 hover:bg-green-800 hover:text-green-300;
+}
+
 .theme-lemonade .nl-text-error {
   @apply text-red-600;
 }
@@ -364,6 +413,22 @@
 
 .theme-purple .dark .nl-select {
   @apply bg-purple-900 text-purple-400 focus:ring-purple-600;
+}
+
+.theme-purple .nl-select-list {
+  @apply bg-purple-100;
+}
+
+.theme-purple .dark .nl-select-list {
+  @apply bg-purple-700;
+}
+
+.theme-purple .nl-select-option {
+  @apply text-purple-800 hover:bg-purple-200;
+}
+
+.theme-purple .dark .nl-select-option {
+  @apply text-purple-400 hover:bg-purple-800 hover:text-purple-300;
 }
 
 .theme-purple .nl-text-error {

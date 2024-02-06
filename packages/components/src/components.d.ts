@@ -81,7 +81,7 @@ declare global {
         new (): HTMLNlButtonElement;
     };
     interface HTMLNlSelectElementEventMap {
-        "onChangeOption": string;
+        "changeOption": string;
     }
     interface HTMLNlSelectElement extends Components.NlSelect, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlSelectElementEventMap>(type: K, listener: (this: HTMLNlSelectElement, ev: NlSelectCustomEvent<HTMLNlSelectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -170,7 +170,7 @@ declare namespace LocalJSX {
     }
     interface NlSelect {
         "darkMode"?: boolean;
-        "onOnChangeOption"?: (event: NlSelectCustomEvent<string>) => void;
+        "onChangeOption"?: (event: NlSelectCustomEvent<string>) => void;
         "options"?: OptionType[];
         "selected"?: number;
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';

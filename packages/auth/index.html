@@ -9,23 +9,20 @@
         import { launch } from './dist/index.esm.js';
 
         const test = async () => {
-            const bunkerUrl = await launch();
+            const bunkerUrl = await launch({
+                theme: 'purple',
+                startScreen: 'signup',
+            });
 
             console.log(bunkerUrl);
         };
 
-        const nlElements = document.getElementsByTagName('nl-button');
-
-        for (var i = 0; i < nlElements.length; i++) {
-            nlElements[i].addEventListener('click', function () {
-                test();
-            });
-        }
+        test();
 
     </script>
 </head>
 <body>
 
-<nl-button></nl-button>
+<!--<nl-button title-btn="Sign in" start-screen="signin" nl-theme="lemonade"></nl-button>-->
 </body>
 </html>
