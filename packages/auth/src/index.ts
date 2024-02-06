@@ -16,6 +16,7 @@ const ndk = new NDK({
 });
 let signer = null;
 let signerPromise = null;
+let popup = null;
 let optionsModal: NostrLoginOptions = {
   theme: 'default',
   startScreen: 'welcome',
@@ -50,6 +51,8 @@ const nostr = {
 };
 
 async function getBunkerUrl(value: string) {
+    if (value.startsWith('bunker://')) return value;
+
     if (value.includes('@')) {
         const [ name, domain ] = value.split('@')
         const bunkerUrl = `https://${domain}/.well-known/nostr.json?name=_`
@@ -66,9 +69,9 @@ async function getBunkerUrl(value: string) {
         //     name, domain
         // })
         return `bunker://${userPubkey}?relay=${bunkerRelay}`
-    } else {
-        return value;
-    }
+    } 
+
+    throw new Error("Invalid user name or bunker url");
 }
 
 export const launch = (opt: NostrLoginOptions) => {
@@ -162,12 +165,11 @@ async function initSigner(info) {
       // signer won't start properly
       await ndk.connect();
 
+      // we might need it here
+      ensurePopup();
+
       // create and prepare the signer
       signer = new NDKNip46Signer(ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
-
-      // pre-open the popup to make sure it's not blocked by browser
-      const popup = window.open('about:blank', '_blank', 'width=100,height=50');
-      popup.document.write("Loading...");
 
       // OAuth flow
       signer.on('authUrl', url => {
@@ -220,8 +222,27 @@ export async function init(opt: NostrLoginOptions) {
   }
 }
 
+function ensurePopup() {
+    if (popup) return;
+    popup = window.open('about:blank', '_blank', 'width=100,height=50');
+    if (!popup) throw new Error("");
+    popup.document.write("Loading...");
+}
+
+function closePopup() {
+    // make sure we release the popup
+    try {
+        popup.close();
+        popup = null;
+    } catch {}
+}
+
 export async function authNip46(value) {
   try {
+
+    // pre-open the popup to make sure it's not blocked by browser
+    ensurePopup();
+
     const bunkerUrl = await getBunkerUrl(value)
     const url = new URL(bunkerUrl);
     const info = {
@@ -230,9 +251,15 @@ export async function authNip46(value) {
       relays: url.searchParams.getAll('relay'),
     };
     console.log('nostr login auth info', info);
-    if (!info.pubkey || !info.sk || !info.relays[0]) throw new Error(`Bad bunker url ${bunkerUrl}`);
+    if (!info.pubkey || !info.sk || !info.relays[0]) {
+        closePopup();
+        throw new Error(`Bad bunker url ${bunkerUrl}`);
+    }
 
     const r = await initSigner(info);
+
+    // make ure it's closed
+    closePopup();
 
     // only save after successfull login
     window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info));
