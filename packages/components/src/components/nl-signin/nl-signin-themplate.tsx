@@ -14,7 +14,7 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
   handleInputChange,
   onLogin,
   title = 'Log in',
-  description = 'Please enter nip46 bunker url',
+  description = 'Please enter your user name.',
   onClickToSignUp,
   isFetchLogin = false,
   error = ''
@@ -32,7 +32,7 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
             onChange={e => handleInputChange(e)}
             type="text"
             class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
-            placeholder="Enter nip46 bunker url"
+            placeholder="name@domain.com"
           />
           <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4 text-gray-500">

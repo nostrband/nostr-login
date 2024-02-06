@@ -49,6 +49,28 @@ const nostr = {
   },
 };
 
+async function getBunkerUrl(value: string) {
+    if (value.includes('@')) {
+        const [ name, domain ] = value.split('@')
+        const bunkerUrl = `https://${domain}/.well-known/nostr.json?name=_`
+        const userUrl = `https://${domain}/.well-known/nostr.json?name=${name}`
+        const bunker = await fetch(bunkerUrl);
+        const bunkerData = await bunker.json();
+        const bunkerPubkey = bunkerData.names["_"];
+        const bunkerRelay = bunkerData.nip46[bunkerPubkey];
+        const user = await fetch(userUrl);
+        const userData = await user.json();
+        const userPubkey = userData.names[name];
+        // console.log({
+        //     bunkerData, userData, bunkerPubkey, bunkerRelay, userPubkey,
+        //     name, domain
+        // })
+        return `bunker://${userPubkey}?relay=${bunkerRelay}`
+    } else {
+        return value;
+    }
+}
+
 export const launch = (opt: NostrLoginOptions) => {
 
   const dialog = document.createElement('dialog');
@@ -198,8 +220,9 @@ export async function init(opt: NostrLoginOptions) {
   }
 }
 
-export async function authNip46(bunkerUrl) {
+export async function authNip46(value) {
   try {
+    const bunkerUrl = await getBunkerUrl(value)
     const url = new URL(bunkerUrl);
     const info = {
       pubkey: url.pathname.split('//')[1],
