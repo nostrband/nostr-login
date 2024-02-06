@@ -19,6 +19,19 @@
 | `handleGetValue`   |             | `CustomEvent<string>` |
 
 
+## Dependencies
+
+### Depends on
+
+- [nl-select](../nl-select)
+
+### Graph
+```mermaid
+graph TD;
+  nl-auth --> nl-select
+  style nl-auth fill:#f9f,stroke:#333,stroke-width:4px
+```
+
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*

@@ -5,6 +5,8 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { OptionType } from "./components/nl-select/nl-select";
+export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface NlAuth {
         "startScreen": string;
@@ -13,6 +15,12 @@ export namespace Components {
     interface NlButton {
         "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
         "titleBtn": string;
+    }
+    interface NlSelect {
+        "darkMode": boolean;
+        "options": OptionType[];
+        "selected": number;
+        "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlSignin {
         "isOpen": boolean;
@@ -30,6 +38,10 @@ export namespace Components {
 export interface NlAuthCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlAuthElement;
+}
+export interface NlSelectCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlSelectElement;
 }
 export interface NlSigninCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -67,6 +79,23 @@ declare global {
     var HTMLNlButtonElement: {
         prototype: HTMLNlButtonElement;
         new (): HTMLNlButtonElement;
+    };
+    interface HTMLNlSelectElementEventMap {
+        "onChangeOption": string;
+    }
+    interface HTMLNlSelectElement extends Components.NlSelect, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlSelectElementEventMap>(type: K, listener: (this: HTMLNlSelectElement, ev: NlSelectCustomEvent<HTMLNlSelectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlSelectElementEventMap>(type: K, listener: (this: HTMLNlSelectElement, ev: NlSelectCustomEvent<HTMLNlSelectElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlSelectElement: {
+        prototype: HTMLNlSelectElement;
+        new (): HTMLNlSelectElement;
     };
     interface HTMLNlSigninElementEventMap {
         "handleGetValue": string;
@@ -122,6 +151,7 @@ declare global {
     interface HTMLElementTagNameMap {
         "nl-auth": HTMLNlAuthElement;
         "nl-button": HTMLNlButtonElement;
+        "nl-select": HTMLNlSelectElement;
         "nl-signin": HTMLNlSigninElement;
         "nl-signup": HTMLNlSignupElement;
         "nl-welcome": HTMLNlWelcomeElement;
@@ -138,6 +168,13 @@ declare namespace LocalJSX {
         "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
         "titleBtn"?: string;
     }
+    interface NlSelect {
+        "darkMode"?: boolean;
+        "onOnChangeOption"?: (event: NlSelectCustomEvent<string>) => void;
+        "options"?: OptionType[];
+        "selected"?: number;
+        "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+    }
     interface NlSignin {
         "isOpen"?: boolean;
         "onHandleGetValue"?: (event: NlSigninCustomEvent<string>) => void;
@@ -153,6 +190,7 @@ declare namespace LocalJSX {
     interface IntrinsicElements {
         "nl-auth": NlAuth;
         "nl-button": NlButton;
+        "nl-select": NlSelect;
         "nl-signin": NlSignin;
         "nl-signup": NlSignup;
         "nl-welcome": NlWelcome;
@@ -164,6 +202,7 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "nl-auth": LocalJSX.NlAuth & JSXBase.HTMLAttributes<HTMLNlAuthElement>;
             "nl-button": LocalJSX.NlButton & JSXBase.HTMLAttributes<HTMLNlButtonElement>;
+            "nl-select": LocalJSX.NlSelect & JSXBase.HTMLAttributes<HTMLNlSelectElement>;
             "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;
             "nl-signup": LocalJSX.NlSignup & JSXBase.HTMLAttributes<HTMLNlSignupElement>;
             "nl-welcome": LocalJSX.NlWelcome & JSXBase.HTMLAttributes<HTMLNlWelcomeElement>;

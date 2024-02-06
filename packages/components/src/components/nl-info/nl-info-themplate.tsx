@@ -30,7 +30,13 @@ export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ onC
           Nostr <span class="font-light">Login</span>
         </h1>
         <p class="text-green-800 dark:text-green-200 font-light text-center text-lg pt-2 max-w-96 mx-auto">Version: 1.0.2</p>
-        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">Learn more about Nostr <a target='_blank' href='https://nostr.how'>here</a>.</p>
+        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">
+          Learn more about Nostr{' '}
+          <a target="_blank" href="https://nostr.how">
+            here
+          </a>
+          .
+        </p>
       </div>
     </div>
   );
