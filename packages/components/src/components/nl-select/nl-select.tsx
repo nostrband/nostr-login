@@ -18,7 +18,7 @@ export class NlSelect {
 
   @Element() element: HTMLElement;
 
-  @Event() onChangeOption: EventEmitter<string>;
+  @Event() changeOption: EventEmitter<string>;
 
   buttonRef: HTMLButtonElement;
   ulRef: HTMLUListElement;
@@ -68,29 +68,12 @@ export class NlSelect {
     this.value = el;
     this.isOpen = false;
 
-    this.onChangeOption.emit(el.value);
+    this.changeOption.emit(el.value);
   }
 
   render() {
-    const listClass = `${this.isOpen ? 'listClass' : 'hidden'} min-w-[15rem] bg-white absolute left-0 shadow-md rounded-lg p-2 mt-1 dark:bg-gray-800 dark:border dark:border-gray-700 dark:divide-gray-700 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full`;
-    const arrowClass = `${this.isOpen ? 'rotate-180' : 'rotate-0'}  duration-300 flex-shrink-0 w-4 h-4 text-gray-500`;
-
-    const renderList = () => {
-      return (
-        <ul ref={el => (this.ulRef = el)} class={listClass}>
-          {this.options.map(el => {
-            return (
-              <li
-                onClick={() => this.handleHhange(el)}
-                class="flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
-              >
-                {el.name}
-              </li>
-            );
-          })}
-        </ul>
-      );
-    };
+    const listClass = `${this.isOpen ? 'listClass' : 'hidden'} min-w-[15rem] nl-select-list absolute left-0 shadow-md rounded-lg p-2 mt-1 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full`;
+    const arrowClass = `${this.isOpen ? 'rotate-180' : 'rotate-0'} duration-300 flex-shrink-0 w-4 h-4 text-gray-500`;
 
     return (
       <div class={`theme-${this.themeState}`}>
@@ -119,7 +102,18 @@ export class NlSelect {
               </svg>
             </button>
 
-            {renderList()}
+            <ul ref={el => (this.ulRef = el)} class={listClass}>
+              {this.options.map(el => {
+                return (
+                  <li
+                    onClick={() => this.handleHhange(el)}
+                    class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm"
+                  >
+                    {el.name}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </div>
       </div>

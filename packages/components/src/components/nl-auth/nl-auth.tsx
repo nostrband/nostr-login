@@ -112,7 +112,7 @@ export class NlAuth {
     }, 1500);
   }
 
-  @Listen('onChangeOption', { target: 'window' })
+  @Listen('changeOption', { target: 'window' })
   handleChangeOption(event: CustomEvent<string>) {
     console.log('Получено значение:', event.detail);
   }
