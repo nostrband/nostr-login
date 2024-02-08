@@ -13,10 +13,13 @@
 
 ## Events
 
-| Event              | Description | Type                  |
-| ------------------ | ----------- | --------------------- |
-| `handleCloseModal` |             | `CustomEvent<any>`    |
-| `handleGetValue`   |             | `CustomEvent<string>` |
+| Event           | Description | Type                  |
+| --------------- | ----------- | --------------------- |
+| `nlCheckLogin`  |             | `CustomEvent<string>` |
+| `nlCheckSignup` |             | `CustomEvent<string>` |
+| `nlCloseModal`  |             | `CustomEvent<any>`    |
+| `nlLogin`       |             | `CustomEvent<string>` |
+| `nlSignup`      |             | `CustomEvent<string>` |
 
 
 ## Dependencies

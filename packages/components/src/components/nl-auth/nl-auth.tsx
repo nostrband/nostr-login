@@ -1,4 +1,4 @@
-import { Component, h, State, Event, EventEmitter, Prop, Watch, Listen } from '@stencil/core';
+import { Component, h, State, Event, EventEmitter, Prop, Watch } from '@stencil/core';
 import { NlWelcomeThemplate } from '../nl-welcome/nl-welcome-themplate';
 import { NlSignupThemplate } from '../nl-signup/nl-signup-themplate';
 import { NlInfoThemplate } from '../nl-info/nl-info-themplate';
@@ -33,55 +33,90 @@ export class NlAuth {
   //   this.themeState = newValue;
   // }
 
-  @State() isFetchToCreateAccaunt: boolean = false;
+  @State() isFetchCreateAccount: boolean = false;
   @State() isFetchLogin: boolean = false;
 
   @State() currentModule: CURRENT_MODULE = CURRENT_MODULE.WELCOME;
   @State() prevModule: CURRENT_MODULE = CURRENT_MODULE.WELCOME;
 
-  @State() bunkerUrl: string = '';
+  @State() loginName: string = '';
+  @State() signupName: string = '';
+  @State() domain: string = '';
   @State() error: string = '';
+  @State() signupNameIsAvailable: boolean = false;
+  @State() servers = [
+    { name: '@nsec.app', value: 'nsec.app' }
+  ]
 
-  @Event() handleGetValue: EventEmitter<string>;
-  @Event() handleCloseModal: EventEmitter;
+  @Event() nlLogin: EventEmitter<string>;
+  @Event() nlSignup: EventEmitter<string>;
+  @Event() nlCloseModal: EventEmitter;
+  @Event() nlCheckLogin: EventEmitter<string>;
+  @Event() nlCheckSignup: EventEmitter<string>;
+
+  isSignup() {
+    return this.currentModule === CURRENT_MODULE.SIGNUP
+  }
+
+  handleNip05() {
+    if (this.isSignup()) {
+      this.nlCheckSignup.emit(`${this.signupName}@${this.domain}`);
+    } else {
+      this.nlCheckLogin.emit(this.loginName);
+    }
+  }
 
   handleInputChange(event: Event) {
-    this.bunkerUrl = (event.target as HTMLInputElement).value;
+    const value = (event.target as HTMLInputElement).value;
+    if (this.isSignup())
+      this.signupName = value;
+    else
+      this.loginName = value;
+    this.handleNip05();
+  }
+
+  handleDomainSelect(event: CustomEvent<string>) {
+    this.domain = event.detail;
+    this.handleNip05();
   }
 
   handleClose() {
-    this.handleCloseModal.emit();
+    this.nlCloseModal.emit();
   }
 
   handleLogin(e: MouseEvent) {
     e.preventDefault();
 
     this.isFetchLogin = true;
-    this.handleGetValue.emit(this.bunkerUrl);
+    this.nlLogin.emit(this.loginName);
   }
 
-  onClickToSignIn() {
+  handleClickToSignIn() {
+    this.error = '';
     this.currentModule = CURRENT_MODULE.SIGNIN;
+    this.handleNip05();
   }
 
-  onClickToSignUp() {
+  handleClickToSignUp() {
+    this.error = '';
     this.currentModule = CURRENT_MODULE.SIGNUP;
+    this.handleNip05();
   }
 
-  onChangeTheme() {
+  handleChangeTheme() {
     this.darkMode = !this.darkMode;
 
     localStorage.setItem('nl-dark-mode', `${this.darkMode}`);
   }
 
-  onClickToInfo() {
+  handleClickToInfo() {
     if (this.currentModule !== CURRENT_MODULE.INFO) {
       this.prevModule = this.currentModule;
       this.currentModule = CURRENT_MODULE.INFO;
     }
   }
 
-  onClickToBack() {
+  handleClickToBack() {
     this.currentModule = this.prevModule;
   }
 
@@ -104,17 +139,11 @@ export class NlAuth {
     }
   }
 
-  onCreateAccount() {
-    this.isFetchToCreateAccaunt = true;
+  handleCreateAccount(e: MouseEvent) {
+    e.preventDefault();
 
-    setTimeout(() => {
-      this.isFetchToCreateAccaunt = false;
-    }, 1500);
-  }
-
-  @Listen('changeOption', { target: 'window' })
-  handleChangeOption(event: CustomEvent<string>) {
-    console.log('Получено значение:', event.detail);
+    this.isFetchCreateAccount = true;
+    this.nlSignup.emit(`${this.signupName}@${this.domain}`);
   }
 
   render() {
@@ -123,32 +152,36 @@ export class NlAuth {
     const renderModule = () => {
       switch (this.currentModule) {
         case CURRENT_MODULE.WELCOME:
-          return <NlWelcomeThemplate onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
+          return <NlWelcomeThemplate handleClickToSignIn={() => this.handleClickToSignIn()} handleClickToSignUp={() => this.handleClickToSignUp()} />;
         case CURRENT_MODULE.SIGNIN:
           return (
             <NlSigninThemplate
               handleInputChange={e => this.handleInputChange(e)}
               isFetchLogin={this.isFetchLogin}
-              onClickToSignUp={() => this.onClickToSignUp()}
-              onLogin={e => this.handleLogin(e)}
+              handleClickToSignUp={() => this.handleClickToSignUp()}
+              handleLogin={e => this.handleLogin(e)}
               error={this.error}
             />
           );
         case CURRENT_MODULE.SIGNUP:
           return (
             <NlSignupThemplate
-              isFetching={this.isFetchToCreateAccaunt}
-              onCreateAccount={() => this.onCreateAccount()}
-              onClickToSignIn={() => this.onClickToSignIn()}
+              isFetching={this.isFetchCreateAccount}
+              handleInputChange={e => this.handleInputChange(e)}
+              handleDomainSelect={d => this.handleDomainSelect(d)}
+              handleCreateAccount={e => this.handleCreateAccount(e)}
+              handleClickToSignIn={() => this.handleClickToSignIn()}
+              isAvailable={this.signupNameIsAvailable}
               error={this.error}
               theme={this.themeState}
               darkMode={this.darkMode}
+              servers={this.servers}
             />
           );
         case CURRENT_MODULE.INFO:
-          return <NlInfoThemplate onClickToBack={() => this.onClickToBack()} />;
+          return <NlInfoThemplate handleClickToBack={() => this.handleClickToBack()} />;
         default:
-          return <NlWelcomeThemplate onClickToSignIn={() => this.onClickToSignIn()} onClickToSignUp={() => this.onClickToSignUp()} />;
+          return <NlWelcomeThemplate handleClickToSignIn={() => this.handleClickToSignIn()} handleClickToSignUp={() => this.handleClickToSignUp()} />;
       }
     };
 
@@ -174,7 +207,7 @@ export class NlAuth {
 
               <div class="flex gap-1">
                 <button
-                  onClick={() => this.onChangeTheme()}
+                  onClick={() => this.handleChangeTheme()}
                   type="button"
                   class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
                 >
@@ -198,7 +231,7 @@ export class NlAuth {
                   )}
                 </button>
                 <button
-                  onClick={() => this.onClickToInfo()}
+                  onClick={() => this.handleClickToInfo()}
                   type="button"
                   class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
                 >

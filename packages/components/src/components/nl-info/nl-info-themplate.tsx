@@ -1,14 +1,14 @@
 import { FunctionalComponent, h } from '@stencil/core';
 
 interface NlInfoThemplateProps {
-  onClickToBack: () => void;
+  handleClickToBack: () => void;
 }
 
-export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ onClickToBack }) => {
+export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ handleClickToBack }) => {
   return (
     <div class="p-4">
       <button
-        onClick={() => onClickToBack()}
+        onClick={() => handleClickToBack()}
         type="button"
         class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         data-hs-overlay="#hs-vertically-centered-modal"

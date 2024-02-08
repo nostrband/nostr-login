@@ -3,27 +3,35 @@ import { FunctionalComponent, h } from '@stencil/core';
 interface NlSignupThemplateProps {
   title?: string;
   description?: string;
-  onClickToSignIn: () => void;
-  onCreateAccount: () => void;
+  handleInputChange: (event: Event) => void;
+  handleDomainSelect: (event: CustomEvent<string>) => void;
+  handleClickToSignIn: () => void;
+  handleCreateAccount: (event: MouseEvent) => void;
   isFetching: boolean;
+  isAvailable: boolean;
   error?: string;
   theme: 'default' | 'ocean' | 'lemonade' | 'purple';
   darkMode: boolean;
+  servers: { name: string, value: string }[]
 }
 
 export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
-  onClickToSignIn,
+  handleInputChange,
+  handleDomainSelect,
+  handleClickToSignIn,
   isFetching = false,
-  onCreateAccount,
+  handleCreateAccount,
   title = 'Sign up',
-  description = 'Join the Nostr network in one click.',
+  description = 'Join the Nostr network.',
   error = '',
   theme,
   darkMode,
+  isAvailable,
+  servers
 }) => {
-  const isAvailable = true;
-  const classError = ` text-sm ${isAvailable ? 'nl-text-success' : 'nl-text-error'} mb-2`;
-  const textError = isAvailable ? 'Available' : 'Already taken';
+  // const classError = ` text-sm ${isAvailable ? 'nl-text-success' : 'nl-text-error'} mb-2`;
+  // const textError = isAvailable ? 'Available' : inputStatus;
+
   return (
     <div>
       <div class="p-4 overflow-y-auto">
@@ -34,12 +42,13 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
       <div class="max-w-52 mx-auto">
         <div class="relative mb-0.5">
           <input
+            onInput={handleInputChange}
             type="text"
             class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
             placeholder="Name"
           />
           <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4 text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke={isAvailable ? "#00cc00" : "currentColor"} class="flex-shrink-0 w-4 h-4 text-gray-500">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -48,32 +57,30 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
             </svg>
           </div>
         </div>
-        <p class={classError}>{textError}</p>
-        <div class="mb-2">
+        {/* {inputStatus && (
+          <p class={classError}>{textError}</p>
+        )} */}
+        <div class="mb-0.5">
           {/*<select class="nl-select border-transparent py-3 px-4 pe-9 block w-full rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none">*/}
           {/*  <option selected value="@nsec.app">*/}
           {/*    @nsec.app*/}
           {/*  </option>*/}
           {/*</select>*/}
           <nl-select
+            onSelectDomain={handleDomainSelect}
             theme={theme}
             darkMode={darkMode}
             selected={0}
-            options={[
-              {
-                name: '@nsec.app',
-                value: '@nsec.app',
-              },
-              {
-                name: 'test',
-                value: '111111',
-              },
-            ]}
+            options={servers}
           ></nl-select>
         </div>
+        <p class='nl-title font-light text-sm mb-2'>
+          Choose a service to
+          manage your Nostr keys.
+        </p>
         <button
           disabled={isFetching}
-          onClick={() => onCreateAccount()}
+          onClick={handleCreateAccount}
           type="button"
           class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         >
@@ -103,7 +110,7 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
       <div class="p-4 overflow-y-auto">
         <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
           If you already have an account please{' '}
-          <span onClick={() => onClickToSignIn()} class="cursor-pointer text-blue-400">
+          <span onClick={() => handleClickToSignIn()} class="cursor-pointer text-blue-400">
             log in
           </span>
           .

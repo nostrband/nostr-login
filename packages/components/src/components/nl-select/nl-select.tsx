@@ -18,7 +18,7 @@ export class NlSelect {
 
   @Element() element: HTMLElement;
 
-  @Event() changeOption: EventEmitter<string>;
+  @Event() selectDomain: EventEmitter<string>;
 
   buttonRef: HTMLButtonElement;
   ulRef: HTMLUListElement;
@@ -55,6 +55,7 @@ export class NlSelect {
     this.mode = this.darkMode;
 
     this.value = this.options[this.selected];
+    this.selectDomain.emit(this.value.value);
   }
 
   calculateDropdownPosition() {
@@ -64,11 +65,11 @@ export class NlSelect {
     }
   }
 
-  handleHhange(el: OptionType) {
+  handleChange(el: OptionType) {
     this.value = el;
     this.isOpen = false;
 
-    this.changeOption.emit(el.value);
+    this.selectDomain.emit(this.value.value);
   }
 
   render() {
@@ -106,7 +107,7 @@ export class NlSelect {
               {this.options.map(el => {
                 return (
                   <li
-                    onClick={() => this.handleHhange(el)}
+                    onClick={() => this.handleChange(el)}
                     class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm"
                   >
                     {el.name}

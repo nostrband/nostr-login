@@ -57,8 +57,11 @@ export interface NlWelcomeCustomEvent<T> extends CustomEvent<T> {
 }
 declare global {
     interface HTMLNlAuthElementEventMap {
-        "handleGetValue": string;
-        "handleCloseModal": any;
+        "nlLogin": string;
+        "nlSignup": string;
+        "nlCloseModal": any;
+        "nlCheckLogin": string;
+        "nlCheckSignup": string;
     }
     interface HTMLNlAuthElement extends Components.NlAuth, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlAuthElementEventMap>(type: K, listener: (this: HTMLNlAuthElement, ev: NlAuthCustomEvent<HTMLNlAuthElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -81,7 +84,7 @@ declare global {
         new (): HTMLNlButtonElement;
     };
     interface HTMLNlSelectElementEventMap {
-        "changeOption": string;
+        "selectDomain": string;
     }
     interface HTMLNlSelectElement extends Components.NlSelect, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlSelectElementEventMap>(type: K, listener: (this: HTMLNlSelectElement, ev: NlSelectCustomEvent<HTMLNlSelectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -159,8 +162,11 @@ declare global {
 }
 declare namespace LocalJSX {
     interface NlAuth {
-        "onHandleCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
-        "onHandleGetValue"?: (event: NlAuthCustomEvent<string>) => void;
+        "onNlCheckLogin"?: (event: NlAuthCustomEvent<string>) => void;
+        "onNlCheckSignup"?: (event: NlAuthCustomEvent<string>) => void;
+        "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
+        "onNlLogin"?: (event: NlAuthCustomEvent<string>) => void;
+        "onNlSignup"?: (event: NlAuthCustomEvent<string>) => void;
         "startScreen"?: string;
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
     }
@@ -170,7 +176,7 @@ declare namespace LocalJSX {
     }
     interface NlSelect {
         "darkMode"?: boolean;
-        "onChangeOption"?: (event: NlSelectCustomEvent<string>) => void;
+        "onSelectDomain"?: (event: NlSelectCustomEvent<string>) => void;
         "options"?: OptionType[];
         "selected"?: number;
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';

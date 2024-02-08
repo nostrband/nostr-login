@@ -14,8 +14,9 @@ const LOCALSTORE_KEY = '__nostrlogin_nip46';
 const ndk = new NDK({
   enableOutboxModel: false,
 });
-let signer = null;
+let signer: NDKNip46Signer | null = null;
 let signerPromise = null;
+let launcherPromise = null;
 let popup = null;
 let optionsModal: NostrLoginOptions = {
   theme: 'default',
@@ -50,6 +51,124 @@ const nostr = {
   },
 };
 
+export const launch = async (opt: NostrLoginOptions) => {
+  // mutex
+  if (launcherPromise) await launcherPromise;
+
+  const dialog = document.createElement('dialog');
+  const modal = document.createElement('nl-auth');
+
+  if (opt.theme) {
+    modal.setAttribute('theme', opt.theme);
+  }
+
+  if (opt.startScreen) {
+    modal.setAttribute('start-screen', opt.startScreen);
+  }
+
+  dialog.appendChild(modal);
+  document.body.appendChild(dialog);
+
+  launcherPromise = new Promise(ok => {
+    const login = (name: string) => {
+      modal.error = 'Please confirm in your key storage app.';
+      // convert name to bunker url
+      getBunkerUrl(name)
+        // connect to bunker by url
+        .then(authNip46)
+        .then(() => {
+          modal.isFetchLogin = false;
+          dialog.close();
+          ok();
+        })
+        .catch(e => {
+          console.log('error', e);
+          modal.isFetchLogin = false;
+          modal.error = e.toString();
+        });
+    };
+
+    const signup = (name: string) => {
+      modal.error = 'Please confirm in your key storage app.';
+      // create acc on service and get bunker url
+      createAccount(name)
+        // connect to bunker by url
+        .then(({ bunkerUrl, sk }) => authNip46(bunkerUrl, sk))
+        .then(() => {
+          modal.isFetchCreateAccount = false;
+          dialog.close();
+          ok();
+        })
+        .catch(e => {
+          console.log('error', e);
+          modal.isFetchCreateAccount = false;
+          modal.error = e.toString();
+        });
+    };
+
+    modal.addEventListener('nlLogin', event => {
+      login(event.detail);
+    });
+
+    modal.addEventListener('nlSignup', event => {
+      signup(event.detail);
+    });
+
+    modal.addEventListener('nlCheckSignup', async event => {
+      let error = '';
+      let signupNameIsAvailable = false;
+
+      await (async () => {
+        const nip05 = event.detail;
+        if (!nip05 || !nip05.includes('@')) return;
+
+        const [name, domain] = nip05.split('@');
+        if (!name) return;
+
+        const REGEXP = new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,8}$/g);
+        if (!REGEXP.test(nip05)) {
+          error = 'Invalid name';
+          return;
+        }
+
+        if (!domain) {
+          error = 'Select service';
+          return;
+        }
+
+        const url = `https://${domain}/.well-known/nostr.json?name=${name.toLowerCase()}`;
+        try {
+          const r = await fetch(url);
+          const d = await r.json();
+          if (d.names[name]) {
+            error = 'Already taken';
+            return;
+          }
+        } catch {}
+
+        signupNameIsAvailable = true;
+      })();
+
+      modal.error = error;
+      modal.signupNameIsAvailable = signupNameIsAvailable;
+    });
+
+    modal.addEventListener('nlCheckLogin', event => {
+      console.log('nlCheckLogin', event.detail);
+      // FIXME check validity
+    });
+
+    modal.addEventListener('nlCloseModal', () => {
+      modal.isFetchLogin = false;
+      dialog.close();
+    });
+
+    dialog.showModal();
+  });
+
+  return launcherPromise;
+};
+
 async function getBunkerUrl(value: string) {
   if (!value) return '';
 
@@ -76,49 +195,43 @@ async function getBunkerUrl(value: string) {
   throw new Error('Invalid user name or bunker url');
 }
 
-export const launch = (opt: NostrLoginOptions) => {
-  const dialog = document.createElement('dialog');
-  const modal = document.createElement('nl-auth');
+function bunkerUrlToInfo(bunkerUrl, sk = '') {
+  const url = new URL(bunkerUrl);
+  return {
+    pubkey: url.pathname.split('//')[1],
+    sk: sk || generatePrivateKey(),
+    relays: url.searchParams.getAll('relay'),
+  };
+}
 
-  if (opt.theme) {
-    modal.setAttribute('theme', opt.theme);
-  }
+async function createAccount(nip05: string) {
+  const [name, domain] = nip05.split('@');
+  const bunkerUrl = await getBunkerUrl(`_@${domain}`);
+  console.log("create account bunker's url", bunkerUrl);
 
-  if (opt.startScreen) {
-    modal.setAttribute('start-screen', opt.startScreen);
-  }
+  const info = bunkerUrlToInfo(bunkerUrl);
 
-  dialog.appendChild(modal);
-  document.body.appendChild(dialog);
+  await initSigner(info);
 
-  return new Promise(ok => {
-    const handleBunkerUrl = (url: string) => {
-      modal.error = 'Please confirm in your key storage app.';
-      authNip46(url)
-        .then(() => {
-          modal.isFetchLogin = false;
-          dialog.close();
-          ok();
-        })
-        .catch(e => {
-          console.log('error', e);
-          modal.isFetchLogin = false;
-          modal.error = e.toString();
-        });
-    };
+  const params = [
+    name,
+    domain,
+    // email?
+  ];
 
-    modal.addEventListener('handleGetValue', event => {
-      handleBunkerUrl(event.detail);
-    });
+  // due to a buggy sendRequest implementation it never resolves
+  // the promise that it returns, so we have to provide a 
+  // callback and wait on it
+  const r = await new Promise(ok => 
+    signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok));
 
-    modal.addEventListener('handleCloseModal', () => {
-      modal.isFetchLogin = false;
-      dialog.close();
-    });
+  console.log('create_account pubkey', r.result);
 
-    dialog.showModal();
-  });
-};
+  return { 
+    bunkerUrl: `bunker://${r.result}?relay=${info.relays[0]}`, 
+    sk: info.sk // reuse the same local key
+  };
+}
 
 const connectModals = (defaultOpt: NostrLoginOptions) => {
   const initialModals = async (opt: NostrLoginOptions) => {
@@ -144,8 +257,9 @@ const connectModals = (defaultOpt: NostrLoginOptions) => {
 };
 
 async function ensureSigner() {
-  // wait until competing request is finished
+  // wait until competing requests are finished
   if (signerPromise) await signerPromise;
+  if (launcherPromise) await launcherPromise;
 
   // still no signer? request auth from user
   if (!signer) {
@@ -159,6 +273,9 @@ async function ensureSigner() {
 }
 
 async function initSigner(info, connect: boolean) {
+  // mutex
+  if (signerPromise) await signerPromise;
+
   signerPromise = new Promise(async (ok, err) => {
     try {
       for (const r of info.relays) ndk.addExplicitRelay(r, undefined);
@@ -205,9 +322,6 @@ async function initSigner(info, connect: boolean) {
       // make sure signer isn't set
       signer = null;
       err(e);
-    } finally {
-      // reset
-      signerPromise = null;
     }
   });
 
@@ -257,15 +371,9 @@ function closePopup() {
   } catch {}
 }
 
-export async function authNip46(value) {
+export async function authNip46(bunkerUrl, sk = '') {
   try {
-    const bunkerUrl = await getBunkerUrl(value);
-    const url = new URL(bunkerUrl);
-    const info = {
-      pubkey: url.pathname.split('//')[1],
-      sk: generatePrivateKey(),
-      relays: url.searchParams.getAll('relay'),
-    };
+    const info = bunkerUrlToInfo(bunkerUrl, sk);
     console.log('nostr login auth info', info);
     if (!info.pubkey || !info.sk || !info.relays[0]) {
       throw new Error(`Bad bunker url ${bunkerUrl}`);
