@@ -220,16 +220,15 @@ async function createAccount(nip05: string) {
   ];
 
   // due to a buggy sendRequest implementation it never resolves
-  // the promise that it returns, so we have to provide a 
+  // the promise that it returns, so we have to provide a
   // callback and wait on it
-  const r = await new Promise(ok => 
-    signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok));
+  const r = await new Promise(ok => signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok));
 
   console.log('create_account pubkey', r.result);
 
-  return { 
-    bunkerUrl: `bunker://${r.result}?relay=${info.relays[0]}`, 
-    sk: info.sk // reuse the same local key
+  return {
+    bunkerUrl: `bunker://${r.result}?relay=${info.relays[0]}`,
+    sk: info.sk, // reuse the same local key
   };
 }
 
@@ -356,10 +355,22 @@ export async function init(opt: NostrLoginOptions) {
 }
 
 function ensurePopup() {
-  if (popup) return;
-  popup = window.open('about:blank', '_blank', 'width=100,height=50'); // noopener,noreferer,popup=1,
-  console.log('popup', popup);
-  if (!popup) throw new Error('Popup blocked. Try again, please!');
+  // user might have closed it already
+  if (!popup || popup.closed) {
+    // NOTE: do not set noreferrer, bunker might use referrer to
+    // simplify the naming of the connected app.
+    // NOTE: do not pass noopener, otherwise null is returned
+    // and we can't pre-populate the Loading... message,
+    // instead we set opener=null below
+    popup = window.open('about:blank', '_blank', 'width=100,height=50');
+    console.log('popup', popup);
+    if (!popup) throw new Error('Popup blocked. Try again, please!');
+
+    // emulate noopener without passing it
+    popup.opener = null;
+  }
+
+  // initial state
   popup.document.write('Loading...');
 }
 
@@ -374,7 +385,7 @@ function closePopup() {
 export async function authNip46(bunkerUrl, sk = '') {
   try {
     const info = bunkerUrlToInfo(bunkerUrl, sk);
-    console.log('nostr login auth info', info);
+    // console.log('nostr login auth info', info);
     if (!info.pubkey || !info.sk || !info.relays[0]) {
       throw new Error(`Bad bunker url ${bunkerUrl}`);
     }
