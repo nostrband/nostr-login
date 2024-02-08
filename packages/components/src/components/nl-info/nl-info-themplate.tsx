@@ -29,11 +29,20 @@ export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ han
         <h1 class="nl-title font-bold text-center text-4xl">
           Nostr <span class="font-light">Login</span>
         </h1>
-        <p class="text-green-800 dark:text-green-200 font-light text-center text-lg pt-2 max-w-96 mx-auto">Version: 1.0.2</p>
+        <p class="text-green-800 dark:text-green-200 font-light text-center text-lg pt-2 max-w-96 mx-auto">Version: 1.0.3</p>
         <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">
           Learn more about Nostr{' '}
           <a target="_blank" href="https://nostr.how">
             here
+          </a>
+          .<br />
+          This is an{' '}
+          <a target="_blank" href="https://github.com/nostrband/nostr-login">
+            open-source
+          </a>{' '}
+          tool by{' '}
+          <a target="_blank" href="https://nostr.band">
+            Nostr.Band
           </a>
           .
         </p>

@@ -9,6 +9,7 @@ import { OptionType } from "./components/nl-select/nl-select";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface NlAuth {
+        "bunkers": string;
         "startScreen": string;
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
@@ -162,6 +163,7 @@ declare global {
 }
 declare namespace LocalJSX {
     interface NlAuth {
+        "bunkers"?: string;
         "onNlCheckLogin"?: (event: NlAuthCustomEvent<string>) => void;
         "onNlCheckSignup"?: (event: NlAuthCustomEvent<string>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;

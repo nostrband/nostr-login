@@ -21,17 +21,29 @@ export class NlAuth {
   @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() theme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
+  @Prop() bunkers: string = 'nsec.app'
+
+  @State() servers = [
+    { name: '@nsec.app', value: 'nsec.app' }
+  ]
+
+  formatServers(bunkers: string) {
+    return bunkers.split(',').map(d => ({
+      name: '@'+d, value: d
+    }))
+  }
+
+  @Watch('bunkers')
+  watchBunkersHandler(newValue: string) {
+    console.log("bunkers", newValue);
+    this.servers = this.formatServers(newValue);
+  }
+
 
   @Watch('theme')
-  watchPropHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
-    console.log(newValue);
+  watchThemeHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
     this.themeState = newValue;
   }
-  // @Watch('startScreen')
-  // watchPropHandler(newValue: CURRENT_MODULE) {
-  //   console.log(newValue);
-  //   this.themeState = newValue;
-  // }
 
   @State() isFetchCreateAccount: boolean = false;
   @State() isFetchLogin: boolean = false;
@@ -44,9 +56,7 @@ export class NlAuth {
   @State() domain: string = '';
   @State() error: string = '';
   @State() signupNameIsAvailable: boolean = false;
-  @State() servers = [
-    { name: '@nsec.app', value: 'nsec.app' }
-  ]
+  @State() loginIsGood: boolean = false;
 
   @Event() nlLogin: EventEmitter<string>;
   @Event() nlSignup: EventEmitter<string>;
@@ -121,8 +131,9 @@ export class NlAuth {
   }
 
   componentWillLoad() {
-    console.log(this.startScreen);
+    // console.log(this.startScreen);
     this.themeState = this.theme;
+    this.servers = this.formatServers(this.bunkers);
     this.currentModule = this.startScreen as CURRENT_MODULE;
     this.prevModule = this.startScreen as CURRENT_MODULE;
 
@@ -161,6 +172,7 @@ export class NlAuth {
               handleClickToSignUp={() => this.handleClickToSignUp()}
               handleLogin={e => this.handleLogin(e)}
               error={this.error}
+              isGood={this.loginIsGood}
             />
           );
         case CURRENT_MODULE.SIGNUP:
