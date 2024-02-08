@@ -8,6 +8,7 @@ interface NlSigninThemplateProps {
   isFetchLogin: boolean;
   error?: string;
   handleInputChange: (event: Event) => void;
+  isGood: boolean;
 }
 
 export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
@@ -17,6 +18,7 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
   description = 'Please enter your user name.',
   handleClickToSignUp,
   isFetchLogin = false,
+  isGood = false,
   error = '',
 }) => {
   return (
@@ -42,7 +44,7 @@ export const NlSigninThemplate: FunctionalComponent<NlSigninThemplateProps> = ({
                 d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
               />
             </svg> */}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4 text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke={isGood ? "#00cc00" : "currentColor"} class="flex-shrink-0 w-4 h-4 text-gray-500">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"

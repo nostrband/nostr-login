@@ -8,6 +8,10 @@ export interface NostrLoginOptions {
   // optional
   theme?: string;
   startScreen?: string;
+  bunkers?: string;
+
+  // forward reqs to this bunker origin for testing
+  devOverrideBunkerOrigin?: string;
 }
 
 const LOCALSTORE_KEY = '__nostrlogin_nip46';
@@ -21,6 +25,7 @@ let popup = null;
 let optionsModal: NostrLoginOptions = {
   theme: 'default',
   startScreen: 'welcome',
+  devOverrideBunkerOrigin: '',
 };
 
 const nostr = {
@@ -66,6 +71,10 @@ export const launch = async (opt: NostrLoginOptions) => {
     modal.setAttribute('start-screen', opt.startScreen);
   }
 
+  if (opt.bunkers) {
+    modal.setAttribute('bunkers', opt.bunkers);
+  }
+
   dialog.appendChild(modal);
   document.body.appendChild(dialog);
 
@@ -106,20 +115,11 @@ export const launch = async (opt: NostrLoginOptions) => {
         });
     };
 
-    modal.addEventListener('nlLogin', event => {
-      login(event.detail);
-    });
-
-    modal.addEventListener('nlSignup', event => {
-      signup(event.detail);
-    });
-
-    modal.addEventListener('nlCheckSignup', async event => {
+    const checkNip05 = async (nip05: string) => {
+      let available = false;
+      let taken = false;
       let error = '';
-      let signupNameIsAvailable = false;
-
-      await (async () => {
-        const nip05 = event.detail;
+      await(async () => {
         if (!nip05 || !nip05.includes('@')) return;
 
         const [name, domain] = nip05.split('@');
@@ -141,21 +141,37 @@ export const launch = async (opt: NostrLoginOptions) => {
           const r = await fetch(url);
           const d = await r.json();
           if (d.names[name]) {
-            error = 'Already taken';
+            taken = true;
             return;
           }
         } catch {}
 
-        signupNameIsAvailable = true;
+        available = true;
       })();
 
-      modal.error = error;
-      modal.signupNameIsAvailable = signupNameIsAvailable;
+      return [available, taken, error];
+    };
+
+    modal.addEventListener('nlLogin', event => {
+      login(event.detail);
     });
 
-    modal.addEventListener('nlCheckLogin', event => {
-      console.log('nlCheckLogin', event.detail);
-      // FIXME check validity
+    modal.addEventListener('nlSignup', event => {
+      signup(event.detail);
+    });
+
+    modal.addEventListener('nlCheckSignup', async event => {
+      const [available, taken, error] = await checkNip05(event.detail);
+      modal.error = error;
+      if (!error && taken) modal.error = 'Already taken';
+      modal.signupNameIsAvailable = available;
+    });
+
+    modal.addEventListener('nlCheckLogin', async event => {
+      const [available, taken, error] = await checkNip05(event.detail);
+      modal.error = error;
+      if (available) modal.error = 'Name not found'
+      modal.loginIsGood = taken
     });
 
     modal.addEventListener('nlCloseModal', () => {
@@ -176,8 +192,9 @@ async function getBunkerUrl(value: string) {
 
   if (value.includes('@')) {
     const [name, domain] = value.split('@');
-    const bunkerUrl = `https://${domain}/.well-known/nostr.json?name=_`;
-    const userUrl = `https://${domain}/.well-known/nostr.json?name=${name}`;
+    const origin = optionsModal.devOverrideBunkerOrigin || `https://${domain}`;
+    const bunkerUrl = `${origin}/.well-known/nostr.json?name=_`;
+    const userUrl = `${origin}/.well-known/nostr.json?name=${name}`;
     const bunker = await fetch(bunkerUrl);
     const bunkerData = await bunker.json();
     const bunkerPubkey = bunkerData.names['_'];
@@ -187,7 +204,7 @@ async function getBunkerUrl(value: string) {
     const userPubkey = userData.names[name];
     // console.log({
     //     bunkerData, userData, bunkerPubkey, bunkerRelay, userPubkey,
-    //     name, domain
+    //     name, domain, origin
     // })
     return `bunker://${userPubkey}?relay=${bunkerRelay}`;
   }
@@ -206,12 +223,13 @@ function bunkerUrlToInfo(bunkerUrl, sk = '') {
 
 async function createAccount(nip05: string) {
   const [name, domain] = nip05.split('@');
+  // FIXME show popup here
   const bunkerUrl = await getBunkerUrl(`_@${domain}`);
   console.log("create account bunker's url", bunkerUrl);
 
   const info = bunkerUrlToInfo(bunkerUrl);
 
-  await initSigner(info);
+  await initSigner(info, { preparePopup: true });
 
   const params = [
     name,
@@ -220,16 +238,19 @@ async function createAccount(nip05: string) {
   ];
 
   // due to a buggy sendRequest implementation it never resolves
-  // the promise that it returns, so we have to provide a 
+  // the promise that it returns, so we have to provide a
   // callback and wait on it
-  const r = await new Promise(ok => 
-    signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok));
+  console.log('signer', signer);
+  const r = await new Promise(ok => {
+    signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok);
+  });
 
-  console.log('create_account pubkey', r.result);
+  console.log('create_account pubkey', r);
+  if (r.result === 'error') throw new Error(r.error);
 
-  return { 
-    bunkerUrl: `bunker://${r.result}?relay=${info.relays[0]}`, 
-    sk: info.sk // reuse the same local key
+  return {
+    bunkerUrl: `bunker://${r.result}?relay=${info.relays[0]}`,
+    sk: info.sk, // reuse the same local key
   };
 }
 
@@ -272,7 +293,7 @@ async function ensureSigner() {
   if (!signer) throw new Error('Rejected by user');
 }
 
-async function initSigner(info, connect: boolean) {
+async function initSigner(info, { connect = false, preparePopup = false }) {
   // mutex
   if (signerPromise) await signerPromise;
 
@@ -283,6 +304,8 @@ async function initSigner(info, connect: boolean) {
       // wait until we connect, otherwise
       // signer won't start properly
       await ndk.connect();
+
+      console.log('creating signer', { info, connect });
 
       // create and prepare the signer
       signer = new NDKNip46Signer(ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
@@ -297,22 +320,19 @@ async function initSigner(info, connect: boolean) {
         ensurePopup();
 
         popup.location.href = url;
-        popup.resizeTo(600, 600);
+        popup.resizeTo(400, 700);
         //window.open(url, 'auth', 'width=600,height=600');
       });
 
-      // if we're doing it for the first time then
-      // we should send 'connect' NIP46 request,
-      // and are also likely to get a authUrl so
-      // we pre-launch a popup
-      if (connect) {
-        // this will cause a 'connect' request, WHY?
-        // pre-launch a popup if it won't be blocked,
-        if (navigator.userActivation.isActive) ensurePopup();
+      // pre-launch a popup if it won't be blocked,
+      // only when we're expecting it
+      if (connect || preparePopup) if (navigator.userActivation.isActive) ensurePopup();
 
-        // connect
-        await signer.blockUntilReady();
-      }
+      // if we're doing it for the first time then
+      // we should send 'connect' NIP46 request
+      if (connect) await signer.blockUntilReady();
+
+      console.log('created signer');
 
       // make ure it's closed
       closePopup();
@@ -345,7 +365,7 @@ export async function init(opt: NostrLoginOptions) {
     // read conf from localstore
     const info = JSON.parse(window.localStorage.getItem(LOCALSTORE_KEY));
     if (info && info.pubkey && info.sk && info.relays && info.relays[0]) {
-      return initSigner(info, false);
+      return initSigner(info);
     } else {
       console.log('nostr login bad stored info', info);
     }
@@ -356,10 +376,22 @@ export async function init(opt: NostrLoginOptions) {
 }
 
 function ensurePopup() {
-  if (popup) return;
-  popup = window.open('about:blank', '_blank', 'width=100,height=50'); // noopener,noreferer,popup=1,
-  console.log('popup', popup);
-  if (!popup) throw new Error('Popup blocked. Try again, please!');
+  // user might have closed it already
+  if (!popup || popup.closed) {
+    // NOTE: do not set noreferrer, bunker might use referrer to
+    // simplify the naming of the connected app.
+    // NOTE: do not pass noopener, otherwise null is returned
+    // and we can't pre-populate the Loading... message,
+    // instead we set opener=null below
+    popup = window.open('about:blank', '_blank', 'width=100,height=50');
+    console.log('popup', popup);
+    if (!popup) throw new Error('Popup blocked. Try again, please!');
+
+    // emulate noopener without passing it
+    popup.opener = null;
+  }
+
+  // initial state
   popup.document.write('Loading...');
 }
 
@@ -374,12 +406,12 @@ function closePopup() {
 export async function authNip46(bunkerUrl, sk = '') {
   try {
     const info = bunkerUrlToInfo(bunkerUrl, sk);
-    console.log('nostr login auth info', info);
+    // console.log('nostr login auth info', info);
     if (!info.pubkey || !info.sk || !info.relays[0]) {
       throw new Error(`Bad bunker url ${bunkerUrl}`);
     }
 
-    const r = await initSigner(info, true);
+    const r = await initSigner(info, { connect: true });
 
     // only save after successfull login
     window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info));
