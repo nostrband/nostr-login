@@ -234,7 +234,7 @@ async function createAccount(nip05: string) {
   const info = bunkerUrlToInfo(bunkerUrl);
 
   // init signer to talk to the bunker (not the user!)
-  await initSigner(info, { preparePopup: true });
+  await initSigner(info, { preparePopup: true, leavePopup: true });
 
   const params = [
     name,
@@ -298,7 +298,7 @@ async function ensureSigner() {
   if (!signer) throw new Error('Rejected by user');
 }
 
-async function initSigner(info, { connect = false, preparePopup = false }) {
+async function initSigner(info, { connect = false, preparePopup = false, leavePopup = false }) {
   // mutex
   if (signerPromise) await signerPromise;
 
@@ -340,7 +340,7 @@ async function initSigner(info, { connect = false, preparePopup = false }) {
       console.log('created signer');
 
       // make ure it's closed
-      closePopup();
+      if (!leavePopup) closePopup();
 
       ok();
     } catch (e) {
