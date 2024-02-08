@@ -8,6 +8,9 @@ export interface NostrLoginOptions {
   // optional
   theme?: string;
   startScreen?: string;
+
+  // forward reqs to this bunker origin for testing
+  devOverrideBunkerOrigin?: string
 }
 
 const LOCALSTORE_KEY = '__nostrlogin_nip46';
@@ -21,6 +24,7 @@ let popup = null;
 let optionsModal: NostrLoginOptions = {
   theme: 'default',
   startScreen: 'welcome',
+  devOverrideBunkerOrigin: ''
 };
 
 const nostr = {
@@ -176,8 +180,9 @@ async function getBunkerUrl(value: string) {
 
   if (value.includes('@')) {
     const [name, domain] = value.split('@');
-    const bunkerUrl = `https://${domain}/.well-known/nostr.json?name=_`;
-    const userUrl = `https://${domain}/.well-known/nostr.json?name=${name}`;
+    const origin = optionsModal.devOverrideBunkerOrigin || `https://${domain}`
+    const bunkerUrl = `${origin}/.well-known/nostr.json?name=_`;
+    const userUrl = `${origin}/.well-known/nostr.json?name=${name}`;
     const bunker = await fetch(bunkerUrl);
     const bunkerData = await bunker.json();
     const bunkerPubkey = bunkerData.names['_'];
@@ -187,7 +192,7 @@ async function getBunkerUrl(value: string) {
     const userPubkey = userData.names[name];
     // console.log({
     //     bunkerData, userData, bunkerPubkey, bunkerRelay, userPubkey,
-    //     name, domain
+    //     name, domain, origin
     // })
     return `bunker://${userPubkey}?relay=${bunkerRelay}`;
   }
@@ -206,12 +211,13 @@ function bunkerUrlToInfo(bunkerUrl, sk = '') {
 
 async function createAccount(nip05: string) {
   const [name, domain] = nip05.split('@');
+  // FIXME show popup here
   const bunkerUrl = await getBunkerUrl(`_@${domain}`);
   console.log("create account bunker's url", bunkerUrl);
 
   const info = bunkerUrlToInfo(bunkerUrl);
 
-  await initSigner(info);
+  await initSigner(info, { preparePopup: true });
 
   const params = [
     name,
@@ -222,9 +228,13 @@ async function createAccount(nip05: string) {
   // due to a buggy sendRequest implementation it never resolves
   // the promise that it returns, so we have to provide a
   // callback and wait on it
-  const r = await new Promise(ok => signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok));
+  console.log("signer", signer)
+  const r = await new Promise(ok => {
+    signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok)
+  });
 
-  console.log('create_account pubkey', r.result);
+  console.log('create_account pubkey', r);
+  if (r.result === 'error') throw new Error(r.error)
 
   return {
     bunkerUrl: `bunker://${r.result}?relay=${info.relays[0]}`,
@@ -271,7 +281,7 @@ async function ensureSigner() {
   if (!signer) throw new Error('Rejected by user');
 }
 
-async function initSigner(info, connect: boolean) {
+async function initSigner(info, { connect = false, preparePopup = false }) {
   // mutex
   if (signerPromise) await signerPromise;
 
@@ -282,6 +292,8 @@ async function initSigner(info, connect: boolean) {
       // wait until we connect, otherwise
       // signer won't start properly
       await ndk.connect();
+
+      console.log("creating signer", {info, connect});
 
       // create and prepare the signer
       signer = new NDKNip46Signer(ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
@@ -300,18 +312,17 @@ async function initSigner(info, connect: boolean) {
         //window.open(url, 'auth', 'width=600,height=600');
       });
 
-      // if we're doing it for the first time then
-      // we should send 'connect' NIP46 request,
-      // and are also likely to get a authUrl so
-      // we pre-launch a popup
-      if (connect) {
-        // this will cause a 'connect' request, WHY?
-        // pre-launch a popup if it won't be blocked,
+      // pre-launch a popup if it won't be blocked,
+      // only when we're expecting it
+      if (connect || preparePopup)
         if (navigator.userActivation.isActive) ensurePopup();
 
-        // connect
+      // if we're doing it for the first time then
+      // we should send 'connect' NIP46 request
+      if (connect)
         await signer.blockUntilReady();
-      }
+
+      console.log("created signer");
 
       // make ure it's closed
       closePopup();
@@ -344,7 +355,7 @@ export async function init(opt: NostrLoginOptions) {
     // read conf from localstore
     const info = JSON.parse(window.localStorage.getItem(LOCALSTORE_KEY));
     if (info && info.pubkey && info.sk && info.relays && info.relays[0]) {
-      return initSigner(info, false);
+      return initSigner(info);
     } else {
       console.log('nostr login bad stored info', info);
     }
@@ -390,7 +401,7 @@ export async function authNip46(bunkerUrl, sk = '') {
       throw new Error(`Bad bunker url ${bunkerUrl}`);
     }
 
-    const r = await initSigner(info, true);
+    const r = await initSigner(info, { connect: true });
 
     // only save after successfull login
     window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info));
