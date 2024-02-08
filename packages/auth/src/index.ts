@@ -223,12 +223,17 @@ function bunkerUrlToInfo(bunkerUrl, sk = '') {
 
 async function createAccount(nip05: string) {
   const [name, domain] = nip05.split('@');
-  // FIXME show popup here
+  // we're gonna need it
+  ensurePopup();
+
+  // bunker's own url
   const bunkerUrl = await getBunkerUrl(`_@${domain}`);
   console.log("create account bunker's url", bunkerUrl);
 
+  // parse bunker url and generate local nsec
   const info = bunkerUrlToInfo(bunkerUrl);
 
+  // init signer to talk to the bunker (not the user!)
   await initSigner(info, { preparePopup: true });
 
   const params = [
