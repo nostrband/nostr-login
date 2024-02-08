@@ -3,13 +3,13 @@ import { FunctionalComponent, h } from '@stencil/core';
 interface NlWelcomeThemplateProps {
   title?: string;
   description?: string;
-  onClickToSignIn: () => void;
-  onClickToSignUp: () => void;
+  handleClickToSignIn: () => void;
+  handleClickToSignUp: () => void;
 }
 
 export const NlWelcomeThemplate: FunctionalComponent<NlWelcomeThemplateProps> = ({
-  onClickToSignIn,
-  onClickToSignUp,
+  handleClickToSignIn,
+  handleClickToSignUp,
   title = 'Welcome!',
   description = 'This app is part of the Nostr network. Log in with your Nostr account or join the network.',
 }) => {
@@ -22,7 +22,7 @@ export const NlWelcomeThemplate: FunctionalComponent<NlWelcomeThemplateProps> = 
 
       <div class="max-w-52 mx-auto pb-5">
         <button
-          onClick={() => onClickToSignIn()}
+          onClick={handleClickToSignIn}
           type="button"
           class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         >
@@ -39,7 +39,7 @@ export const NlWelcomeThemplate: FunctionalComponent<NlWelcomeThemplateProps> = 
         <div class="nl-divider py-3 flex items-center text-xs uppercase before:flex-[1_1_0%] before:border-t before:me-6 after:flex-[1_1_0%] after:border-t  after:ms-6">Or</div>
 
         <button
-          onClick={() => onClickToSignUp()}
+          onClick={handleClickToSignUp}
           type="button"
           class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         >

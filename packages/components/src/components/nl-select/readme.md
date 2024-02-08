@@ -19,7 +19,7 @@
 
 | Event          | Description | Type                  |
 | -------------- | ----------- | --------------------- |
-| `changeOption` |             | `CustomEvent<string>` |
+| `selectDomain` |             | `CustomEvent<string>` |
 
 
 ## Dependencies
