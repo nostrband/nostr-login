@@ -7,14 +7,14 @@ screens to let users set up the NIP-46 connection, it also supports
 the new OAuth-like flow that is very smooth.
 
 Usage:
-`
+```
 import { init as initNostrLogin } from "nostr-login"
 
 // make sure this is called before any
 // window.nostr calls are made
 initNostrLogin({/*options*/})
 
-`
+```
 
 That's it, now whenever window.nostr call is made, it will be proxied
 to the user's key storage app. On the first call, a dialog is shown to
@@ -23,7 +23,7 @@ let users go through sign up or log in flow.
 You can also customize the experience and trigger the login dialogs 
 yourself:
 
-`
+```
 import { launch as launchNostrLoginDialog } from "nostr-login"
 
 // make sure init() was called 
@@ -35,7 +35,12 @@ function onSignupClick() {
     startScreen: 'signup'
   })
 }
-`
+```
+
+API:
+- `init(opts)` - set mapping of window.nostr to nostr-login
+- `launch(opts)` - launch nostr-login UI
+- `logout()` - drop the current nip46 connection 
 
 Options:
 - `theme` - 'default' | 'ocean' | 'lemonade' | 'purple' 
@@ -47,3 +52,4 @@ TODO:
 - fetch bunker list using NIP-89
 - improve handling of popup blocks
 - add timeout handling
+- login prompt on sign-in flow if key isn't found
