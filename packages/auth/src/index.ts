@@ -37,7 +37,7 @@ const nostr = {
     await ensureSigner();
     event.pubkey = signer.remotePubkey;
     event.id = getEventHash(event);
-    event.sig = signer.sign(event);
+    event.sig = await signer.sign(event);
     return event;
   },
   async getRelays() {
@@ -310,7 +310,7 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
       // signer won't start properly
       await ndk.connect();
 
-      console.log('creating signer', { info, connect });
+      // console.log('creating signer', { info, connect });
 
       // create and prepare the signer
       signer = new NDKNip46Signer(ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
@@ -337,7 +337,7 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
       // we should send 'connect' NIP46 request
       if (connect) await signer.blockUntilReady();
 
-      console.log('created signer');
+      // console.log('created signer');
 
       // make ure it's closed
       if (!leavePopup) closePopup();
