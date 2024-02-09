@@ -298,7 +298,7 @@ async function ensureSigner() {
   if (!signer) throw new Error('Rejected by user');
 }
 
-async function initSigner(info, { connect = false, preparePopup = false, leavePopup = false }) {
+async function initSigner(info, { connect = false, preparePopup = false, leavePopup = false } = {}) {
   // mutex
   if (signerPromise) await signerPromise;
 
