@@ -52,4 +52,3 @@ TODO:
 - fetch bunker list using NIP-89
 - improve handling of popup blocks
 - add timeout handling
-- login prompt on sign-in flow if key isn't found
