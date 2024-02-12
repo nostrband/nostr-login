@@ -191,7 +191,7 @@ async function getBunkerUrl(value: string) {
   if (value.startsWith('bunker://')) return value;
 
   if (value.includes('@')) {
-    const [name, domain] = value.split('@');
+    const [name, domain] = value.toLocaleLowerCase().split('@');
     const origin = optionsModal.devOverrideBunkerOrigin || `https://${domain}`;
     const bunkerUrl = `${origin}/.well-known/nostr.json?name=_`;
     const userUrl = `${origin}/.well-known/nostr.json?name=${name}`;
