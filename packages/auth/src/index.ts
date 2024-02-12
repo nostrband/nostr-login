@@ -122,7 +122,7 @@ export const launch = async (opt: NostrLoginOptions) => {
       await(async () => {
         if (!nip05 || !nip05.includes('@')) return;
 
-        const [name, domain] = nip05.split('@');
+        const [name, domain] = nip05.toLocaleLowerCase().split('@');
         if (!name) return;
 
         const REGEXP = new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,8}$/g);
