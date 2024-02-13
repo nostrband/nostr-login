@@ -198,15 +198,17 @@ async function getBunkerUrl(value: string) {
     const bunker = await fetch(bunkerUrl);
     const bunkerData = await bunker.json();
     const bunkerPubkey = bunkerData.names['_'];
-    const bunkerRelay = bunkerData.nip46[bunkerPubkey];
+    const bunkerRelays = bunkerData.nip46[bunkerPubkey];
     const user = await fetch(userUrl);
     const userData = await user.json();
     const userPubkey = userData.names[name];
     // console.log({
-    //     bunkerData, userData, bunkerPubkey, bunkerRelay, userPubkey,
+    //     bunkerData, userData, bunkerPubkey, bunkerRelays, userPubkey,
     //     name, domain, origin
     // })
-    return `bunker://${userPubkey}?relay=${bunkerRelay}`;
+    if (!bunkerRelays.length)
+      throw new Error('Bunker relay not provided');
+    return `bunker://${userPubkey}?relay=${bunkerRelays[0]}`;
   }
 
   throw new Error('Invalid user name or bunker url');
