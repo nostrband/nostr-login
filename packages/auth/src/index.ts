@@ -78,7 +78,7 @@ export const launch = async (opt: NostrLoginOptions) => {
   dialog.appendChild(modal);
   document.body.appendChild(dialog);
 
-  launcherPromise = new Promise(ok => {
+  launcherPromise = new Promise((ok) => {
     const login = (name: string) => {
       modal.error = 'Please confirm in your key storage app.';
       // convert name to bunker url
@@ -177,6 +177,7 @@ export const launch = async (opt: NostrLoginOptions) => {
     modal.addEventListener('nlCloseModal', () => {
       modal.isFetchLogin = false;
       dialog.close();
+      ok();
     });
 
     dialog.showModal();
@@ -217,7 +218,7 @@ async function getBunkerUrl(value: string) {
 function bunkerUrlToInfo(bunkerUrl, sk = '') {
   const url = new URL(bunkerUrl);
   return {
-    pubkey: url.pathname.split('//')[1],
+    pubkey: url.hostrname || url.pathname.split('//')[1],
     sk: sk || generatePrivateKey(),
     relays: url.searchParams.getAll('relay'),
   };
