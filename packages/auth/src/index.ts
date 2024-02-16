@@ -37,7 +37,7 @@ const nostr = {
     await ensureSigner();
     event.pubkey = signer.remotePubkey;
     event.id = getEventHash(event);
-    event.sig = signer.sign(event);
+    event.sig = await signer.sign(event);
     return event;
   },
   async getRelays() {
@@ -78,7 +78,7 @@ export const launch = async (opt: NostrLoginOptions) => {
   dialog.appendChild(modal);
   document.body.appendChild(dialog);
 
-  launcherPromise = new Promise(ok => {
+  launcherPromise = new Promise((ok) => {
     const login = (name: string) => {
       modal.error = 'Please confirm in your key storage app.';
       // convert name to bunker url
@@ -122,7 +122,7 @@ export const launch = async (opt: NostrLoginOptions) => {
       await(async () => {
         if (!nip05 || !nip05.includes('@')) return;
 
-        const [name, domain] = nip05.split('@');
+        const [name, domain] = nip05.toLocaleLowerCase().split('@');
         if (!name) return;
 
         const REGEXP = new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,8}$/g);
@@ -177,6 +177,7 @@ export const launch = async (opt: NostrLoginOptions) => {
     modal.addEventListener('nlCloseModal', () => {
       modal.isFetchLogin = false;
       dialog.close();
+      ok();
     });
 
     dialog.showModal();
@@ -191,22 +192,24 @@ async function getBunkerUrl(value: string) {
   if (value.startsWith('bunker://')) return value;
 
   if (value.includes('@')) {
-    const [name, domain] = value.split('@');
+    const [name, domain] = value.toLocaleLowerCase().split('@');
     const origin = optionsModal.devOverrideBunkerOrigin || `https://${domain}`;
     const bunkerUrl = `${origin}/.well-known/nostr.json?name=_`;
     const userUrl = `${origin}/.well-known/nostr.json?name=${name}`;
     const bunker = await fetch(bunkerUrl);
     const bunkerData = await bunker.json();
     const bunkerPubkey = bunkerData.names['_'];
-    const bunkerRelay = bunkerData.nip46[bunkerPubkey];
+    const bunkerRelays = bunkerData.nip46[bunkerPubkey];
     const user = await fetch(userUrl);
     const userData = await user.json();
     const userPubkey = userData.names[name];
     // console.log({
-    //     bunkerData, userData, bunkerPubkey, bunkerRelay, userPubkey,
+    //     bunkerData, userData, bunkerPubkey, bunkerRelays, userPubkey,
     //     name, domain, origin
     // })
-    return `bunker://${userPubkey}?relay=${bunkerRelay}`;
+    if (!bunkerRelays.length)
+      throw new Error('Bunker relay not provided');
+    return `bunker://${userPubkey}?relay=${bunkerRelays[0]}`;
   }
 
   throw new Error('Invalid user name or bunker url');
@@ -215,7 +218,7 @@ async function getBunkerUrl(value: string) {
 function bunkerUrlToInfo(bunkerUrl, sk = '') {
   const url = new URL(bunkerUrl);
   return {
-    pubkey: url.pathname.split('//')[1],
+    pubkey: url.hostname || url.pathname.split('//')[1],
     sk: sk || generatePrivateKey(),
     relays: url.searchParams.getAll('relay'),
   };
@@ -234,7 +237,7 @@ async function createAccount(nip05: string) {
   const info = bunkerUrlToInfo(bunkerUrl);
 
   // init signer to talk to the bunker (not the user!)
-  await initSigner(info, { preparePopup: true });
+  await initSigner(info, { preparePopup: true, leavePopup: true });
 
   const params = [
     name,
@@ -298,7 +301,7 @@ async function ensureSigner() {
   if (!signer) throw new Error('Rejected by user');
 }
 
-async function initSigner(info, { connect = false, preparePopup = false }) {
+async function initSigner(info, { connect = false, preparePopup = false, leavePopup = false } = {}) {
   // mutex
   if (signerPromise) await signerPromise;
 
@@ -310,7 +313,7 @@ async function initSigner(info, { connect = false, preparePopup = false }) {
       // signer won't start properly
       await ndk.connect();
 
-      console.log('creating signer', { info, connect });
+      // console.log('creating signer', { info, connect });
 
       // create and prepare the signer
       signer = new NDKNip46Signer(ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
@@ -337,10 +340,10 @@ async function initSigner(info, { connect = false, preparePopup = false }) {
       // we should send 'connect' NIP46 request
       if (connect) await signer.blockUntilReady();
 
-      console.log('created signer');
+      // console.log('created signer');
 
       // make ure it's closed
-      closePopup();
+      if (!leavePopup) closePopup();
 
       ok();
     } catch (e) {

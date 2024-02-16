@@ -78,6 +78,7 @@ export class NlAuth {
 
   handleInputChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
+//    console.log("check", value, event);
     if (this.isSignup())
       this.signupName = value;
     else
