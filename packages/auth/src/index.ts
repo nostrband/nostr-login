@@ -218,7 +218,7 @@ async function getBunkerUrl(value: string) {
 function bunkerUrlToInfo(bunkerUrl, sk = '') {
   const url = new URL(bunkerUrl);
   return {
-    pubkey: url.hostrname || url.pathname.split('//')[1],
+    pubkey: url.hostname || url.pathname.split('//')[1],
     sk: sk || generatePrivateKey(),
     relays: url.searchParams.getAll('relay'),
   };
