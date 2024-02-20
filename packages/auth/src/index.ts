@@ -2,13 +2,20 @@
 // @ts-nocheck
 import 'nostr-login-components';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
-import { getEventHash, generatePrivateKey } from 'nostr-tools';
+import { getEventHash, generatePrivateKey, nip19 } from 'nostr-tools';
+
+export interface NostrLoginAuthOptions {
+  localNsec: string
+  relays: string[]
+  type: 'login' | 'signup'
+}
 
 export interface NostrLoginOptions {
   // optional
   theme?: string;
   startScreen?: string;
   bunkers?: string;
+  onAuth?: (npub: string, options: NostrLoginAuthOptions) => void
 
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
@@ -84,7 +91,7 @@ export const launch = async (opt: NostrLoginOptions) => {
       // convert name to bunker url
       getBunkerUrl(name)
         // connect to bunker by url
-        .then(authNip46)
+        .then((bunkerUrl) => authNip46('login', bunkerUrl))
         .then(() => {
           modal.isFetchLogin = false;
           dialog.close();
@@ -102,7 +109,7 @@ export const launch = async (opt: NostrLoginOptions) => {
       // create acc on service and get bunker url
       createAccount(name)
         // connect to bunker by url
-        .then(({ bunkerUrl, sk }) => authNip46(bunkerUrl, sk))
+        .then(({ bunkerUrl, sk }) => authNip46('signup', bunkerUrl, sk))
         .then(() => {
           modal.isFetchCreateAccount = false;
           dialog.close();
@@ -411,7 +418,7 @@ function closePopup() {
   } catch {}
 }
 
-export async function authNip46(bunkerUrl, sk = '') {
+async function authNip46(type: 'login' | 'signup', bunkerUrl, sk = '') {
   try {
     const info = bunkerUrlToInfo(bunkerUrl, sk);
     // console.log('nostr login auth info', info);
@@ -423,6 +430,19 @@ export async function authNip46(bunkerUrl, sk = '') {
 
     // only save after successfull login
     window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info));
+
+    // callback
+    if (optionsModal.onAuth) {
+      try {
+        optionsModal.onAuth(nip19.npubEncode(info.pubkey), {
+          localNsec: nip19.nsecEncode(info.sk),
+          relays: info.relays,
+          type
+        });
+      } catch (e) {
+        console.log("onAuth error", e);
+      }
+    } 
 
     // result
     return r;
