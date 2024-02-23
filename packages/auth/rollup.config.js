@@ -10,6 +10,11 @@ export default {
             format: 'esm',
             sourcemap: true,
         },
+        {
+            file: 'dist/unpkg.js',
+            format: 'iife',
+            name: 'nostrLogin',
+        }
     ],
     plugins: [
         typescript({
