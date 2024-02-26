@@ -5,9 +5,9 @@ import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { getEventHash, generatePrivateKey, nip19 } from 'nostr-tools';
 
 export interface NostrLoginAuthOptions {
-  localNsec: string
-  relays: string[]
-  type: 'login' | 'signup'
+  localNsec: string;
+  relays: string[];
+  type: 'login' | 'signup';
 }
 
 export interface NostrLoginOptions {
@@ -15,7 +15,7 @@ export interface NostrLoginOptions {
   theme?: string;
   startScreen?: string;
   bunkers?: string;
-  onAuth?: (npub: string, options: NostrLoginAuthOptions) => void
+  onAuth?: (npub: string, options: NostrLoginAuthOptions) => void;
 
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
@@ -64,141 +64,133 @@ const nostr = {
 };
 
 export const launch = async (opt: NostrLoginOptions) => {
-  return new Promise((resolve, reject) => {
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        // mutex
-        if (launcherPromise) await launcherPromise;
+  // mutex
+  if (launcherPromise) await launcherPromise;
 
-        const dialog = document.createElement('dialog');
-        const modal = document.createElement('nl-auth');
+  const dialog = document.createElement('dialog');
+  const modal = document.createElement('nl-auth');
 
-        if (opt.theme) {
-          modal.setAttribute('theme', opt.theme);
-        }
+  if (opt.theme) {
+    modal.setAttribute('theme', opt.theme);
+  }
 
-        if (opt.startScreen) {
-          modal.setAttribute('start-screen', opt.startScreen);
-        }
+  if (opt.startScreen) {
+    modal.setAttribute('start-screen', opt.startScreen);
+  }
 
-        if (opt.bunkers) {
-          modal.setAttribute('bunkers', opt.bunkers);
-        }
+  if (opt.bunkers) {
+    modal.setAttribute('bunkers', opt.bunkers);
+  }
 
-        dialog.appendChild(modal);
-        document.body.appendChild(dialog);
+  dialog.appendChild(modal);
+  document.body.appendChild(dialog);
 
-        launcherPromise = new Promise((ok) => {
-          const login = (name: string) => {
-            modal.error = 'Please confirm in your key storage app.';
-            // convert name to bunker url
-            getBunkerUrl(name)
-                // connect to bunker by url
-                .then((bunkerUrl) => authNip46('login', bunkerUrl))
-                .then(() => {
-                  modal.isFetchLogin = false;
-                  dialog.close();
-                  ok();
-                })
-                .catch(e => {
-                  console.log('error', e);
-                  modal.isFetchLogin = false;
-                  modal.error = e.toString();
-                });
-          };
-
-          const signup = (name: string) => {
-            modal.error = 'Please confirm in your key storage app.';
-            // create acc on service and get bunker url
-            createAccount(name)
-                // connect to bunker by url
-                .then(({ bunkerUrl, sk }) => authNip46('signup', bunkerUrl, sk))
-                .then(() => {
-                  modal.isFetchCreateAccount = false;
-                  dialog.close();
-                  ok();
-                })
-                .catch(e => {
-                  console.log('error', e);
-                  modal.isFetchCreateAccount = false;
-                  modal.error = e.toString();
-                });
-          };
-
-          const checkNip05 = async (nip05: string) => {
-            let available = false;
-            let taken = false;
-            let error = '';
-            await(async () => {
-              if (!nip05 || !nip05.includes('@')) return;
-
-              const [name, domain] = nip05.toLocaleLowerCase().split('@');
-              if (!name) return;
-
-              const REGEXP = new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,8}$/g);
-              if (!REGEXP.test(nip05)) {
-                error = 'Invalid name';
-                return;
-              }
-
-              if (!domain) {
-                error = 'Select service';
-                return;
-              }
-
-              const url = `https://${domain}/.well-known/nostr.json?name=${name.toLowerCase()}`;
-              try {
-                const r = await fetch(url);
-                const d = await r.json();
-                if (d.names[name]) {
-                  taken = true;
-                  return;
-                }
-              } catch {}
-
-              available = true;
-            })();
-
-            return [available, taken, error];
-          };
-
-          modal.addEventListener('nlLogin', event => {
-            login(event.detail);
-          });
-
-          modal.addEventListener('nlSignup', event => {
-            signup(event.detail);
-          });
-
-          modal.addEventListener('nlCheckSignup', async event => {
-            const [available, taken, error] = await checkNip05(event.detail);
-            modal.error = error;
-            if (!error && taken) modal.error = 'Already taken';
-            modal.signupNameIsAvailable = available;
-          });
-
-          modal.addEventListener('nlCheckLogin', async event => {
-            const [available, taken, error] = await checkNip05(event.detail);
-            modal.error = error;
-            if (available) modal.error = 'Name not found'
-            modal.loginIsGood = taken
-          });
-
-          modal.addEventListener('nlCloseModal', () => {
-            modal.isFetchLogin = false;
-            dialog.close();
-            ok();
-          });
-
-          dialog.showModal();
+  launcherPromise = new Promise(ok => {
+    const login = (name: string) => {
+      modal.error = 'Please confirm in your key storage app.';
+      // convert name to bunker url
+      getBunkerUrl(name)
+        // connect to bunker by url
+        .then(bunkerUrl => authNip46('login', bunkerUrl))
+        .then(() => {
+          modal.isFetchLogin = false;
+          dialog.close();
+          ok();
+        })
+        .catch(e => {
+          console.log('error', e);
+          modal.isFetchLogin = false;
+          modal.error = e.toString();
         });
+    };
 
-        resolve(launcherPromise);
-      } catch (error) {
-        reject(error); // Отклоняем промис в случае ошибки
-      }
+    const signup = (name: string) => {
+      modal.error = 'Please confirm in your key storage app.';
+      // create acc on service and get bunker url
+      createAccount(name)
+        // connect to bunker by url
+        .then(({ bunkerUrl, sk }) => authNip46('signup', bunkerUrl, sk))
+        .then(() => {
+          modal.isFetchCreateAccount = false;
+          dialog.close();
+          ok();
+        })
+        .catch(e => {
+          console.log('error', e);
+          modal.isFetchCreateAccount = false;
+          modal.error = e.toString();
+        });
+    };
+
+    const checkNip05 = async (nip05: string) => {
+      let available = false;
+      let taken = false;
+      let error = '';
+      await (async () => {
+        if (!nip05 || !nip05.includes('@')) return;
+
+        const [name, domain] = nip05.toLocaleLowerCase().split('@');
+        if (!name) return;
+
+        const REGEXP = new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,8}$/g);
+        if (!REGEXP.test(nip05)) {
+          error = 'Invalid name';
+          return;
+        }
+
+        if (!domain) {
+          error = 'Select service';
+          return;
+        }
+
+        const url = `https://${domain}/.well-known/nostr.json?name=${name.toLowerCase()}`;
+        try {
+          const r = await fetch(url);
+          const d = await r.json();
+          if (d.names[name]) {
+            taken = true;
+            return;
+          }
+        } catch {}
+
+        available = true;
+      })();
+
+      return [available, taken, error];
+    };
+
+    modal.addEventListener('nlLogin', event => {
+      login(event.detail);
     });
+
+    modal.addEventListener('nlSignup', event => {
+      signup(event.detail);
+    });
+
+    modal.addEventListener('nlCheckSignup', async event => {
+      const [available, taken, error] = await checkNip05(event.detail);
+      modal.error = error;
+      if (!error && taken) modal.error = 'Already taken';
+      modal.signupNameIsAvailable = available;
+    });
+
+    modal.addEventListener('nlCheckLogin', async event => {
+      const [available, taken, error] = await checkNip05(event.detail);
+      modal.error = error;
+      if (available) modal.error = 'Name not found';
+      modal.loginIsGood = taken;
+    });
+
+    modal.addEventListener('nlCloseModal', () => {
+      modal.isFetchLogin = false;
+      dialog.close();
+      ok();
+    });
+
+    dialog.showModal();
   });
+
+  return launcherPromise;
 };
 
 async function getBunkerUrl(value: string) {
@@ -222,8 +214,7 @@ async function getBunkerUrl(value: string) {
     //     bunkerData, userData, bunkerPubkey, bunkerRelays, userPubkey,
     //     name, domain, origin
     // })
-    if (!bunkerRelays.length)
-      throw new Error('Bunker relay not provided');
+    if (!bunkerRelays.length) throw new Error('Bunker relay not provided');
     return `bunker://${userPubkey}?relay=${bunkerRelays[0]}`;
   }
 
@@ -445,12 +436,12 @@ async function authNip46(type: 'login' | 'signup', bunkerUrl, sk = '') {
         optionsModal.onAuth(nip19.npubEncode(info.pubkey), {
           localNsec: nip19.nsecEncode(info.sk),
           relays: info.relays,
-          type
+          type,
         });
       } catch (e) {
-        console.log("onAuth error", e);
+        console.log('onAuth error', e);
       }
-    } 
+    }
 
     // result
     return r;
