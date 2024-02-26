@@ -64,7 +64,6 @@ const nostr = {
 };
 
 export const launch = async (opt: NostrLoginOptions) => {
-
   return new Promise((resolve, reject) => {
     document.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -200,8 +199,6 @@ export const launch = async (opt: NostrLoginOptions) => {
       }
     });
   });
-
-
 };
 
 async function getBunkerUrl(value: string) {
