@@ -5,11 +5,11 @@
 
 ## Properties
 
-| Property      | Attribute      | Description | Type                                             | Default                  |
-| ------------- | -------------- | ----------- | ------------------------------------------------ | ------------------------ |
-| `bunkers`     | `bunkers`      |             | `string`                                         | `'nsec.app'`             |
-| `startScreen` | `start-screen` |             | `string`                                         | `CURRENT_MODULE.WELCOME` |
-| `theme`       | `theme`        |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
+| Property      | Attribute      | Description | Type                                             | Default                      |
+| ------------- | -------------- | ----------- | ------------------------------------------------ | ---------------------------- |
+| `bunkers`     | `bunkers`      |             | `string`                                         | `'nsec.app,highlighter.com'` |
+| `startScreen` | `start-screen` |             | `string`                                         | `CURRENT_MODULE.WELCOME`     |
+| `theme`       | `theme`        |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`                  |
 
 
 ## Events

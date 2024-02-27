@@ -5,9 +5,9 @@ import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { getEventHash, generatePrivateKey, nip19 } from 'nostr-tools';
 
 export interface NostrLoginAuthOptions {
-  localNsec: string
-  relays: string[]
-  type: 'login' | 'signup'
+  localNsec: string;
+  relays: string[];
+  type: 'login' | 'signup';
 }
 
 export interface NostrLoginOptions {
@@ -15,7 +15,7 @@ export interface NostrLoginOptions {
   theme?: string;
   startScreen?: string;
   bunkers?: string;
-  onAuth?: (npub: string, options: NostrLoginAuthOptions) => void
+  onAuth?: (npub: string, options: NostrLoginAuthOptions) => void;
 
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
@@ -85,13 +85,13 @@ export const launch = async (opt: NostrLoginOptions) => {
   dialog.appendChild(modal);
   document.body.appendChild(dialog);
 
-  launcherPromise = new Promise((ok) => {
+  launcherPromise = new Promise(ok => {
     const login = (name: string) => {
       modal.error = 'Please confirm in your key storage app.';
       // convert name to bunker url
       getBunkerUrl(name)
         // connect to bunker by url
-        .then((bunkerUrl) => authNip46('login', bunkerUrl))
+        .then(bunkerUrl => authNip46('login', bunkerUrl))
         .then(() => {
           modal.isFetchLogin = false;
           dialog.close();
@@ -126,7 +126,7 @@ export const launch = async (opt: NostrLoginOptions) => {
       let available = false;
       let taken = false;
       let error = '';
-      await(async () => {
+      await (async () => {
         if (!nip05 || !nip05.includes('@')) return;
 
         const [name, domain] = nip05.toLocaleLowerCase().split('@');
@@ -177,8 +177,8 @@ export const launch = async (opt: NostrLoginOptions) => {
     modal.addEventListener('nlCheckLogin', async event => {
       const [available, taken, error] = await checkNip05(event.detail);
       modal.error = error;
-      if (available) modal.error = 'Name not found'
-      modal.loginIsGood = taken
+      if (available) modal.error = 'Name not found';
+      modal.loginIsGood = taken;
     });
 
     modal.addEventListener('nlCloseModal', () => {
@@ -214,8 +214,7 @@ async function getBunkerUrl(value: string) {
     //     bunkerData, userData, bunkerPubkey, bunkerRelays, userPubkey,
     //     name, domain, origin
     // })
-    if (!bunkerRelays.length)
-      throw new Error('Bunker relay not provided');
+    if (!bunkerRelays.length) throw new Error('Bunker relay not provided');
     return `bunker://${userPubkey}?relay=${bunkerRelays[0]}`;
   }
 
@@ -437,12 +436,12 @@ async function authNip46(type: 'login' | 'signup', bunkerUrl, sk = '') {
         optionsModal.onAuth(nip19.npubEncode(info.pubkey), {
           localNsec: nip19.nsecEncode(info.sk),
           relays: info.relays,
-          type
+          type,
         });
       } catch (e) {
-        console.log("onAuth error", e);
+        console.log('onAuth error', e);
       }
-    } 
+    }
 
     // result
     return r;

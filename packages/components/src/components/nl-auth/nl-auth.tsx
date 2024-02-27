@@ -21,10 +21,11 @@ export class NlAuth {
   @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() theme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
-  @Prop() bunkers: string = 'nsec.app'
+  @Prop() bunkers: string = 'nsec.app,highlighter.com'
 
   @State() servers = [
-    { name: '@nsec.app', value: 'nsec.app' }
+    { name: '@nsec.app', value: 'nsec.app' },
+    { name: '@highlighter.com', value: 'highlighter.com' },
   ]
 
   formatServers(bunkers: string) {
