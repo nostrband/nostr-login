@@ -1,4 +1,4 @@
-import { launch } from './index';
+import { init } from './index';
 document.addEventListener('DOMContentLoaded', async () => {
-  launch({});
+  init({});
 });
