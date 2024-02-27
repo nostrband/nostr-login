@@ -2,7 +2,7 @@
 // @ts-nocheck
 import 'nostr-login-components';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
-import { getEventHash, generatePrivateKey, nip19 } from 'nostr-tools';
+import { getEventHash, generatePrivateKey, nip19, getPublicKey } from 'nostr-tools';
 
 export interface NostrLoginAuthOptions {
   localNsec: string;
@@ -16,12 +16,16 @@ export interface NostrLoginOptions {
   startScreen?: string;
   bunkers?: string;
   onAuth?: (npub: string, options: NostrLoginAuthOptions) => void;
+  redirect?: boolean;
+  redirectUri?: string;
 
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
 }
 
 const LOCALSTORE_KEY = '__nostrlogin_nip46';
+const LOCALSTORE_KEY_TMP = '__nostrlogin_nip46_tmp';
+const REDIRECT_CONFIRM_PARAM = 'nostr_login_confirm';
 const ndk = new NDK({
   enableOutboxModel: false,
 });
@@ -325,17 +329,33 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
       signer = new NDKNip46Signer(ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
 
       // OAuth flow
-      signer.on('authUrl', url => {
-        console.log('nostr login auth url', url);
+      signer.on('authUrl', authUrl => {
+        console.log('nostr login auth url', authUrl);
 
-        // if it fails we will either return 'failed'
-        // to the window.nostr caller, or show proper error
-        // in our modal
-        ensurePopup();
+        if (optionsModal.redirect) {
 
-        popup.location.href = url;
-        popup.resizeTo(400, 700);
-        //window.open(url, 'auth', 'width=600,height=600');
+          // put current connection info to tmp key,
+          // when we're redirected back w/ nostr_login_confirm param
+          // we will pick this info from storage and connect
+          if (optionsModal.redirect)
+            window.localStorage.setItem(LOCALSTORE_KEY_TMP, JSON.stringify(info));    
+      
+          const redirectUriBase = `${optionsModal.redirectUri || window.location.href}`;
+          const pubkey = getPublicKey(info.sk);
+          const redirectUri = `${redirectUriBase}${redirectUriBase.includes('?') ? '&' : '?'}${REDIRECT_CONFIRM_PARAM}=${pubkey}`;
+          const url = `${authUrl}${authUrl.includes('?') ? '&' : '?'}redirect_uri=${encodeURIComponent(redirectUri)}`
+          
+          // let the localstore write happen
+          setTimeout(() => window.location.href = url, 100);
+        } else {
+          // if it fails we will either return 'failed'
+          // to the window.nostr caller, or show proper error
+          // in our modal
+          ensurePopup();
+
+          popup.location.href = authUrl;
+          popup.resizeTo(400, 700);
+        }
       });
 
       // pre-launch a popup if it won't be blocked,
@@ -375,6 +395,32 @@ export async function init(opt: NostrLoginOptions) {
     optionsModal = { ...opt };
   }
 
+  // redirect mode means we will first redirect user to the 
+  // bunker site, and then it will redirect us back where we should
+  // pick up and reuse the temporarily stored connection info
+  if (optionsModal.redirect) {
+    const params = new URLSearchParams(window.location.search);
+    const pubkey = params.get(REDIRECT_CONFIRM_PARAM);
+    // have confirm param?
+    if (pubkey) {
+      try {
+        // read conf from localstore
+        const info = JSON.parse(window.localStorage.getItem(LOCALSTORE_KEY_TMP));
+        const infoPubkey = getPublicKey(info.sk)
+        if (info && pubkey === infoPubkey && info.relays && info.relays[0]) {
+          window.localStorage.removeItem(LOCALSTORE_KEY_TMP)
+          window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info))
+          const url = new URL(window.location.href)
+          url.searchParams.delete(REDIRECT_CONFIRM_PARAM)
+          window.history.pushState({}, '', url)
+          console.log("nostr login confirmed local pubkey", pubkey);
+        }
+      } catch (e) {
+        console.log("nostr login failed to confirm", e);
+      }
+    }
+  }
+
   try {
     // read conf from localstore
     const info = JSON.parse(window.localStorage.getItem(LOCALSTORE_KEY));
@@ -390,6 +436,8 @@ export async function init(opt: NostrLoginOptions) {
 }
 
 function ensurePopup() {
+  if (optionsModal.redirect) return;
+
   // user might have closed it already
   if (!popup || popup.closed) {
     // NOTE: do not set noreferrer, bunker might use referrer to
