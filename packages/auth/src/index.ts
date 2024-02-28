@@ -1,8 +1,8 @@
 /* eslint-disable */
 // @ts-nocheck
 import 'nostr-login-components';
-import NDK, { NDKNip46Signer, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
-import { getEventHash, generatePrivateKey, nip19 } from 'nostr-tools';
+import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKUser } from '@nostr-dev-kit/ndk';
+import { getEventHash, generatePrivateKey, nip19, getPublicKey } from 'nostr-tools';
 
 export interface NostrLoginAuthOptions {
   localNsec: string;
@@ -16,6 +16,7 @@ export interface NostrLoginOptions {
   startScreen?: string;
   bunkers?: string;
   onAuth?: (npub: string, options: NostrLoginAuthOptions) => void;
+  perms?: string;
 
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
@@ -248,7 +249,8 @@ async function createAccount(nip05: string) {
   const params = [
     name,
     domain,
-    // email?
+    '', // email
+    optionsModal.perms || '',
   ];
 
   // due to a buggy sendRequest implementation it never resolves
@@ -344,7 +346,22 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
 
       // if we're doing it for the first time then
       // we should send 'connect' NIP46 request
-      if (connect) await signer.blockUntilReady();
+      if (connect) {
+        // since ndk doesn't yet support perms param
+        // we reimplement the 'connect' call here
+        // await signer.blockUntilReady();
+
+        const connectParams = [getPublicKey(info.sk), '', optionsModal.perms || ''];
+        await new Promise((ok, err) => {
+          signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
+            if (response.result === 'ack') {
+              ok();
+            } else {
+              err(response.error);
+            }
+          });
+        })
+      }
 
       // console.log('created signer');
 
