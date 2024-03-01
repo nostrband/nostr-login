@@ -7,7 +7,7 @@ import { getEventHash, generatePrivateKey, nip19, getPublicKey } from 'nostr-too
 export interface NostrLoginAuthOptions {
   localNsec: string;
   relays: string[];
-  type: 'login' | 'signup';
+  type: 'login' | 'signup' | 'logout';
 }
 
 export interface NostrLoginOptions {
@@ -22,6 +22,13 @@ export interface NostrLoginOptions {
   devOverrideBunkerOrigin?: string;
 }
 
+interface Info {
+  pubkey: string;
+  sk: string;
+  relays: string[];
+  nip05?: string;
+}
+
 const LOCALSTORE_KEY = '__nostrlogin_nip46';
 const ndk = new NDK({
   enableOutboxModel: false,
@@ -30,6 +37,7 @@ let signer: NDKNip46Signer | null = null;
 let signerPromise = null;
 let launcherPromise = null;
 let popup = null;
+let userInfo: Info | null = null;
 let optionsModal: NostrLoginOptions = {
   theme: 'default',
   startScreen: 'welcome',
@@ -92,7 +100,7 @@ export const launch = async (opt: NostrLoginOptions) => {
       // convert name to bunker url
       getBunkerUrl(name)
         // connect to bunker by url
-        .then(bunkerUrl => authNip46('login', bunkerUrl))
+        .then(bunkerUrl => authNip46('login', name, bunkerUrl))
         .then(() => {
           modal.isFetchLogin = false;
           dialog.close();
@@ -110,7 +118,7 @@ export const launch = async (opt: NostrLoginOptions) => {
       // create acc on service and get bunker url
       createAccount(name)
         // connect to bunker by url
-        .then(({ bunkerUrl, sk }) => authNip46('signup', bunkerUrl, sk))
+        .then(({ bunkerUrl, sk }) => authNip46('signup', name, bunkerUrl, sk))
         .then(() => {
           modal.isFetchCreateAccount = false;
           dialog.close();
@@ -222,7 +230,7 @@ async function getBunkerUrl(value: string) {
   throw new Error('Invalid user name or bunker url');
 }
 
-function bunkerUrlToInfo(bunkerUrl, sk = '') {
+function bunkerUrlToInfo(bunkerUrl, sk = ''): Info {
   const url = new URL(bunkerUrl);
   return {
     pubkey: url.hostname || url.pathname.split('//')[1],
@@ -330,14 +338,24 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
       signer.on('authUrl', url => {
         console.log('nostr login auth url', url);
 
-        // if it fails we will either return 'failed'
-        // to the window.nostr caller, or show proper error
-        // in our modal
-        ensurePopup();
+        if (userInfo) {
+          // FIXME show the 'Please confirm' banner
+          // and run the code below when user clicks.
+          ensurePopup();
 
-        popup.location.href = url;
-        popup.resizeTo(400, 700);
-        //window.open(url, 'auth', 'width=600,height=600');
+          popup.location.href = url;
+
+          popup.resizeTo(400, 700);
+        } else {
+          // if it fails we will either return 'failed'
+          // to the window.nostr caller, or show proper error
+          // in our modal
+          ensurePopup();
+
+          popup.location.href = url;
+
+          popup.resizeTo(400, 700);
+        }
       });
 
       // pre-launch a popup if it won't be blocked,
@@ -360,7 +378,7 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
               err(response.error);
             }
           });
-        })
+        });
       }
 
       // console.log('created signer');
@@ -396,7 +414,8 @@ export async function init(opt: NostrLoginOptions) {
     // read conf from localstore
     const info = JSON.parse(window.localStorage.getItem(LOCALSTORE_KEY));
     if (info && info.pubkey && info.sk && info.relays && info.relays[0]) {
-      return initSigner(info);
+      await initSigner(info);
+      onAuth('login', info);
     } else {
       console.log('nostr login bad stored info', info);
     }
@@ -434,9 +453,31 @@ function closePopup() {
   } catch {}
 }
 
-async function authNip46(type: 'login' | 'signup', bunkerUrl, sk = '') {
+function onAuth(type: 'login' | 'signup' | 'logout', info?: Info) {
+  userInfo = info;
+
+  if (optionsModal.onAuth) {
+    try {
+      const npub = info ? nip19.npubEncode(info.pubkey) : '';
+      const options: NostrLoginAuthOptions = {
+        type,
+      };
+      if (type !== 'logout') {
+        options.localNsec = nip19.nsecEncode(info.sk);
+        options.relays = info.relays;
+      }
+      optionsModal.onAuth(npub, options);
+    } catch (e) {
+      console.log('onAuth error', e);
+    }
+  }
+}
+
+async function authNip46(type: 'login' | 'signup', name, bunkerUrl, sk = '') {
   try {
     const info = bunkerUrlToInfo(bunkerUrl, sk);
+    info.nip05 = name;
+
     // console.log('nostr login auth info', info);
     if (!info.pubkey || !info.sk || !info.relays[0]) {
       throw new Error(`Bad bunker url ${bunkerUrl}`);
@@ -448,17 +489,7 @@ async function authNip46(type: 'login' | 'signup', bunkerUrl, sk = '') {
     window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info));
 
     // callback
-    if (optionsModal.onAuth) {
-      try {
-        optionsModal.onAuth(nip19.npubEncode(info.pubkey), {
-          localNsec: nip19.nsecEncode(info.sk),
-          relays: info.relays,
-          type,
-        });
-      } catch (e) {
-        console.log('onAuth error', e);
-      }
-    }
+    onAuth(type, info);
 
     // result
     return r;
@@ -472,6 +503,7 @@ async function authNip46(type: 'login' | 'signup', bunkerUrl, sk = '') {
 
 export async function logout() {
   // clear localstore from user data
+  onAuth('logout');
   signer = null;
   for (const r of ndk.pool.relays.keys()) ndk.pool.removeRelay(r);
   window.localStorage.removeItem(LOCALSTORE_KEY);
