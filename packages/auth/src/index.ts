@@ -38,6 +38,7 @@ let signerPromise = null;
 let launcherPromise = null;
 let popup = null;
 let userInfo: Info | null = null;
+let callCount = 0;
 let optionsModal: NostrLoginOptions = {
   theme: 'default',
   startScreen: 'welcome',
@@ -54,10 +55,12 @@ const nostr = {
   },
   async signEvent(event) {
     await ensureSigner();
-    event.pubkey = signer.remotePubkey;
-    event.id = getEventHash(event);
-    event.sig = await signer.sign(event);
-    return event;
+    return wait(async () => {
+      event.pubkey = signer.remotePubkey;
+      event.id = getEventHash(event);
+      event.sig = await signer.sign(event);
+      return event;  
+    })
   },
   async getRelays() {
     // FIXME implement!
@@ -66,11 +69,11 @@ const nostr = {
   nip04: {
     async encrypt(pubkey, plaintext) {
       await ensureSigner();
-      return signer.encrypt(pubkey, plaintext);
+      return wait(async () => await signer.encrypt(pubkey, plaintext));
     },
     async decrypt(pubkey, ciphertext) {
       await ensureSigner();
-      return signer.decrypt(pubkey, ciphertext);
+      return wait(async () => await signer.decrypt(pubkey, ciphertext));
     },
   },
 };
@@ -204,6 +207,44 @@ export const launch = async (opt: NostrLoginOptions) => {
 
   return launcherPromise;
 };
+
+async function wait(cb) {
+  const timer = setTimeout(onCallTimeout, 5000);
+  if (!callCount)
+    await onCallStart();
+  callCount++;
+
+  let error
+  let result
+  try {
+    const r = await cb();
+  } catch (e) {
+    error = e;
+  }
+
+  callCount--;
+  await onCallEnd();
+
+  if (timer)
+    clearTimeout(timer);
+
+  if (error) throw error;
+  return result;
+}
+
+async function onCallStart() {
+  // set spinner - we've started talking to the key storage
+} 
+
+async function onCallEnd() {
+  // remove spinner - we've finished talking to the key storage,
+  // also hide the 'Not responding' banner
+}
+
+async function onCallTimeout() {
+  // show 'Not responding' banner, hide when onCallEnd happens,
+  // may be called multiple times - should check if banner is already visible
+}
 
 async function getBunkerUrl(value: string) {
   if (!value) return '';
