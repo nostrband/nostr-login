@@ -47,7 +47,10 @@ let optionsModal: NostrLoginOptions = {
 const nostr = {
   async getPublicKey() {
     await ensureSigner();
-    return signer.remotePubkey;
+    if (userInfo)
+      return userInfo.pubkey;
+    else
+      throw new Error("No user");
   },
   async signEvent(event) {
     await ensureSigner();
