@@ -119,6 +119,14 @@
   @apply text-teal-400;
 }
 
+.theme-default .nl-banner {
+  @apply border border-gray-200 bg-white text-gray-800 shadow-sm;
+}
+
+.theme-default .dark .nl-banner {
+  @apply bg-slate-900 border-gray-700 text-gray-300;
+}
+
 /*Theme ocean*/
 .theme-ocean .nl-bg {
   @apply bg-blue-200 shadow-sm;
@@ -195,7 +203,6 @@
 .theme-ocean .dark .nl-select {
   @apply bg-sky-900 text-sky-400 focus:ring-sky-600;
 }
-
 
 .theme-ocean .nl-select-list {
   @apply bg-sky-100;

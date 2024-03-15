@@ -18,6 +18,8 @@ export interface NostrLoginOptions {
   onAuth?: (npub: string, options: NostrLoginAuthOptions) => void;
   perms?: string;
 
+  iife?: boolean; // for unpkg module
+
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
 }
@@ -45,13 +47,13 @@ let optionsModal: NostrLoginOptions = {
   devOverrideBunkerOrigin: '',
 };
 
+let banner: HTMLElement | null = null;
+
 const nostr = {
   async getPublicKey() {
     await ensureSigner();
-    if (userInfo)
-      return userInfo.pubkey;
-    else
-      throw new Error("No user");
+    if (userInfo) return userInfo.pubkey;
+    else throw new Error('No user');
   },
   async signEvent(event) {
     await ensureSigner();
@@ -59,8 +61,8 @@ const nostr = {
       event.pubkey = signer.remotePubkey;
       event.id = getEventHash(event);
       event.sig = await signer.sign(event);
-      return event;  
-    })
+      return event;
+    });
   },
   async getRelays() {
     // FIXME implement!
@@ -210,12 +212,11 @@ export const launch = async (opt: NostrLoginOptions) => {
 
 async function wait(cb) {
   const timer = setTimeout(onCallTimeout, 5000);
-  if (!callCount)
-    await onCallStart();
+  if (!callCount) await onCallStart();
   callCount++;
 
-  let error
-  let result
+  let error;
+  let result;
   try {
     const r = await cb();
   } catch (e) {
@@ -225,8 +226,7 @@ async function wait(cb) {
   callCount--;
   await onCallEnd();
 
-  if (timer)
-    clearTimeout(timer);
+  if (timer) clearTimeout(timer);
 
   if (error) throw error;
   return result;
@@ -234,16 +234,22 @@ async function wait(cb) {
 
 async function onCallStart() {
   // set spinner - we've started talking to the key storage
-} 
+  banner.isLoading = true;
+}
 
 async function onCallEnd() {
   // remove spinner - we've finished talking to the key storage,
   // also hide the 'Not responding' banner
+  banner.isLoading = false;
 }
 
 async function onCallTimeout() {
   // show 'Not responding' banner, hide when onCallEnd happens,
   // may be called multiple times - should check if banner is already visible
+  // выводить уведомление go to domain - по
+  banner.notify = {
+    test: 'test',
+  };
 }
 
 async function getBunkerUrl(value: string) {
@@ -345,6 +351,23 @@ const connectModals = (defaultOpt: NostrLoginOptions) => {
   }
 };
 
+const launchAuthBanner = (opt: NostrLoginOptions) => {
+  banner = document.createElement('nl-banner');
+
+  banner.addEventListener('handleLoginBanner', event => {
+    const startScreen = event.detail;
+    launch({
+      startScreen,
+    });
+  });
+
+  banner.addEventListener('handleLogoutBanner', event => {
+    logout();
+  });
+
+  document.body.appendChild(banner);
+};
+
 async function ensureSigner() {
   // wait until competing requests are finished
   if (signerPromise) await signerPromise;
@@ -385,11 +408,18 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
         if (userInfo) {
           // FIXME show the 'Please confirm' banner
           // and run the code below when user clicks.
+
+          // banner => confirm =>
+          banner.notify = {
+            test: 'test',
+          };
           ensurePopup();
 
           popup.location.href = url;
 
           popup.resizeTo(400, 700);
+
+          // confirm button
         } else {
           // if it fails we will either return 'failed'
           // to the window.nostr caller, or show proper error
@@ -448,7 +478,11 @@ export async function init(opt: NostrLoginOptions) {
 
   window.nostr = nostr;
 
-  connectModals(opt);
+  if (opt.iife) {
+    launchAuthBanner(opt);
+  } else {
+    connectModals(opt);
+  }
 
   if (opt) {
     optionsModal = { ...opt };
@@ -497,19 +531,23 @@ function closePopup() {
   } catch {}
 }
 
-function onAuth(type: 'login' | 'signup' | 'logout', info?: Info) {
+function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
   userInfo = info;
+  banner.userInfo = userInfo;
 
   if (optionsModal.onAuth) {
     try {
       const npub = info ? nip19.npubEncode(info.pubkey) : '';
+
       const options: NostrLoginAuthOptions = {
         type,
       };
+
       if (type !== 'logout') {
         options.localNsec = nip19.nsecEncode(info.sk);
         options.relays = info.relays;
       }
+
       optionsModal.onAuth(npub, options);
     } catch (e) {
       console.log('onAuth error', e);

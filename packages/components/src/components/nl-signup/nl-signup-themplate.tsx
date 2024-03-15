@@ -12,7 +12,7 @@ interface NlSignupThemplateProps {
   error?: string;
   theme: 'default' | 'ocean' | 'lemonade' | 'purple';
   darkMode: boolean;
-  servers: { name: string, value: string }[]
+  servers: { name: string; value: string }[];
 }
 
 export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
@@ -27,7 +27,7 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
   theme,
   darkMode,
   isAvailable,
-  servers
+  servers,
 }) => {
   // const classError = ` text-sm ${isAvailable ? 'nl-text-success' : 'nl-text-error'} mb-2`;
   // const textError = isAvailable ? 'Available' : inputStatus;
@@ -48,7 +48,14 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
             placeholder="Name"
           />
           <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke={isAvailable ? "#00cc00" : "currentColor"} class="flex-shrink-0 w-4 h-4 text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke={isAvailable ? '#00cc00' : 'currentColor'}
+              class="flex-shrink-0 w-4 h-4 text-gray-500"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -66,18 +73,9 @@ export const NlSignupThemplate: FunctionalComponent<NlSignupThemplateProps> = ({
           {/*    @nsec.app*/}
           {/*  </option>*/}
           {/*</select>*/}
-          <nl-select
-            onSelectDomain={handleDomainSelect}
-            theme={theme}
-            darkMode={darkMode}
-            selected={0}
-            options={servers}
-          ></nl-select>
+          <nl-select onSelectDomain={handleDomainSelect} theme={theme} darkMode={darkMode} selected={0} options={servers}></nl-select>
         </div>
-        <p class='nl-title font-light text-sm mb-2'>
-          Choose a service to
-          manage your Nostr keys.
-        </p>
+        <p class="nl-title font-light text-sm mb-2">Choose a service to manage your Nostr keys.</p>
         <button
           disabled={isFetching}
           onClick={handleCreateAccount}
