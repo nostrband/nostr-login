@@ -25,7 +25,7 @@ export class NlBanner {
   @Event() handleLogoutBanner: EventEmitter<string>;
 
   @Watch('notify')
-  watchNotifyHandler(notify: { test: string } | null) {
+  watchNotifyHandler() {
     this.isOpenConfirm = true;
     this.isOpen = true;
   }
