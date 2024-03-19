@@ -212,7 +212,7 @@ export class NlAuth {
               </div>
 
               <div class="flex gap-1">
-                <button
+                {/* <button
                   onClick={() => this.handleChangeTheme()}
                   type="button"
                   class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
@@ -235,7 +235,7 @@ export class NlAuth {
                       />
                     </svg>
                   )}
-                </button>
+                </button> */}
                 <button
                   onClick={() => this.handleClickToInfo()}
                   type="button"

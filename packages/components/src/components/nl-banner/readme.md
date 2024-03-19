@@ -5,14 +5,14 @@
 
 ## Properties
 
-| Property       | Attribute      | Description | Type                                                              | Default                                 |
-| -------------- | -------------- | ----------- | ----------------------------------------------------------------- | --------------------------------------- |
-| `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`                                 |
-| `listNotifies` | --             |             | `string[]`                                                        | `[]`                                    |
-| `nlTheme`      | `nl-theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"`                  | `'default'`                             |
-| `notify`       | --             |             | `{ confirm: number; url?: string; timeOut?: { link: string; }; }` | `null`                                  |
-| `titleBanner`  | `title-banner` |             | `string`                                                          | `'Please login to manage your profile'` |
-| `userInfo`     | --             |             | `Info`                                                            | `null`                                  |
+| Property       | Attribute      | Description | Type                                                              | Default     |
+| -------------- | -------------- | ----------- | ----------------------------------------------------------------- | ----------- |
+| `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`     |
+| `listNotifies` | --             |             | `string[]`                                                        | `[]`        |
+| `nlTheme`      | `nl-theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"`                  | `'default'` |
+| `notify`       | --             |             | `{ confirm: number; url?: string; timeOut?: { link: string; }; }` | `null`      |
+| `titleBanner`  | `title-banner` |             | `string`                                                          | `''`        |
+| `userInfo`     | --             |             | `Info`                                                            | `null`      |
 
 
 ## Events

@@ -7,6 +7,7 @@ export enum CURRENT_MODULE {
 
 export enum METHOD_MODULE {
   SIGNIN = 'signin',
+  SIGNUP = 'signup',
   LOGOUT = 'logout',
   CONFIRM = 'confirm',
 }
@@ -16,4 +17,5 @@ export interface Info {
   sk: string;
   relays: string[];
   nip05?: string;
+  picture?: string;
 }

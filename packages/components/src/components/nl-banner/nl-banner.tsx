@@ -11,12 +11,12 @@ export class NlBanner {
   @State() isLogin: boolean = false;
   @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() nlTheme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
-  @Prop() titleBanner: string = 'Please login to manage your profile';
-  @State() linkNotifyTimeOut: string = '';
+  @Prop() titleBanner: string = '';
+  @State() domain: string = '';
   @State() urlNotify: string = '';
   @Prop() listNotifies: string[] = [];
   @State() isOpenNotifyTimeOut: boolean = false;
-  @State() imgUrl: string = '';
+  // @State() imgUrl: string = '';
   @State() isOpen: boolean = false;
   @State() isConfirm: boolean = true;
   @State() isOpenConfirm: boolean = false;
@@ -33,17 +33,18 @@ export class NlBanner {
   @Event() handleLogoutBanner: EventEmitter<string>;
 
   @Watch('notify')
-  watchNotifyHandler(notify: { confirm: number; url?: string; timeOut?: { link: string } }) {
+  watchNotifyHandler(notify: { confirm: number; url?: string; timeOut?: boolean }) {
     this.isNotConfirmToSend = true;
     this.isOpen = true;
     this.isOpenConfirm = true;
+    this.domain = this.userInfo?.nip05?.split('@')?.[1] || ''
 
     if (notify.url) {
       this.urlNotify = notify.url;
+      this.isOpenNotifyTimeOut = false
     }
 
-    if (notify.timeOut) {
-      this.linkNotifyTimeOut = notify.timeOut.link;
+    if (!this.urlNotify && notify.timeOut) {
       this.isOpenNotifyTimeOut = true;
     }
   }
@@ -74,7 +75,6 @@ export class NlBanner {
   handleClose() {
     this.isOpen = false;
     this.isOpenNotifyTimeOut = false;
-    this.linkNotifyTimeOut = '';
     this.isOpenConfirm = false;
 
     if (this.isNotConfirmToSend) {
@@ -87,6 +87,11 @@ export class NlBanner {
 
   handleLogin() {
     this.handleLoginBanner.emit(METHOD_MODULE.SIGNIN);
+    this.handleClose();
+  }
+
+  handleSignup() {
+    this.handleLoginBanner.emit(METHOD_MODULE.SIGNUP);
     this.handleClose();
   }
 
@@ -108,8 +113,8 @@ export class NlBanner {
   }
 
   render() {
-    const isShowImg = Boolean(this.imgUrl);
-    const userName = this.userInfo ? this.userInfo.nip05 || this.userInfo.pubkey : '';
+    const isShowImg = Boolean(this.userInfo?.picture);
+    const userName = this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
     const isShowUserName = Boolean(userName);
 
     return (
@@ -129,7 +134,7 @@ export class NlBanner {
                 {this.userInfo ? (
                   <div class="uppercase font-bold w-6 h-6 mr-2 rounded-full border border-gray-200 flex justify-center items-center">
                     {isShowImg ? (
-                      <img class="w-full rounded-full" src={this.imgUrl} alt="Logo" />
+                      <img class="w-full rounded-full" src={this.userInfo.picture} alt="Logo" />
                     ) : isShowUserName ? (
                       userName[0]
                     ) : (
@@ -143,13 +148,16 @@ export class NlBanner {
                     )}
                   </div>
                 ) : (
-                  <svg class="w-6 h-6" width="225" height="224" viewBox="0 0 225 224" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="224.047" height="224" rx="64" fill="#6951FA" />
-                    <path
-                      d="M162.441 135.941V88.0593C170.359 85.1674 176 77.5348 176 68.6696C176 57.2919 166.708 48 155.33 48C143.953 48 134.661 57.2444 134.661 68.6696C134.661 77.5822 140.302 85.1674 148.219 88.0593V135.941C147.698 136.13 147.176 136.367 146.655 136.604L87.3956 77.3452C88.6282 74.6904 89.2919 71.7511 89.2919 68.6696C89.2919 57.2444 80.0474 48 68.6696 48C57.2919 48 48 57.2444 48 68.6696C48 77.5822 53.6415 85.1674 61.5585 88.0593V135.941C53.6415 138.833 48 146.465 48 155.33C48 166.708 57.2444 176 68.6696 176C80.0948 176 89.3393 166.708 89.3393 155.33C89.3393 146.418 83.6978 138.833 75.7807 135.941V88.0593C76.3022 87.8696 76.8237 87.6326 77.3452 87.3956L136.604 146.655C135.372 149.31 134.708 152.249 134.708 155.33C134.708 166.708 143.953 176 155.378 176C166.803 176 176.047 166.708 176.047 155.33C176.047 146.418 170.406 138.833 162.489 135.941H162.441Z"
-                      fill="white"
-                    />
-                  </svg>
+                  <div class="flex justify-center items-center">
+                    <svg class="w-6 h-6" width="225" height="224" viewBox="0 0 225 224" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="224.047" height="224" rx="64" fill="#6951FA" />
+                      <path
+                        d="M162.441 135.941V88.0593C170.359 85.1674 176 77.5348 176 68.6696C176 57.2919 166.708 48 155.33 48C143.953 48 134.661 57.2444 134.661 68.6696C134.661 77.5822 140.302 85.1674 148.219 88.0593V135.941C147.698 136.13 147.176 136.367 146.655 136.604L87.3956 77.3452C88.6282 74.6904 89.2919 71.7511 89.2919 68.6696C89.2919 57.2444 80.0474 48 68.6696 48C57.2919 48 48 57.2444 48 68.6696C48 77.5822 53.6415 85.1674 61.5585 88.0593V135.941C53.6415 138.833 48 146.465 48 155.33C48 166.708 57.2444 176 68.6696 176C80.0948 176 89.3393 166.708 89.3393 155.33C89.3393 146.418 83.6978 138.833 75.7807 135.941V88.0593C76.3022 87.8696 76.8237 87.6326 77.3452 87.3956L136.604 146.655C135.372 149.31 134.708 152.249 134.708 155.33C134.708 166.708 143.953 176 155.378 176C166.803 176 176.047 166.708 176.047 155.33C176.047 146.418 170.406 138.833 162.489 135.941H162.441Z"
+                        fill="white"
+                      />
+                    </svg>
+                    {this.isOpen && <span class="px-2"><b>Nostr</b> Login</span>}
+                  </div>
                 )}
 
                 {isShowUserName && <div class="show-slow truncate w-16 text-xs">{userName}</div>}
@@ -192,17 +200,17 @@ export class NlBanner {
                     </svg>
                   </div>
                   <p class="mb-2 text-center max-w-40 min-w-40 mx-auto">
-                    {this.isOpenNotifyTimeOut ? 'Timeout error, please go to domain project' : 'Please confirm this action in your key storage app'}
+                    {this.isOpenNotifyTimeOut ? 'Keys not responding, check your key storage app' : `Confirmation required at ${this.domain}`}
                   </p>
 
                   {this.isOpenNotifyTimeOut ? (
                     <a
                       onClick={() => this.handleClose()}
-                      href={this.linkNotifyTimeOut}
+                      href={`https://${this.domain}`}
                       target="_blank"
                       class="nl-button text-nowrap py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
                     >
-                      Go to domain
+                      Go to {this.domain}
                     </a>
                   ) : (
                     <button
@@ -217,31 +225,62 @@ export class NlBanner {
               ) : (
                 <div>
                   <div>
-                    {!this.userInfo && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
+                    {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     {Boolean(this.listNotifies.length) && (
                       <div
                         onClick={() => this.handleRetryConfirm()}
                         class="show-slow border border-yellow-600 text-yellow-600 bg-yellow-100 p-2 rounded-lg mb-2 cursor-pointer w-44 text-xs m-auto text-center"
                       >
-                        You have {this.listNotifies.length} notifies
+                        Requests: {this.listNotifies.length}
                       </div>
                     )}
                     {!this.userInfo ? (
-                      <button
-                        // disabled={this.isLoading}
-                        onClick={() => this.handleLogin()}
-                        type="button"
-                        class="nl-button show-slow text-nowrap py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                      >
-                        {/*{this.isLoading && (*/}
-                        {/*  <span*/}
-                        {/*    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"*/}
-                        {/*    role="status"*/}
-                        {/*    aria-label="loading"*/}
-                        {/*  ></span>*/}
-                        {/*)}*/}
-                        Sign in
-                      </button>
+                      <div>
+                        <button
+                          // disabled={this.isLoading}
+                          onClick={() => this.handleLogin()}
+                          type="button"
+                          class="nl-button show-slow text-nowrap py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4">
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"
+                            />
+                          </svg>
+                          {/*{this.isLoading && (*/}
+                          {/*  <span*/}
+                          {/*    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"*/}
+                          {/*    role="status"*/}
+                          {/*    aria-label="loading"*/}
+                          {/*  ></span>*/}
+                          {/*)}*/}
+                          Log in
+                        </button>
+                        <button
+                          // disabled={this.isLoading}
+                          onClick={() => this.handleSignup()}
+                          type="button"
+                          class="nl-button show-slow text-nowrap py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                        >
+                          {/*{this.isLoading && (*/}
+                          {/*  <span*/}
+                          {/*    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"*/}
+                          {/*    role="status"*/}
+                          {/*    aria-label="loading"*/}
+                          {/*  ></span>*/}
+                          {/*)}*/}
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4">
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
+                            />
+                          </svg>
+                          Sign up
+                        </button>
+                      </div>
                     ) : (
                       <button
                         // disabled={this.isLoading}

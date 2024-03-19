@@ -3,6 +3,7 @@
 import 'nostr-login-components';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKUser } from '@nostr-dev-kit/ndk';
 import { getEventHash, generatePrivateKey, nip19, getPublicKey } from 'nostr-tools';
+import { Info } from 'nostr-login-components/dist/types/types';
 
 export interface NostrLoginAuthOptions {
   localNsec: string;
@@ -17,6 +18,7 @@ export interface NostrLoginOptions {
   bunkers?: string;
   onAuth?: (npub: string, options: NostrLoginAuthOptions) => void;
   perms?: string;
+  darkMode?: boolean;
 
   iife?: boolean; // for unpkg module
 
@@ -24,23 +26,24 @@ export interface NostrLoginOptions {
   devOverrideBunkerOrigin?: string;
 }
 
-interface Info {
-  pubkey: string;
-  sk: string;
-  relays: string[];
-  nip05?: string;
-}
-
+const TIMEOUT = 5000; // 5 sec
 const LOCALSTORE_KEY = '__nostrlogin_nip46';
 const ndk = new NDK({
   enableOutboxModel: false,
 });
+const profileNdk = new NDK({
+  enableOutboxModel: true,
+  explicitRelayUrls: ["wss://relay.nostr.band/all", "wss://purplepag.es"]
+});
+profileNdk.connect()
+
 let signer: NDKNip46Signer | null = null;
 let signerPromise = null;
 let launcherPromise = null;
 let popup = null;
 let userInfo: Info | null = null;
 let callCount = 0;
+let callTimer = undefined;
 let optionsModal: NostrLoginOptions = {
   theme: 'default',
   startScreen: 'welcome',
@@ -62,6 +65,7 @@ const nostr = {
       event.pubkey = signer.remotePubkey;
       event.id = getEventHash(event);
       event.sig = await signer.sign(event);
+      console.log("signed", { event });
       return event;
     });
   },
@@ -212,14 +216,16 @@ export const launch = async (opt: NostrLoginOptions) => {
 };
 
 async function wait(cb) {
-  const timer = setTimeout(onCallTimeout, 5000);
+  if (!callTimer) 
+    callTimer = setTimeout(onCallTimeout, TIMEOUT);
+
   if (!callCount) await onCallStart();
   callCount++;
 
   let error;
   let result;
   try {
-    const r = await cb();
+    result = await cb();
   } catch (e) {
     error = e;
   }
@@ -227,7 +233,8 @@ async function wait(cb) {
   callCount--;
   await onCallEnd();
 
-  if (timer) clearTimeout(timer);
+  if (callTimer) clearTimeout(callTimer);
+  callTimer = undefined;
 
   if (error) throw error;
   return result;
@@ -235,24 +242,26 @@ async function wait(cb) {
 
 async function onCallStart() {
   // set spinner - we've started talking to the key storage
-  banner.isLoading = true;
+  if (banner) banner.isLoading = true;
 }
 
 async function onCallEnd() {
   // remove spinner - we've finished talking to the key storage,
   // also hide the 'Not responding' banner
-  banner.isLoading = false;
+  if (banner) banner.isLoading = false;
 }
 
 async function onCallTimeout() {
   // show 'Not responding' banner, hide when onCallEnd happens,
   // may be called multiple times - should check if banner is already visible
   // рано падает таймаут
-  banner.isLoading = false;
-  // banner.notify = {
-  //   confirm: Date.now(),
-  //   timeOut: { link: userInfo?.nip05 },
-  // };
+  if (banner) {
+    // banner.isLoading = false;
+    banner.notify = {
+      confirm: Date.now(),
+      timeOut: { domain: userInfo?.nip05?.split('@')[1] },
+    };
+  }
 }
 
 async function getBunkerUrl(value: string) {
@@ -388,6 +397,8 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
 
   banner.addEventListener('handleRetryConfirmBanner', () => {
     const url = listNotifies.pop();
+    // FIXME go to nip05 domain? 
+    if (!url) return;
 
     banner.listNotifies = listNotifies;
 
@@ -434,13 +445,17 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
       signer.on('authUrl', url => {
         console.log('nostr login auth url', url);
 
+        if (callTimer) clearTimeout(callTimer);
+
         if (userInfo) {
-          // FIXME show the 'Please confirm' banner
-          // and run the code below when user clicks.
-          banner.notify = {
-            confirm: Date.now(),
-            url,
-          };
+          // show the 'Please confirm' banner
+          if (banner) {
+            // banner.isLoading = false;
+            banner.notify = {
+              confirm: Date.now(),
+              url,
+            };
+          }
         } else {
           // if it fails we will either return 'failed'
           // to the window.nostr caller, or show proper error
@@ -474,7 +489,7 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
 
       // console.log('created signer');
 
-      // make ure it's closed
+      // make sure it's closed
       if (!leavePopup) closePopup();
 
       ok();
@@ -494,6 +509,10 @@ export async function init(opt: NostrLoginOptions) {
   if (window.nostr) return;
 
   window.nostr = nostr;
+
+  if ('darkMode' in opt) {
+    localStorage.setItem('nl-dark-mode', `${opt.darkMode}`);
+  }
 
   if (opt.iife) {
     launchAuthBanner(opt);
@@ -548,27 +567,55 @@ function closePopup() {
   } catch {}
 }
 
+async function fetchProfile(info: Info) {
+  const user = new NDKUser({ pubkey: info.pubkey });
+  user.ndk = profileNdk;
+  return await user.fetchProfile();
+}
+
 function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
+
   userInfo = info;
-  banner.userInfo = userInfo;
+  if (banner) {
+    banner.userInfo = userInfo;
+    if (userInfo)
+      banner.titleBanner = 'You are logged in';
+    else
+      banner.titleBanner = ''; // 'Use with Nostr';
+  }
 
-  if (optionsModal.onAuth) {
-    try {
-      const npub = info ? nip19.npubEncode(info.pubkey) : '';
-
-      const options: NostrLoginAuthOptions = {
-        type,
+  if (info) {
+    // async profile fetch
+    fetchProfile(info).then(p => {
+      if (userInfo !== info) return;
+      userInfo = {
+        ...userInfo,
+        picture: p?.image || p?.picture
       };
+      banner.userInfo = userInfo;
+    })
+  }
 
-      if (type !== 'logout') {
-        options.localNsec = nip19.nsecEncode(info.sk);
-        options.relays = info.relays;
-      }
+  try {
+    const npub = info ? nip19.npubEncode(info.pubkey) : '';
 
-      optionsModal.onAuth(npub, options);
-    } catch (e) {
-      console.log('onAuth error', e);
+    const options: NostrLoginAuthOptions = {
+      type,
+    };
+
+    if (type !== 'logout') {
+      options.localNsec = nip19.nsecEncode(info.sk);
+      options.relays = info.relays;
     }
+
+    if (optionsModal.onAuth)
+      optionsModal.onAuth(npub, options);
+
+    const event = new CustomEvent("nlAuth", { "detail": options });
+    document.dispatchEvent(event);
+
+  } catch (e) {
+    console.log('onAuth error', e);
   }
 }
 
