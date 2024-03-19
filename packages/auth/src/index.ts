@@ -48,6 +48,7 @@ let optionsModal: NostrLoginOptions = {
 };
 
 let banner: HTMLElement | null = null;
+const listNotifies: string[] = [];
 
 const nostr = {
   async getPublicKey() {
@@ -246,10 +247,12 @@ async function onCallEnd() {
 async function onCallTimeout() {
   // show 'Not responding' banner, hide when onCallEnd happens,
   // may be called multiple times - should check if banner is already visible
-  // выводить уведомление go to domain - по
-  banner.notify = {
-    test: 'test',
-  };
+  // рано падает таймаут
+  banner.isLoading = false;
+  // banner.notify = {
+  //   confirm: Date.now(),
+  //   timeOut: { link: userInfo?.nip05 },
+  // };
 }
 
 async function getBunkerUrl(value: string) {
@@ -351,6 +354,14 @@ const connectModals = (defaultOpt: NostrLoginOptions) => {
   }
 };
 
+const launchEnsurePopup = (url: string) => {
+  ensurePopup();
+
+  popup.location.href = url;
+
+  popup.resizeTo(400, 700);
+};
+
 const launchAuthBanner = (opt: NostrLoginOptions) => {
   banner = document.createElement('nl-banner');
 
@@ -363,6 +374,24 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
 
   banner.addEventListener('handleLogoutBanner', event => {
     logout();
+  });
+
+  banner.addEventListener('handleNotifyConfirmBanner', event => {
+    launchEnsurePopup(event.detail);
+  });
+
+  banner.addEventListener('handleSetConfirmBanner', event => {
+    listNotifies.push(event.detail);
+
+    banner.listNotifies = listNotifies;
+  });
+
+  banner.addEventListener('handleRetryConfirmBanner', () => {
+    const url = listNotifies.pop();
+
+    banner.listNotifies = listNotifies;
+
+    launchEnsurePopup(url);
   });
 
   document.body.appendChild(banner);
@@ -408,27 +437,15 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
         if (userInfo) {
           // FIXME show the 'Please confirm' banner
           // and run the code below when user clicks.
-
-          // banner => confirm =>
           banner.notify = {
-            test: 'test',
+            confirm: Date.now(),
+            url,
           };
-          ensurePopup();
-
-          popup.location.href = url;
-
-          popup.resizeTo(400, 700);
-
-          // confirm button
         } else {
           // if it fails we will either return 'failed'
           // to the window.nostr caller, or show proper error
           // in our modal
-          ensurePopup();
-
-          popup.location.href = url;
-
-          popup.resizeTo(400, 700);
+          launchEnsurePopup(url);
         }
       });
 

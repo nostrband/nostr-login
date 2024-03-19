@@ -63,9 +63,10 @@
       //     });
       //   });
       // }
+      const listNotifies = [];
 
       const banner = document.createElement('nl-banner');
-      // banner.isLoading = true;
+
       document.body.appendChild(banner);
 
       const btnLogin = document.getElementById('login');
@@ -83,6 +84,22 @@
         banner.userInfo = null;
       });
 
+      banner.addEventListener('handleSetConfirmBanner', event => {
+        listNotifies.push(event.detail);
+
+        banner.listNotifies = listNotifies;
+      });
+
+      banner.addEventListener('handleRetryConfirmBanner', () => {
+        listNotifies.pop();
+
+        banner.listNotifies = listNotifies;
+      });
+
+      banner.addEventListener('handleNotifyConfirmBanner', () => {
+        console.log('handleNotifyConfirmBanner');
+      });
+
       const startLoading = document.getElementById('startloading');
       const stopLoading = document.getElementById('stoploading');
       const notify = document.getElementById('notify');
@@ -97,7 +114,9 @@
 
       notify.addEventListener('click', () => {
         banner.notify = {
-          test: 'test',
+          confirm: Date.now(),
+          url: 'test.html',
+          // timeOut: { link: 'link.test' },
         };
       });
     </script>

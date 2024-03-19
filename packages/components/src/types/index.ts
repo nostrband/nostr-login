@@ -8,6 +8,7 @@ export enum CURRENT_MODULE {
 export enum METHOD_MODULE {
   SIGNIN = 'signin',
   LOGOUT = 'logout',
+  CONFIRM = 'confirm',
 }
 
 export interface Info {

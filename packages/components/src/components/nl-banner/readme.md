@@ -5,21 +5,25 @@
 
 ## Properties
 
-| Property      | Attribute      | Description | Type                                             | Default                                 |
-| ------------- | -------------- | ----------- | ------------------------------------------------ | --------------------------------------- |
-| `isLoading`   | `is-loading`   |             | `boolean`                                        | `false`                                 |
-| `nlTheme`     | `nl-theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`                             |
-| `notify`      | --             |             | `{ test: string; }`                              | `null`                                  |
-| `titleBanner` | `title-banner` |             | `string`                                         | `'Please login to manage your profile'` |
-| `userInfo`    | --             |             | `Info`                                           | `null`                                  |
+| Property       | Attribute      | Description | Type                                                              | Default                                 |
+| -------------- | -------------- | ----------- | ----------------------------------------------------------------- | --------------------------------------- |
+| `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`                                 |
+| `listNotifies` | --             |             | `string[]`                                                        | `[]`                                    |
+| `nlTheme`      | `nl-theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"`                  | `'default'`                             |
+| `notify`       | --             |             | `{ confirm: number; url?: string; timeOut?: { link: string; }; }` | `null`                                  |
+| `titleBanner`  | `title-banner` |             | `string`                                                          | `'Please login to manage your profile'` |
+| `userInfo`     | --             |             | `Info`                                                            | `null`                                  |
 
 
 ## Events
 
-| Event                | Description | Type                  |
-| -------------------- | ----------- | --------------------- |
-| `handleLoginBanner`  |             | `CustomEvent<string>` |
-| `handleLogoutBanner` |             | `CustomEvent<string>` |
+| Event                       | Description | Type                  |
+| --------------------------- | ----------- | --------------------- |
+| `handleLoginBanner`         |             | `CustomEvent<string>` |
+| `handleLogoutBanner`        |             | `CustomEvent<string>` |
+| `handleNotifyConfirmBanner` |             | `CustomEvent<string>` |
+| `handleRetryConfirmBanner`  |             | `CustomEvent<string>` |
+| `handleSetConfirmBanner`    |             | `CustomEvent<string>` |
 
 
 ----------------------------------------------

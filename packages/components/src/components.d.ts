@@ -17,8 +17,9 @@ export namespace Components {
     }
     interface NlBanner {
         "isLoading": boolean;
+        "listNotifies": string[];
         "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
-        "notify": { test: string } | null;
+        "notify": { confirm: number; url?: string; timeOut?: { link: string } } | null;
         "titleBanner": string;
         "userInfo": Info | null;
     }
@@ -92,6 +93,9 @@ declare global {
         new (): HTMLNlAuthElement;
     };
     interface HTMLNlBannerElementEventMap {
+        "handleRetryConfirmBanner": string;
+        "handleNotifyConfirmBanner": string;
+        "handleSetConfirmBanner": string;
         "handleLoginBanner": string;
         "handleLogoutBanner": string;
     }
@@ -206,10 +210,14 @@ declare namespace LocalJSX {
     }
     interface NlBanner {
         "isLoading"?: boolean;
+        "listNotifies"?: string[];
         "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
-        "notify"?: { test: string } | null;
+        "notify"?: { confirm: number; url?: string; timeOut?: { link: string } } | null;
         "onHandleLoginBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleLogoutBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleNotifyConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleRetryConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleSetConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "titleBanner"?: string;
         "userInfo"?: Info | null;
     }
