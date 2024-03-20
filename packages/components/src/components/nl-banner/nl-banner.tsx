@@ -37,11 +37,11 @@ export class NlBanner {
     this.isNotConfirmToSend = true;
     this.isOpen = true;
     this.isOpenConfirm = true;
-    this.domain = this.userInfo?.nip05?.split('@')?.[1] || ''
+    this.domain = this.userInfo?.nip05?.split('@')?.[1] || '';
 
     if (notify.url) {
       this.urlNotify = notify.url;
-      this.isOpenNotifyTimeOut = false
+      this.isOpenNotifyTimeOut = false;
     }
 
     if (!this.urlNotify && notify.timeOut) {
@@ -156,7 +156,11 @@ export class NlBanner {
                         fill="white"
                       />
                     </svg>
-                    {this.isOpen && <span class="px-2"><b>Nostr</b> Login</span>}
+                    {this.isOpen && (
+                      <span class="px-2">
+                        <b>Nostr</b> Login
+                      </span>
+                    )}
                   </div>
                 )}
 
@@ -262,7 +266,7 @@ export class NlBanner {
                           // disabled={this.isLoading}
                           onClick={() => this.handleSignup()}
                           type="button"
-                          class="nl-button show-slow text-nowrap py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                          class="nl-button show-slow text-nowrap mt-3 py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
                         >
                           {/*{this.isLoading && (*/}
                           {/*  <span*/}

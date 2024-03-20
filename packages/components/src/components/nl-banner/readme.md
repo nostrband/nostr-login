@@ -2,7 +2,6 @@
 
 <!-- Auto Generated Below -->
 
-
 ## Properties
 
 | Property       | Attribute      | Description | Type                                                              | Default     |
@@ -14,7 +13,6 @@
 | `titleBanner`  | `title-banner` |             | `string`                                                          | `''`        |
 | `userInfo`     | --             |             | `Info`                                                            | `null`      |
 
-
 ## Events
 
 | Event                       | Description | Type                  |
@@ -25,7 +23,6 @@
 | `handleRetryConfirmBanner`  |             | `CustomEvent<string>` |
 | `handleSetConfirmBanner`    |             | `CustomEvent<string>` |
 
+---
 
-----------------------------------------------
-
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_
