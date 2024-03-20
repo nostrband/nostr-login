@@ -5,13 +5,23 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { Info } from "./types";
 import { OptionType } from "./components/nl-select/nl-select";
+export { Info } from "./types";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface NlAuth {
         "bunkers": string;
         "startScreen": string;
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
+    }
+    interface NlBanner {
+        "isLoading": boolean;
+        "listNotifies": string[];
+        "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
+        "notify": { confirm: number; url?: string; timeOut?: { link: string } } | null;
+        "titleBanner": string;
+        "userInfo": Info | null;
     }
     interface NlButton {
         "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
@@ -39,6 +49,10 @@ export namespace Components {
 export interface NlAuthCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlAuthElement;
+}
+export interface NlBannerCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlBannerElement;
 }
 export interface NlSelectCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -77,6 +91,27 @@ declare global {
     var HTMLNlAuthElement: {
         prototype: HTMLNlAuthElement;
         new (): HTMLNlAuthElement;
+    };
+    interface HTMLNlBannerElementEventMap {
+        "handleRetryConfirmBanner": string;
+        "handleNotifyConfirmBanner": string;
+        "handleSetConfirmBanner": string;
+        "handleLoginBanner": string;
+        "handleLogoutBanner": string;
+    }
+    interface HTMLNlBannerElement extends Components.NlBanner, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlBannerElementEventMap>(type: K, listener: (this: HTMLNlBannerElement, ev: NlBannerCustomEvent<HTMLNlBannerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlBannerElementEventMap>(type: K, listener: (this: HTMLNlBannerElement, ev: NlBannerCustomEvent<HTMLNlBannerElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlBannerElement: {
+        prototype: HTMLNlBannerElement;
+        new (): HTMLNlBannerElement;
     };
     interface HTMLNlButtonElement extends Components.NlButton, HTMLStencilElement {
     }
@@ -154,6 +189,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "nl-auth": HTMLNlAuthElement;
+        "nl-banner": HTMLNlBannerElement;
         "nl-button": HTMLNlButtonElement;
         "nl-select": HTMLNlSelectElement;
         "nl-signin": HTMLNlSigninElement;
@@ -171,6 +207,19 @@ declare namespace LocalJSX {
         "onNlSignup"?: (event: NlAuthCustomEvent<string>) => void;
         "startScreen"?: string;
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+    }
+    interface NlBanner {
+        "isLoading"?: boolean;
+        "listNotifies"?: string[];
+        "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+        "notify"?: { confirm: number; url?: string; timeOut?: { link: string } } | null;
+        "onHandleLoginBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleLogoutBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleNotifyConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleRetryConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleSetConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "titleBanner"?: string;
+        "userInfo"?: Info | null;
     }
     interface NlButton {
         "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
@@ -197,6 +246,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "nl-auth": NlAuth;
+        "nl-banner": NlBanner;
         "nl-button": NlButton;
         "nl-select": NlSelect;
         "nl-signin": NlSignin;
@@ -209,6 +259,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "nl-auth": LocalJSX.NlAuth & JSXBase.HTMLAttributes<HTMLNlAuthElement>;
+            "nl-banner": LocalJSX.NlBanner & JSXBase.HTMLAttributes<HTMLNlBannerElement>;
             "nl-button": LocalJSX.NlButton & JSXBase.HTMLAttributes<HTMLNlButtonElement>;
             "nl-select": LocalJSX.NlSelect & JSXBase.HTMLAttributes<HTMLNlSelectElement>;
             "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;

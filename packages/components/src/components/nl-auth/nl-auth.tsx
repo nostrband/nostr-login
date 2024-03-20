@@ -3,13 +3,7 @@ import { NlWelcomeThemplate } from '../nl-welcome/nl-welcome-themplate';
 import { NlSignupThemplate } from '../nl-signup/nl-signup-themplate';
 import { NlInfoThemplate } from '../nl-info/nl-info-themplate';
 import { NlSigninThemplate } from '../nl-signin/nl-signin-themplate';
-
-enum CURRENT_MODULE {
-  WELCOME = 'welcome',
-  INFO = 'info',
-  SIGNIN = 'signin',
-  SIGNUP = 'signup',
-}
+import { CURRENT_MODULE } from '../../types';
 
 @Component({
   tag: 'nl-auth',
@@ -21,25 +15,25 @@ export class NlAuth {
   @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() theme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
-  @Prop() bunkers: string = 'nsec.app,highlighter.com'
+  @Prop() bunkers: string = 'nsec.app,highlighter.com';
 
   @State() servers = [
     { name: '@nsec.app', value: 'nsec.app' },
     { name: '@highlighter.com', value: 'highlighter.com' },
-  ]
+  ];
 
   formatServers(bunkers: string) {
     return bunkers.split(',').map(d => ({
-      name: '@'+d, value: d
-    }))
+      name: '@' + d,
+      value: d,
+    }));
   }
 
   @Watch('bunkers')
   watchBunkersHandler(newValue: string) {
-    console.log("bunkers", newValue);
+    console.log('bunkers', newValue);
     this.servers = this.formatServers(newValue);
   }
-
 
   @Watch('theme')
   watchThemeHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
@@ -66,7 +60,7 @@ export class NlAuth {
   @Event() nlCheckSignup: EventEmitter<string>;
 
   isSignup() {
-    return this.currentModule === CURRENT_MODULE.SIGNUP
+    return this.currentModule === CURRENT_MODULE.SIGNUP;
   }
 
   handleNip05() {
@@ -79,11 +73,9 @@ export class NlAuth {
 
   handleInputChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
-//    console.log("check", value, event);
-    if (this.isSignup())
-      this.signupName = value;
-    else
-      this.loginName = value;
+    //    console.log("check", value, event);
+    if (this.isSignup()) this.signupName = value;
+    else this.loginName = value;
     this.handleNip05();
   }
 
@@ -220,7 +212,7 @@ export class NlAuth {
               </div>
 
               <div class="flex gap-1">
-                <button
+                {/* <button
                   onClick={() => this.handleChangeTheme()}
                   type="button"
                   class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
@@ -243,7 +235,7 @@ export class NlAuth {
                       />
                     </svg>
                   )}
-                </button>
+                </button> */}
                 <button
                   onClick={() => this.handleClickToInfo()}
                   type="button"

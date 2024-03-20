@@ -16,7 +16,7 @@ export const NlWelcomeThemplate: FunctionalComponent<NlWelcomeThemplateProps> = 
   return (
     <div>
       <div class="p-4 overflow-y-auto">
-        <h1 class="nl-title  font-bold text-center text-4xl">{title}</h1>
+        <h1 class="nl-title font-bold text-center text-4xl">{title}</h1>
         <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{description}</p>
       </div>
 
@@ -24,7 +24,7 @@ export const NlWelcomeThemplate: FunctionalComponent<NlWelcomeThemplateProps> = 
         <button
           onClick={handleClickToSignIn}
           type="button"
-          class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+          class="nl-button py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4">
             <path

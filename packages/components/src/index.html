@@ -7,66 +7,126 @@
     <script type="module">
       import './build/components.esm.js';
 
-      export const launch = opt => {
-        const dialog = document.createElement('dialog');
-        const modal = document.createElement('nl-auth');
+      // export const launch = opt => {
+      //   const dialog = document.createElement('dialog');
+      //   const modal = document.createElement('nl-auth');
+      //
+      //   dialog.appendChild(modal);
+      //   document.body.appendChild(dialog);
+      //
+      //   return new Promise(resolve => {
+      //     modal.addEventListener('handleGetValue', event => {
+      //       const inputValue = event.detail;
+      //
+      //       resolve(inputValue);
+      //     });
+      //
+      //     modal.addEventListener('handleCloseModal', event => {
+      //       dialog.close();
+      //       const inputValue = event.detail;
+      //
+      //       resolve(inputValue);
+      //     });
+      //
+      //     dialog.showModal();
+      //     if (opt && opt.theme) {
+      //       modal.setAttribute('theme', opt.theme);
+      //     }
+      //
+      //     if (opt && opt.startScreen) {
+      //       modal.setAttribute('start-screen', opt.startScreen);
+      //     }
+      //   });
+      // };
+      //
+      // const initialModals = async opt => {
+      //   const bunkerUrl = await launch(opt);
+      //
+      //   console.log({ bunkerUrl });
+      // };
+      //
+      // initialModals({
+      //   theme: 'purple',
+      //   startScreen: 'signup',
+      // });
+      //
+      // const nlElements = document.getElementsByTagName('nl-button');
+      //
+      // for (let i = 0; i < nlElements.length; i++) {
+      //   const theme = nlElements[i].getAttribute('nl-theme');
+      //   const startScreen = nlElements[i].getAttribute('start-screen');
+      //
+      //   nlElements[i].addEventListener('click', function () {
+      //     initialModals({
+      //       theme,
+      //       startScreen,
+      //     });
+      //   });
+      // }
+      const listNotifies = [];
 
-        dialog.appendChild(modal);
-        document.body.appendChild(dialog);
+      const banner = document.createElement('nl-banner');
 
-        return new Promise(resolve => {
-          modal.addEventListener('handleGetValue', event => {
-            const inputValue = event.detail;
+      document.body.appendChild(banner);
 
-            resolve(inputValue);
-          });
+      const btnLogin = document.getElementById('login');
 
-          modal.addEventListener('handleCloseModal', event => {
-            dialog.close();
-            const inputValue = event.detail;
-
-            resolve(inputValue);
-          });
-
-          dialog.showModal();
-          if (opt && opt.theme) {
-            modal.setAttribute('theme', opt.theme);
-          }
-
-          if (opt && opt.startScreen) {
-            modal.setAttribute('start-screen', opt.startScreen);
-          }
-        });
-      };
-
-      const initialModals = async opt => {
-        const bunkerUrl = await launch(opt);
-
-        console.log({ bunkerUrl });
-      };
-
-      initialModals({
-        theme: 'purple',
-        startScreen: 'signup',
+      btnLogin.addEventListener('click', () => {
+        banner.userInfo = {
+          pubkey: '5ca5b40e1d25a83f0b06fb6f2154f4744295d03e0f8b4944863ca01dec988618',
+          sk: '100ca8122509665f9e094c14eb936b037663e8d9bafabac2c1dd9269b748c456',
+          relays: ['wss://relay.nsec.app'],
+          nip05: 'test2024@nsec.app',
+        };
       });
 
-      const nlElements = document.getElementsByTagName('nl-button');
+      banner.addEventListener('handleLogoutBanner', () => {
+        banner.userInfo = null;
+      });
 
-      for (let i = 0; i < nlElements.length; i++) {
-        const theme = nlElements[i].getAttribute('nl-theme');
-        const startScreen = nlElements[i].getAttribute('start-screen');
+      banner.addEventListener('handleSetConfirmBanner', event => {
+        listNotifies.push(event.detail);
 
-        nlElements[i].addEventListener('click', function () {
-          initialModals({
-            theme,
-            startScreen,
-          });
-        });
-      }
+        banner.listNotifies = listNotifies;
+      });
+
+      banner.addEventListener('handleRetryConfirmBanner', () => {
+        listNotifies.pop();
+
+        banner.listNotifies = listNotifies;
+      });
+
+      banner.addEventListener('handleNotifyConfirmBanner', () => {
+        console.log('handleNotifyConfirmBanner');
+      });
+
+      const startLoading = document.getElementById('startloading');
+      const stopLoading = document.getElementById('stoploading');
+      const notify = document.getElementById('notify');
+
+      startLoading.addEventListener('click', () => {
+        banner.isLoading = true;
+      });
+
+      stopLoading.addEventListener('click', () => {
+        banner.isLoading = false;
+      });
+
+      notify.addEventListener('click', () => {
+        banner.notify = {
+          confirm: Date.now(),
+          url: 'test.html',
+          // timeOut: { link: 'link.test' },
+        };
+      });
     </script>
   </head>
   <body>
-    <nl-button title-btn="Sign in" start-screen="signin" nl-theme="lemonade"></nl-button>
+    <button id="login">login</button>
+    <button id="startloading">start loading</button>
+    <button id="stoploading">stop loading</button>
+    <button id="notify">notify</button>
+    <!--    <nl-banner></nl-banner>-->
     <!--  <nl-button title-btn="Sign up" start-screen="signup"></nl-button>-->
     <!--  <nl-button nl-theme="ocean"></nl-button>-->
   </body>

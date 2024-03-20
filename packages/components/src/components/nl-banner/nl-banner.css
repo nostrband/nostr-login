@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.show-slow {
+  opacity: 0;
+  transition: 0.1s;
+}
+
+.isOpen .show-slow {
+  opacity: 1;
+  transition: 0.3s;
+  transition-delay: 0.3s;
+}

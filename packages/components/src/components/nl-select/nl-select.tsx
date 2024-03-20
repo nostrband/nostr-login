@@ -106,10 +106,7 @@ export class NlSelect {
             <ul ref={el => (this.ulRef = el)} class={listClass}>
               {this.options.map(el => {
                 return (
-                  <li
-                    onClick={() => this.handleChange(el)}
-                    class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm"
-                  >
+                  <li onClick={() => this.handleChange(el)} class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm">
                     {el.name}
                   </li>
                 );
