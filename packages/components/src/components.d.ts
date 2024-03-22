@@ -98,6 +98,7 @@ declare global {
         "handleSetConfirmBanner": string;
         "handleLoginBanner": string;
         "handleLogoutBanner": string;
+        "handleOpenWelcomeModal": string;
     }
     interface HTMLNlBannerElement extends Components.NlBanner, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlBannerElementEventMap>(type: K, listener: (this: HTMLNlBannerElement, ev: NlBannerCustomEvent<HTMLNlBannerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -216,6 +217,7 @@ declare namespace LocalJSX {
         "onHandleLoginBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleLogoutBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleNotifyConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleOpenWelcomeModal"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleRetryConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleSetConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "titleBanner"?: string;

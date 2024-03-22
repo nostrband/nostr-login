@@ -2,6 +2,7 @@
 
 <!-- Auto Generated Below -->
 
+
 ## Properties
 
 | Property       | Attribute      | Description | Type                                                              | Default     |
@@ -13,6 +14,7 @@
 | `titleBanner`  | `title-banner` |             | `string`                                                          | `''`        |
 | `userInfo`     | --             |             | `Info`                                                            | `null`      |
 
+
 ## Events
 
 | Event                       | Description | Type                  |
@@ -20,9 +22,11 @@
 | `handleLoginBanner`         |             | `CustomEvent<string>` |
 | `handleLogoutBanner`        |             | `CustomEvent<string>` |
 | `handleNotifyConfirmBanner` |             | `CustomEvent<string>` |
+| `handleOpenWelcomeModal`    |             | `CustomEvent<string>` |
 | `handleRetryConfirmBanner`  |             | `CustomEvent<string>` |
 | `handleSetConfirmBanner`    |             | `CustomEvent<string>` |
 
----
 
-_Built with [StencilJS](https://stenciljs.com/)_
+----------------------------------------------
+
+*Built with [StencilJS](https://stenciljs.com/)*

@@ -31,6 +31,7 @@ export class NlBanner {
   @Event() handleSetConfirmBanner: EventEmitter<string>;
   @Event() handleLoginBanner: EventEmitter<string>;
   @Event() handleLogoutBanner: EventEmitter<string>;
+  @Event() handleOpenWelcomeModal: EventEmitter<string>;
 
   @Watch('notify')
   watchNotifyHandler(notify: { confirm: number; url?: string; timeOut?: boolean }) {
@@ -69,7 +70,11 @@ export class NlBanner {
   }
 
   handleOpen() {
-    this.isOpen = true;
+    if(this.userInfo) {
+      this.isOpen = true;
+    } else {
+      this.handleOpenWelcomeModal.emit();
+    }
   }
 
   handleClose() {

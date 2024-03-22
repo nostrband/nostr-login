@@ -395,6 +395,10 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
     banner.listNotifies = listNotifies;
   });
 
+  banner.addEventListener('handleOpenWelcomeModal', event => {
+    launch(optionsModal)
+  });
+
   banner.addEventListener('handleRetryConfirmBanner', () => {
     const url = listNotifies.pop();
     // FIXME go to nip05 domain? 
