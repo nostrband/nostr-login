@@ -8,7 +8,7 @@ export type OptionType = {
 @Component({
   tag: 'nl-select',
   styleUrl: 'nl-select.css',
-  shadow: true,
+  shadow: false,
 })
 export class NlSelect {
   @State() isOpen: boolean = false;
@@ -78,41 +78,39 @@ export class NlSelect {
 
     return (
       <div class={`theme-${this.themeState}`}>
-        <div class={this.mode && 'dark'}>
-          <div class="relative" ref={el => (this.wrapperRef = el)}>
-            <button
-              ref={el => (this.buttonRef = el)}
-              onClick={() => this.toggleDropdown()}
-              type="button"
-              class="nl-select peer py-3 px-4 flex items-center w-full justify-between border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
+        <div class="relative" ref={el => (this.wrapperRef = el)}>
+          <button
+            ref={el => (this.buttonRef = el)}
+            onClick={() => this.toggleDropdown()}
+            type="button"
+            class="nl-select peer py-3 px-4 flex items-center w-full justify-between border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
+          >
+            <span class="truncate overflow-hidden">{this.value.name}</span>
+            <svg
+              class={arrowClass}
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <span class="truncate overflow-hidden">{this.value.name}</span>
-              <svg
-                class={arrowClass}
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
 
-            <ul ref={el => (this.ulRef = el)} class={listClass}>
-              {this.options.map(el => {
-                return (
-                  <li onClick={() => this.handleChange(el)} class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm">
-                    {el.name}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+          <ul ref={el => (this.ulRef = el)} class={listClass}>
+            {this.options.map(el => {
+              return (
+                <li onClick={() => this.handleChange(el)} class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm">
+                  {el.name}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
     );

@@ -104,6 +104,10 @@ export const launch = async (opt: NostrLoginOptions) => {
     modal.setAttribute('bunkers', opt.bunkers);
   }
 
+  if (opt.isSignInWithExtension !== undefined) {
+    modal.isSignInWithExtension = opt.isSignInWithExtension;
+  }
+
   dialog.appendChild(modal);
   document.body.appendChild(dialog);
 
@@ -187,6 +191,10 @@ export const launch = async (opt: NostrLoginOptions) => {
 
     modal.addEventListener('nlSignup', event => {
       signup(event.detail);
+    });
+
+    modal.addEventListener('handleRemoveWindowNostr', event => {
+      console.log('handleRemoveWindowNostr')
     });
 
     modal.addEventListener('nlCheckSignup', async event => {

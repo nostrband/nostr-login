@@ -1,34 +1,47 @@
 # nl-signin
 
+
+
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property | Attribute | Description | Type      | Default     |
-| -------- | --------- | ----------- | --------- | ----------- |
-| `isOpen` | `is-open` |             | `boolean` | `undefined` |
+| Property      | Attribute     | Description | Type     | Default                          |
+| ------------- | ------------- | ----------- | -------- | -------------------------------- |
+| `description` | `description` |             | `string` | `'Please enter your user name.'` |
+| `titleLogin`  | `title-login` |             | `string` | `'Log in'`                       |
 
 
 ## Events
 
-| Event            | Description | Type                  |
-| ---------------- | ----------- | --------------------- |
-| `handleGetValue` |             | `CustomEvent<string>` |
+| Event          | Description | Type                   |
+| -------------- | ----------- | ---------------------- |
+| `fetchHandler` |             | `CustomEvent<boolean>` |
+| `nlCheckLogin` |             | `CustomEvent<string>`  |
+| `nlLogin`      |             | `CustomEvent<string>`  |
 
 
-## Methods
+## Dependencies
 
-### `openModal() => Promise<void>`
+### Used by
 
+ - [nl-auth](../nl-auth)
 
+### Depends on
 
-#### Returns
+- [nl-loading](../nl-loading)
+- [button-base](../button-base)
 
-Type: `Promise<void>`
-
-
-
+### Graph
+```mermaid
+graph TD;
+  nl-signin --> nl-loading
+  nl-signin --> button-base
+  nl-loading --> button-base
+  nl-auth --> nl-signin
+  style nl-signin fill:#f9f,stroke:#333,stroke-width:4px
+```
 
 ----------------------------------------------
 

@@ -70,7 +70,7 @@ export class NlBanner {
   }
 
   handleOpen() {
-    if(this.userInfo) {
+    if (this.userInfo) {
       this.isOpen = true;
     } else {
       this.handleOpenWelcomeModal.emit();

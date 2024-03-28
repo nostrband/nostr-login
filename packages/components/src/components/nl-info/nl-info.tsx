@@ -1,23 +1,13 @@
-import { FunctionalComponent, h } from '@stencil/core';
+import { Component, h } from '@stencil/core';
 
-interface NlInfoThemplateProps {
-  handleClickToBack: () => void;
-}
-
-export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ handleClickToBack }) => {
-  return (
-    <div class="p-4">
-      <button
-        onClick={() => handleClickToBack()}
-        type="button"
-        class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-        data-hs-overlay="#hs-vertically-centered-modal"
-      >
-        <span class="sr-only">Back</span>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-        </svg>
-      </button>
+@Component({
+  tag: 'nl-info',
+  styleUrl: 'nl-info.css',
+  shadow: false,
+})
+export class NlInfo {
+  render() {
+    return (
       <div class="p-4 overflow-y-auto">
         <svg class="w-12 h-12 mx-auto mb-2" width="225" height="224" viewBox="0 0 225 224" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="224.047" height="224" rx="64" fill="#6951FA" />
@@ -47,6 +37,6 @@ export const NlInfoThemplate: FunctionalComponent<NlInfoThemplateProps> = ({ han
           .
         </p>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}

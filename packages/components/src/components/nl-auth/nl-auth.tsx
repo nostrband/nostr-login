@@ -1,9 +1,5 @@
-import { Component, h, State, Event, EventEmitter, Prop, Watch } from '@stencil/core';
-import { NlWelcomeThemplate } from '../nl-welcome/nl-welcome-themplate';
-import { NlSignupThemplate } from '../nl-signup/nl-signup-themplate';
-import { NlInfoThemplate } from '../nl-info/nl-info-themplate';
-import { NlSigninThemplate } from '../nl-signin/nl-signin-themplate';
-import { CURRENT_MODULE } from '../../types';
+import { Component, Event, EventEmitter, Fragment, h, Prop, State } from '@stencil/core';
+import { CURRENT_MODULE } from '@/types';
 
 @Component({
   tag: 'nl-auth',
@@ -11,123 +7,33 @@ import { CURRENT_MODULE } from '../../types';
   shadow: true,
 })
 export class NlAuth {
-  @State() darkMode: boolean = false;
-  @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() theme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
-  @Prop() bunkers: string = 'nsec.app,highlighter.com';
+  @Prop() isSignInWithExtension: boolean = true;
 
-  @State() servers = [
-    { name: '@nsec.app', value: 'nsec.app' },
-    { name: '@highlighter.com', value: 'highlighter.com' },
-  ];
-
-  formatServers(bunkers: string) {
-    return bunkers.split(',').map(d => ({
-      name: '@' + d,
-      value: d,
-    }));
-  }
-
-  @Watch('bunkers')
-  watchBunkersHandler(newValue: string) {
-    console.log('bunkers', newValue);
-    this.servers = this.formatServers(newValue);
-  }
-
-  @Watch('theme')
-  watchThemeHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
-    this.themeState = newValue;
-  }
-
-  @State() isFetchCreateAccount: boolean = false;
-  @State() isFetchLogin: boolean = false;
-
+  @State() error: string = '';
   @State() currentModule: CURRENT_MODULE = CURRENT_MODULE.WELCOME;
   @State() prevModule: CURRENT_MODULE = CURRENT_MODULE.WELCOME;
+  @State() darkMode: boolean = false;
+  @State() isLoading: boolean = false;
+  @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
 
-  @State() loginName: string = '';
-  @State() signupName: string = '';
-  @State() domain: string = '';
-  @State() error: string = '';
-  @State() signupNameIsAvailable: boolean = false;
-  @State() loginIsGood: boolean = false;
-
-  @Event() nlLogin: EventEmitter<string>;
-  @Event() nlSignup: EventEmitter<string>;
   @Event() nlCloseModal: EventEmitter;
-  @Event() nlCheckLogin: EventEmitter<string>;
-  @Event() nlCheckSignup: EventEmitter<string>;
-
-  isSignup() {
-    return this.currentModule === CURRENT_MODULE.SIGNUP;
-  }
-
-  handleNip05() {
-    if (this.isSignup()) {
-      this.nlCheckSignup.emit(`${this.signupName}@${this.domain}`);
-    } else {
-      this.nlCheckLogin.emit(this.loginName);
-    }
-  }
-
-  handleInputChange(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    //    console.log("check", value, event);
-    if (this.isSignup()) this.signupName = value;
-    else this.loginName = value;
-    this.handleNip05();
-  }
-
-  handleDomainSelect(event: CustomEvent<string>) {
-    this.domain = event.detail;
-    this.handleNip05();
-  }
+  @Event() handleRemoveWindowNostr: EventEmitter<string>;
+  @Event() handleChangeDarkMode: EventEmitter<string>;
 
   handleClose() {
     this.nlCloseModal.emit();
   }
 
-  handleLogin(e: MouseEvent) {
-    e.preventDefault();
-
-    this.isFetchLogin = true;
-    this.nlLogin.emit(this.loginName);
-  }
-
-  handleClickToSignIn() {
-    this.error = '';
-    this.currentModule = CURRENT_MODULE.SIGNIN;
-    this.handleNip05();
-  }
-
-  handleClickToSignUp() {
-    this.error = '';
-    this.currentModule = CURRENT_MODULE.SIGNUP;
-    this.handleNip05();
-  }
-
   handleChangeTheme() {
     this.darkMode = !this.darkMode;
-
+    this.handleChangeDarkMode.emit(String(!this.darkMode));
     localStorage.setItem('nl-dark-mode', `${this.darkMode}`);
   }
 
-  handleClickToInfo() {
-    if (this.currentModule !== CURRENT_MODULE.INFO) {
-      this.prevModule = this.currentModule;
-      this.currentModule = CURRENT_MODULE.INFO;
-    }
-  }
-
-  handleClickToBack() {
-    this.currentModule = this.prevModule;
-  }
-
   componentWillLoad() {
-    // console.log(this.startScreen);
     this.themeState = this.theme;
-    this.servers = this.formatServers(this.bunkers);
     this.currentModule = this.startScreen as CURRENT_MODULE;
     this.prevModule = this.startScreen as CURRENT_MODULE;
 
@@ -144,11 +50,36 @@ export class NlAuth {
     }
   }
 
-  handleCreateAccount(e: MouseEvent) {
-    e.preventDefault();
+  componentWillUpdate() {
+    if (this.currentModule !== CURRENT_MODULE.INFO) {
+      this.prevModule = CURRENT_MODULE.WELCOME;
+    }
+  }
 
-    this.isFetchCreateAccount = true;
-    this.nlSignup.emit(`${this.signupName}@${this.domain}`);
+  handleRemoveWindowNostrClick() {
+    this.handleRemoveWindowNostr.emit();
+  }
+
+  handleClickToBack() {
+    this.error = '';
+    this.currentModule = this.prevModule;
+  }
+
+  handleChangeScreen(e) {
+    this.error = '';
+    this.prevModule = this.currentModule;
+    this.currentModule = e.detail;
+  }
+
+  handleClickToInfo() {
+    if (this.currentModule !== CURRENT_MODULE.INFO) {
+      this.prevModule = this.currentModule;
+      this.currentModule = CURRENT_MODULE.INFO;
+    }
+  }
+
+  handleFetch(e) {
+    this.isLoading = e.detail;
   }
 
   render() {
@@ -157,37 +88,21 @@ export class NlAuth {
     const renderModule = () => {
       switch (this.currentModule) {
         case CURRENT_MODULE.WELCOME:
-          return <NlWelcomeThemplate handleClickToSignIn={() => this.handleClickToSignIn()} handleClickToSignUp={() => this.handleClickToSignUp()} />;
+          return <nl-welcome isSignInWithExtension={this.isSignInWithExtension} onChangeScreen={e => this.handleChangeScreen(e)} />;
         case CURRENT_MODULE.SIGNIN:
-          return (
-            <NlSigninThemplate
-              handleInputChange={e => this.handleInputChange(e)}
-              isFetchLogin={this.isFetchLogin}
-              handleClickToSignUp={() => this.handleClickToSignUp()}
-              handleLogin={e => this.handleLogin(e)}
-              error={this.error}
-              isGood={this.loginIsGood}
-            />
-          );
+          return <nl-signin onFetchHandler={e => this.handleFetch(e)} />;
         case CURRENT_MODULE.SIGNUP:
-          return (
-            <NlSignupThemplate
-              isFetching={this.isFetchCreateAccount}
-              handleInputChange={e => this.handleInputChange(e)}
-              handleDomainSelect={d => this.handleDomainSelect(d)}
-              handleCreateAccount={e => this.handleCreateAccount(e)}
-              handleClickToSignIn={() => this.handleClickToSignIn()}
-              isAvailable={this.signupNameIsAvailable}
-              error={this.error}
-              theme={this.themeState}
-              darkMode={this.darkMode}
-              servers={this.servers}
-            />
-          );
+          return <nl-signup onFetchHandler={e => this.handleFetch(e)} />;
         case CURRENT_MODULE.INFO:
-          return <NlInfoThemplate handleClickToBack={() => this.handleClickToBack()} />;
+          return <nl-info />;
+        case CURRENT_MODULE.EXTENSION:
+          return <nl-info-extension />;
+        case CURRENT_MODULE.SIGNIN_READ_ONLY:
+          return <nl-signin-read-only />;
+        case CURRENT_MODULE.SIGNIN_BUNKER_URL:
+          return <nl-signin-bunker-url />;
         default:
-          return <NlWelcomeThemplate handleClickToSignIn={() => this.handleClickToSignIn()} handleClickToSignUp={() => this.handleClickToSignUp()} />;
+          return <nl-welcome isSignInWithExtension={this.isSignInWithExtension} onChangeScreen={e => this.handleChangeScreen(e)} />;
       }
     };
 
@@ -206,13 +121,13 @@ export class NlAuth {
                     fill="white"
                   />
                 </svg>
-                <p class="font-bold nl-logo">
+                <p class="font-bold nl-logo text-base">
                   Nostr <span class="font-light">Login</span>
                 </p>
               </div>
 
               <div class="flex gap-1">
-                {/* <button
+                <button
                   onClick={() => this.handleChangeTheme()}
                   type="button"
                   class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
@@ -235,7 +150,7 @@ export class NlAuth {
                       />
                     </svg>
                   )}
-                </button> */}
+                </button>
                 <button
                   onClick={() => this.handleClickToInfo()}
                   type="button"
@@ -274,8 +189,64 @@ export class NlAuth {
                 </button>
               </div>
             </div>
-
+            {this.currentModule !== CURRENT_MODULE.WELCOME && !this.isLoading && (
+              <div class="p-4">
+                <button
+                  onClick={() => this.handleClickToBack()}
+                  type="button"
+                  class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                  data-hs-overlay="#hs-vertically-centered-modal"
+                >
+                  <span class="sr-only">Back</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                  </svg>
+                </button>
+              </div>
+            )}
             {renderModule()}
+            <div class="ps-4 pe-4 overflow-y-auto">
+              <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{this.error}</p>
+            </div>
+            {this.currentModule !== CURRENT_MODULE.INFO && this.currentModule !== CURRENT_MODULE.WELCOME && this.currentModule !== CURRENT_MODULE.EXTENSION && (
+              <Fragment>
+                {this.currentModule === CURRENT_MODULE.SIGNUP ? (
+                  <div class="p-4 overflow-y-auto">
+                    <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+                      If you already have an account please{' '}
+                      <span
+                        onClick={() =>
+                          this.handleChangeScreen({
+                            detail: CURRENT_MODULE.SIGNIN,
+                          })
+                        }
+                        class="cursor-pointer text-blue-400"
+                      >
+                        log in
+                      </span>
+                      .
+                    </p>
+                  </div>
+                ) : (
+                  <div class="p-4 overflow-y-auto">
+                    <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+                      If you don't have an account please{' '}
+                      <span
+                        onClick={() =>
+                          this.handleChangeScreen({
+                            detail: CURRENT_MODULE.SIGNUP,
+                          })
+                        }
+                        class="cursor-pointer text-blue-400"
+                      >
+                        sign up
+                      </span>
+                      .
+                    </p>
+                  </div>
+                )}
+              </Fragment>
+            )}
           </div>
         </div>
       </div>
