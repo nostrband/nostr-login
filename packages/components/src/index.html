@@ -4,41 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
     <title>Modal Auth Develop</title>
+    <style>
+      .nl-button {
+        margin-top: 100px;
+      }
+      div {
+        background: #9fc6db;
+      }
+    </style>
     <script type="module">
       import './build/components.esm.js';
 
-      // export const launch = opt => {
-      //   const dialog = document.createElement('dialog');
-      //   const modal = document.createElement('nl-auth');
-      //
-      //   dialog.appendChild(modal);
-      //   document.body.appendChild(dialog);
-      //
-      //   return new Promise(resolve => {
-      //     modal.addEventListener('handleGetValue', event => {
-      //       const inputValue = event.detail;
-      //
-      //       resolve(inputValue);
-      //     });
-      //
-      //     modal.addEventListener('handleCloseModal', event => {
-      //       dialog.close();
-      //       const inputValue = event.detail;
-      //
-      //       resolve(inputValue);
-      //     });
-      //
-      //     dialog.showModal();
-      //     if (opt && opt.theme) {
-      //       modal.setAttribute('theme', opt.theme);
-      //     }
-      //
-      //     if (opt && opt.startScreen) {
-      //       modal.setAttribute('start-screen', opt.startScreen);
-      //     }
-      //   });
-      // };
-      //
       // const initialModals = async opt => {
       //   const bunkerUrl = await launch(opt);
       //
@@ -67,6 +43,54 @@
 
       const banner = document.createElement('nl-banner');
 
+      const launch = opt => {
+        const dialog = document.createElement('dialog');
+        const modal = document.createElement('nl-auth');
+
+        dialog.appendChild(modal);
+        document.body.appendChild(dialog);
+
+        return new Promise(resolve => {
+          modal.addEventListener('handleGetValue', event => {
+            const inputValue = event.detail;
+
+            resolve(inputValue);
+          });
+
+          modal.addEventListener('handleCloseModal', event => {
+            dialog.close();
+            const inputValue = event.detail;
+
+            resolve(inputValue);
+          });
+
+          modal.addEventListener('handleRemoveWindowNostr', event => {
+            console.log('handleRemoveWindowNostr');
+          });
+
+          modal.addEventListener('handleChangeDarkMode', event => {
+            console.log('handleChangeDarkMode');
+          });
+
+          modal.addEventListener('changeScreen', event => {
+            console.log('changeScreen');
+          });
+
+          dialog.showModal();
+          if (opt && opt.theme) {
+            modal.theme = opt.theme;
+          }
+
+          if (opt && opt.startScreen) {
+            modal.setAttribute('start-screen', opt.startScreen);
+          }
+
+          if (opt && opt.isSignInWithExtension !== undefined) {
+            modal.isSignInWithExtension = opt.isSignInWithExtension;
+          }
+        });
+      };
+
       document.body.appendChild(banner);
 
       const btnLogin = document.getElementById('login');
@@ -82,6 +106,13 @@
 
       banner.addEventListener('handleLogoutBanner', () => {
         banner.userInfo = null;
+      });
+
+      banner.addEventListener('handleOpenWelcomeModal', () => {
+        launch({
+          theme: 'lemonade',
+          // isSignInWithExtension: false
+        });
       });
 
       banner.addEventListener('handleSetConfirmBanner', event => {
@@ -119,15 +150,35 @@
           // timeOut: { link: 'link.test' },
         };
       });
+
+      const testBtn = document.createElement('nl-button');
+
+      document.body.appendChild(testBtn);
+
+      setTimeout(() => {
+        testBtn.titleBtn = 'test text 1111111';
+        setTimeout(() => {
+          testBtn.nlTheme = 'purple';
+        }, 2000);
+      }, 2000);
     </script>
   </head>
-  <body>
+  <body class="dark">
     <button id="login">login</button>
     <button id="startloading">start loading</button>
     <button id="stoploading">stop loading</button>
     <button id="notify">notify</button>
     <!--    <nl-banner></nl-banner>-->
     <!--  <nl-button title-btn="Sign up" start-screen="signup"></nl-button>-->
-    <!--  <nl-button nl-theme="ocean"></nl-button>-->
+    <!--    <nl-button nl-theme="ocean"></nl-button>-->
+    <!--    <button-base nl-theme="ocean">-->
+    <!--      <svg slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">-->
+    <!--        <path-->
+    <!--          stroke-linecap="round"-->
+    <!--          stroke-linejoin="round"-->
+    <!--          d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z"-->
+    <!--        />-->
+    <!--      </svg>-->
+    <!--    </button-base>-->
   </body>
 </html>
