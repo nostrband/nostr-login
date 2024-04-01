@@ -1,5 +1,7 @@
 # nl-select
 
+
+
 <!-- Auto Generated Below -->
 
 
@@ -24,12 +26,12 @@
 
 ### Used by
 
- - [nl-auth](../nl-auth)
+ - [nl-signup](../nl-signup)
 
 ### Graph
 ```mermaid
 graph TD;
-  nl-auth --> nl-select
+  nl-signup --> nl-select
   style nl-select fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
