@@ -282,6 +282,7 @@ declare global {
     };
     interface HTMLNlWelcomeElementEventMap {
         "changeScreen": void;
+        "nlLoginExtension": void;
     }
     interface HTMLNlWelcomeElement extends Components.NlWelcome, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlWelcomeElementEventMap>(type: K, listener: (this: HTMLNlWelcomeElement, ev: NlWelcomeCustomEvent<HTMLNlWelcomeElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -391,6 +392,7 @@ declare namespace LocalJSX {
         "description"?: string;
         "isSignInWithExtension"?: boolean;
         "onChangeScreen"?: (event: NlWelcomeCustomEvent<void>) => void;
+        "onNlLoginExtension"?: (event: NlWelcomeCustomEvent<void>) => void;
         "titleWelcome"?: string;
     }
     interface IntrinsicElements {

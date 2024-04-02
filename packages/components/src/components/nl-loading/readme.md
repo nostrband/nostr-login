@@ -17,6 +17,7 @@
 ### Used by
 
  - [nl-signin](../nl-signin)
+ - [nl-signup](../nl-signup)
 
 ### Depends on
 
@@ -27,6 +28,7 @@
 graph TD;
   nl-loading --> button-base
   nl-signin --> nl-loading
+  nl-signup --> nl-loading
   style nl-loading fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

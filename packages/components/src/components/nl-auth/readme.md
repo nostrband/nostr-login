@@ -49,6 +49,7 @@ graph TD;
   nl-signin --> nl-loading
   nl-signin --> button-base
   nl-loading --> button-base
+  nl-signup --> nl-loading
   nl-signup --> nl-select
   nl-signup --> button-base
   nl-signin-read-only --> button-base

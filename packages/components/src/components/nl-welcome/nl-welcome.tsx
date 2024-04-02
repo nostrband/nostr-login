@@ -14,15 +14,13 @@ export class NlWelcome {
   @State() isOpenAdvancedLogin: boolean = false;
 
   @Event() changeScreen: EventEmitter<void>;
-  // @Event() handleSignInExtension: EventEmitter<void>;
+  @Event() nlLoginExtension: EventEmitter<void>;
 
   handleChangeScreen(screen) {
     this.changeScreen.emit(screen);
+    if (screen === CURRENT_MODULE.EXTENSION)
+      this.nlLoginExtension.emit()
   }
-
-  // handleSignInWithExtension() {
-  //   this.handleSignInExtension.emit();
-  // }
 
   handleOpenAdvanced() {
     this.isOpenAdvancedLogin = !this.isOpenAdvancedLogin;

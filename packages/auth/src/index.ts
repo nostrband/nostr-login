@@ -53,6 +53,8 @@ let optionsModal: NostrLoginOptions = {
 let banner: HTMLElement | null = null;
 const listNotifies: string[] = [];
 
+let nostrExtension = undefined
+
 const nostr = {
   async getPublicKey() {
     await ensureSigner();
@@ -121,6 +123,7 @@ export const launch = async (opt: NostrLoginOptions) => {
         .then(() => {
           modal.isFetchLogin = false;
           dialog.close();
+          setWindowNostr();
           ok();
         })
         .catch(e => {
@@ -139,6 +142,7 @@ export const launch = async (opt: NostrLoginOptions) => {
         .then(() => {
           modal.isFetchCreateAccount = false;
           dialog.close();
+          setWindowNostr();
           ok();
         })
         .catch(e => {
@@ -187,6 +191,13 @@ export const launch = async (opt: NostrLoginOptions) => {
 
     modal.addEventListener('nlLogin', event => {
       login(event.detail);
+    });
+
+    modal.addEventListener('nlLoginExtension', async (event) => {
+      console.log("nostr login extension", window.nostr)
+      if (!window.nostr) return
+      const pubkey = await window.nostr.getPublicKey()
+      onAuth('login', { pubkey })
     });
 
     modal.addEventListener('nlSignup', event => {
@@ -516,16 +527,24 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
 }
 
 export async function init(opt: NostrLoginOptions) {
-  // skip if it's already started or
-  // if there is nip07 extension
-  if (window.nostr) return;
+  // skip if it's already started 
+  if (window.nostr === nostr) return
 
-  window.nostr = nostr;
+  // set watcher to set window.nostr if extension 
+  // isn't found
+  setTimeout(() => {
+    if (!window.nostr) {
+      console.log("nostr login set window.nostr")
+      window.nostr = nostr
+    }
+  }, 1000)
 
+  // force darkMode from init options
   if ('darkMode' in opt) {
     localStorage.setItem('nl-dark-mode', `${opt.darkMode}`);
   }
 
+  // launch
   if (opt.iife) {
     launchAuthBanner(opt);
   } else {
@@ -539,7 +558,11 @@ export async function init(opt: NostrLoginOptions) {
   try {
     // read conf from localstore
     const info = JSON.parse(window.localStorage.getItem(LOCALSTORE_KEY));
-    if (info && info.pubkey && info.sk && info.relays && info.relays[0]) {
+    if (!info) return;
+
+    if (info.extension && info.pubkey) {
+      onAuth('login', { pubkey: info.pubkey });
+    } else if (info.pubkey && info.sk && info.relays && info.relays[0]) {
       await initSigner(info);
       onAuth('login', info);
     } else {
@@ -583,6 +606,14 @@ async function fetchProfile(info: Info) {
   const user = new NDKUser({ pubkey: info.pubkey });
   user.ndk = profileNdk;
   return await user.fetchProfile();
+}
+
+function setWindowNostr() {
+  // save the extension
+  if (window.nostr !== nostr) nostrExtension = window.nostr
+
+  // set ourselves as nip07 handler
+  window.nostr = nostr    
 }
 
 function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
@@ -660,9 +691,13 @@ async function authNip46(type: 'login' | 'signup', name, bunkerUrl, sk = '') {
 }
 
 export async function logout() {
-  // clear localstore from user data
-  onAuth('logout');
+  // restore the extension
+  if (nostrExtension) window.nostr = nostrExtension
+
   signer = null;
   for (const r of ndk.pool.relays.keys()) ndk.pool.removeRelay(r);
   window.localStorage.removeItem(LOCALSTORE_KEY);
+
+  // clear localstore from user data
+  onAuth('logout');
 }
