@@ -18,6 +18,8 @@ export namespace Components {
         "titleBtn": string;
     }
     interface NlAuth {
+        "authUrl": string;
+        "isLoading": boolean;
         "isSignInWithExtension": boolean;
         "startScreen": string;
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
@@ -102,10 +104,6 @@ export interface NlSignupCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlSignupElement;
 }
-export interface NlWelcomeCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLNlWelcomeElement;
-}
 declare global {
     interface HTMLButtonBaseElement extends Components.ButtonBase, HTMLStencilElement {
     }
@@ -174,6 +172,7 @@ declare global {
     };
     interface HTMLNlLoadingElementEventMap {
         "stopFetchHandler": boolean;
+        "handleContinue": boolean;
     }
     interface HTMLNlLoadingElement extends Components.NlLoading, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlLoadingElementEventMap>(type: K, listener: (this: HTMLNlLoadingElement, ev: NlLoadingCustomEvent<HTMLNlLoadingElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -208,7 +207,6 @@ declare global {
     };
     interface HTMLNlSigninElementEventMap {
         "nlLogin": string;
-        "fetchHandler": boolean;
         "nlCheckLogin": string;
     }
     interface HTMLNlSigninElement extends Components.NlSignin, HTMLStencilElement {
@@ -280,18 +278,7 @@ declare global {
         prototype: HTMLNlSignupElement;
         new (): HTMLNlSignupElement;
     };
-    interface HTMLNlWelcomeElementEventMap {
-        "changeScreen": void;
-    }
     interface HTMLNlWelcomeElement extends Components.NlWelcome, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLNlWelcomeElementEventMap>(type: K, listener: (this: HTMLNlWelcomeElement, ev: NlWelcomeCustomEvent<HTMLNlWelcomeElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLNlWelcomeElementEventMap>(type: K, listener: (this: HTMLNlWelcomeElement, ev: NlWelcomeCustomEvent<HTMLNlWelcomeElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLNlWelcomeElement: {
         prototype: HTMLNlWelcomeElement;
@@ -320,6 +307,8 @@ declare namespace LocalJSX {
         "titleBtn"?: string;
     }
     interface NlAuth {
+        "authUrl"?: string;
+        "isLoading"?: boolean;
         "isSignInWithExtension"?: boolean;
         "onHandleChangeDarkMode"?: (event: NlAuthCustomEvent<string>) => void;
         "onHandleRemoveWindowNostr"?: (event: NlAuthCustomEvent<string>) => void;
@@ -351,6 +340,7 @@ declare namespace LocalJSX {
     interface NlInfoExtension {
     }
     interface NlLoading {
+        "onHandleContinue"?: (event: NlLoadingCustomEvent<boolean>) => void;
         "onStopFetchHandler"?: (event: NlLoadingCustomEvent<boolean>) => void;
     }
     interface NlSelect {
@@ -362,7 +352,6 @@ declare namespace LocalJSX {
     }
     interface NlSignin {
         "description"?: string;
-        "onFetchHandler"?: (event: NlSigninCustomEvent<boolean>) => void;
         "onNlCheckLogin"?: (event: NlSigninCustomEvent<string>) => void;
         "onNlLogin"?: (event: NlSigninCustomEvent<string>) => void;
         "titleLogin"?: string;
@@ -390,7 +379,6 @@ declare namespace LocalJSX {
     interface NlWelcome {
         "description"?: string;
         "isSignInWithExtension"?: boolean;
-        "onChangeScreen"?: (event: NlWelcomeCustomEvent<void>) => void;
         "titleWelcome"?: string;
     }
     interface IntrinsicElements {

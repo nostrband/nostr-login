@@ -47,8 +47,21 @@
         const dialog = document.createElement('dialog');
         const modal = document.createElement('nl-auth');
 
-        dialog.appendChild(modal);
-        document.body.appendChild(dialog);
+        // dialog.appendChild(modal);
+        document.body.appendChild(modal);
+
+        const startLoadingModal = document.getElementById('startloadingmodal');
+
+        startLoadingModal.addEventListener('click', () => {
+          modal.isLoading = true;
+        });
+
+        const setAuthUrl = document.getElementById('setauthurl');
+
+        setAuthUrl.addEventListener('click', () => {
+          modal.isLoading = false;
+          modal.authUrl = 'authUrl';
+        });
 
         return new Promise(resolve => {
           modal.addEventListener('handleGetValue', event => {
@@ -64,16 +77,24 @@
             resolve(inputValue);
           });
 
-          modal.addEventListener('handleRemoveWindowNostr', event => {
+          modal.addEventListener('handleRemoveWindowNostr', () => {
             console.log('handleRemoveWindowNostr');
           });
 
-          modal.addEventListener('handleChangeDarkMode', event => {
+          modal.addEventListener('handleChangeDarkMode', () => {
             console.log('handleChangeDarkMode');
           });
 
-          modal.addEventListener('changeScreen', event => {
+          modal.addEventListener('changeScreen', () => {
             console.log('changeScreen');
+          });
+
+          modal.addEventListener('stopFetchHandler', () => {
+            modal.isLoading = false;
+          });
+
+          modal.addEventListener('handleContinue', () => {
+            modal.authUrl = '';
           });
 
           dialog.showModal();
@@ -110,8 +131,8 @@
 
       banner.addEventListener('handleOpenWelcomeModal', () => {
         launch({
-          theme: 'lemonade',
-          // isSignInWithExtension: false
+          // theme: 'lemonade',
+          isSignInWithExtension: false,
         });
       });
 
@@ -168,6 +189,11 @@
     <button id="startloading">start loading</button>
     <button id="stoploading">stop loading</button>
     <button id="notify">notify</button>
+
+    <div style="position: fixed; z-index: 9999">
+      <button id="startloadingmodal">start loading modal</button>
+      <button id="setauthurl">nostr login auth url</button>
+    </div>
     <!--    <nl-banner></nl-banner>-->
     <!--  <nl-button title-btn="Sign up" start-screen="signup"></nl-button>-->
     <!--    <nl-button nl-theme="ocean"></nl-button>-->

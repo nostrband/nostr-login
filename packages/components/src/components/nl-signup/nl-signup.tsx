@@ -1,4 +1,5 @@
 import { Component, h, Fragment, State, Prop, Event, EventEmitter, Watch } from '@stencil/core';
+import { state } from '@/store';
 
 @Component({
   tag: 'nl-signup',
@@ -10,14 +11,7 @@ export class NlSignup {
   @Prop() description = 'Join the Nostr network.';
   @Prop() bunkers: string = 'nsec.app,highlighter.com';
 
-  @State() signupName = '';
   @State() isAvailable = false;
-  @State() isFetching = false;
-  @State() domain: string = '';
-  @State() servers = [
-    { name: '@nsec.app', value: 'nsec.app' },
-    { name: '@highlighter.com', value: 'highlighter.com' },
-  ];
 
   @Event() nlSignup: EventEmitter<string>;
   @Event() nlCheckSignup: EventEmitter<string>;
@@ -31,49 +25,32 @@ export class NlSignup {
   }
 
   handleInputChange(event: Event) {
-    this.signupName = (event.target as HTMLInputElement).value;
-    this.nlCheckSignup.emit(`${(event.target as HTMLInputElement).value}@${this.domain}`);
+    state.nlSignup.signupName = (event.target as HTMLInputElement).value;
+    this.nlCheckSignup.emit(`${(event.target as HTMLInputElement).value}@${state.nlSignup.domain}`);
   }
 
   handleDomainSelect(event: CustomEvent<string>) {
-    this.domain = event.detail;
-    this.nlCheckSignup.emit(`${this.signupName}@${event.detail}`);
+    state.nlSignup.domain = event.detail;
+    this.nlCheckSignup.emit(`${state.nlSignup.signupName}@${event.detail}`);
   }
 
   handleCreateAccount(e: MouseEvent) {
     e.preventDefault();
 
-    this.isFetching = true;
-    this.fetchHandler.emit(true);
-
-    setTimeout(() => {
-      this.isFetching = false;
-      this.fetchHandler.emit(false);
-    }, 3000);
-
-    this.nlSignup.emit(`${this.signupName}@${this.domain}`);
+    this.nlSignup.emit(`${state.nlSignup.signupName}@${state.nlSignup.domain}`);
   }
 
   @Watch('bunkers')
   watchBunkersHandler(newValue: string) {
-    this.servers = this.formatServers(newValue);
+    state.nlSignup.servers = this.formatServers(newValue);
   }
 
   componentWillLoad() {
-    this.servers = this.formatServers(this.bunkers);
-  }
-
-  handleStop() {
-    this.isFetching = false;
-    this.fetchHandler.emit(false);
+    state.nlSignup.servers = this.formatServers(this.bunkers);
   }
 
   render() {
     return (
-        <Fragment>
-          {this.isFetching ? (
-              <nl-loading onStopFetchHandler={() => this.handleStop()} />
-          ) : (
       <Fragment>
         <div class="p-4 overflow-y-auto">
           <h1 class="nl-title font-bold text-center text-2xl">{this.titleSignup}</h1>
@@ -87,6 +64,7 @@ export class NlSignup {
               type="text"
               class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
               placeholder="Name"
+              value={state.nlSignup.signupName}
             />
             <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">
               <svg
@@ -114,11 +92,16 @@ export class NlSignup {
             {/*    @nsec.app*/}
             {/*  </option>*/}
             {/*</select>*/}
-            <nl-select onSelectDomain={e => this.handleDomainSelect(e)} selected={0} options={this.servers}></nl-select>
+            <nl-select onSelectDomain={e => this.handleDomainSelect(e)} selected={0} options={state.nlSignup.servers}></nl-select>
           </div>
           <p class="nl-title font-light text-sm mb-2">Choose a service to manage your Nostr keys.</p>
-          <button-base disabled={this.isFetching} onClick={e => this.handleCreateAccount(e)} titleBtn="Create an account">
-            {this.isFetching ? (
+
+          <div class="ps-4 pe-4 overflow-y-auto">
+            <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
+          </div>
+
+          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create an account">
+            {state.isLoading ? (
               <span
                 slot="icon-start"
                 class="animate-spin-loading inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"
@@ -137,8 +120,6 @@ export class NlSignup {
           </button-base>
         </div>
       </Fragment>
-          )}
-        </Fragment>
     );
   }
 }

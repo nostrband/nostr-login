@@ -14,13 +14,6 @@
 | `titleWelcome`          | `title-welcome`             |             | `string`  | `'Welcome!'`                                                                                   |
 
 
-## Events
-
-| Event          | Description | Type                |
-| -------------- | ----------- | ------------------- |
-| `changeScreen` |             | `CustomEvent<void>` |
-
-
 ## Dependencies
 
 ### Used by
