@@ -1,5 +1,6 @@
-import { Component, EventEmitter, h, Event, Fragment, State, Prop } from '@stencil/core';
+import { Component, h, Fragment, State, Prop } from '@stencil/core';
 import { CURRENT_MODULE } from '@/types';
+import { state } from '@/store';
 
 @Component({
   tag: 'nl-welcome',
@@ -13,11 +14,8 @@ export class NlWelcome {
 
   @State() isOpenAdvancedLogin: boolean = false;
 
-  @Event() changeScreen: EventEmitter<void>;
-  // @Event() handleSignInExtension: EventEmitter<void>;
-
   handleChangeScreen(screen) {
-    this.changeScreen.emit(screen);
+    state.screen = screen;
   }
 
   // handleSignInWithExtension() {

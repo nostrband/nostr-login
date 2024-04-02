@@ -33,14 +33,16 @@ const ndk = new NDK({
 });
 const profileNdk = new NDK({
   enableOutboxModel: true,
-  explicitRelayUrls: ["wss://relay.nostr.band/all", "wss://purplepag.es"]
+  explicitRelayUrls: ['wss://relay.nostr.band/all', 'wss://purplepag.es'],
 });
-profileNdk.connect()
+profileNdk.connect();
 
 let signer: NDKNip46Signer | null = null;
 let signerPromise = null;
 let launcherPromise = null;
 let popup = null;
+let modal = null;
+// let authUrl = '';
 let userInfo: Info | null = null;
 let callCount = 0;
 let callTimer = undefined;
@@ -65,7 +67,7 @@ const nostr = {
       event.pubkey = signer.remotePubkey;
       event.id = getEventHash(event);
       event.sig = await signer.sign(event);
-      console.log("signed", { event });
+      console.log('signed', { event });
       return event;
     });
   },
@@ -90,7 +92,7 @@ export const launch = async (opt: NostrLoginOptions) => {
   if (launcherPromise) await launcherPromise;
 
   const dialog = document.createElement('dialog');
-  const modal = document.createElement('nl-auth');
+  modal = document.createElement('nl-auth');
 
   if (opt.theme) {
     modal.setAttribute('theme', opt.theme);
@@ -113,19 +115,20 @@ export const launch = async (opt: NostrLoginOptions) => {
 
   launcherPromise = new Promise(ok => {
     const login = (name: string) => {
-      modal.error = 'Please confirm in your key storage app.';
+      // modal.error = 'Please confirm in your key storage app.';
+      modal.isLoading = true;
       // convert name to bunker url
       getBunkerUrl(name)
         // connect to bunker by url
         .then(bunkerUrl => authNip46('login', name, bunkerUrl))
         .then(() => {
-          modal.isFetchLogin = false;
+          modal.isLoading = false;
           dialog.close();
           ok();
         })
         .catch(e => {
           console.log('error', e);
-          modal.isFetchLogin = false;
+          modal.isLoading = false;
           modal.error = e.toString();
         });
     };
@@ -193,8 +196,8 @@ export const launch = async (opt: NostrLoginOptions) => {
       signup(event.detail);
     });
 
-    modal.addEventListener('handleRemoveWindowNostr', event => {
-      console.log('handleRemoveWindowNostr')
+    modal.addEventListener('handleRemoveWindowNostr', () => {
+      console.log('handleRemoveWindowNostr');
     });
 
     modal.addEventListener('nlCheckSignup', async event => {
@@ -212,7 +215,7 @@ export const launch = async (opt: NostrLoginOptions) => {
     });
 
     modal.addEventListener('nlCloseModal', () => {
-      modal.isFetchLogin = false;
+      modal.isLoading = false;
       dialog.close();
       ok();
     });
@@ -224,8 +227,7 @@ export const launch = async (opt: NostrLoginOptions) => {
 };
 
 async function wait(cb) {
-  if (!callTimer) 
-    callTimer = setTimeout(onCallTimeout, TIMEOUT);
+  if (!callTimer) callTimer = setTimeout(onCallTimeout, TIMEOUT);
 
   if (!callCount) await onCallStart();
   callCount++;
@@ -312,7 +314,7 @@ function bunkerUrlToInfo(bunkerUrl, sk = ''): Info {
 async function createAccount(nip05: string) {
   const [name, domain] = nip05.split('@');
   // we're gonna need it
-  ensurePopup();
+  // ensurePopup();
 
   // bunker's own url
   const bunkerUrl = await getBunkerUrl(`_@${domain}`);
@@ -372,11 +374,7 @@ const connectModals = (defaultOpt: NostrLoginOptions) => {
 };
 
 const launchEnsurePopup = (url: string) => {
-  ensurePopup();
-
-  popup.location.href = url;
-
-  popup.resizeTo(400, 700);
+  ensurePopup(url);
 };
 
 const launchAuthBanner = (opt: NostrLoginOptions) => {
@@ -389,7 +387,7 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
     });
   });
 
-  banner.addEventListener('handleLogoutBanner', event => {
+  banner.addEventListener('handleLogoutBanner', () => {
     logout();
   });
 
@@ -403,13 +401,13 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
     banner.listNotifies = listNotifies;
   });
 
-  banner.addEventListener('handleOpenWelcomeModal', event => {
-    launch(optionsModal)
+  banner.addEventListener('handleOpenWelcomeModal', () => {
+    launch(optionsModal);
   });
 
   banner.addEventListener('handleRetryConfirmBanner', () => {
     const url = listNotifies.pop();
-    // FIXME go to nip05 domain? 
+    // FIXME go to nip05 domain?
     if (!url) return;
 
     banner.listNotifies = listNotifies;
@@ -472,13 +470,19 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
           // if it fails we will either return 'failed'
           // to the window.nostr caller, or show proper error
           // in our modal
-          launchEnsurePopup(url);
+          modal.authUrl = url
+          modal.isLoading = false
         }
+
+        modal.addEventListener('handleContinue', () => {
+          console.log('handleContinue')
+          launchEnsurePopup(url);
+        });
       });
 
       // pre-launch a popup if it won't be blocked,
       // only when we're expecting it
-      if (connect || preparePopup) if (navigator.userActivation.isActive) ensurePopup();
+      // if (connect || preparePopup) if (navigator.userActivation.isActive) ensurePopup(); ?????????????????
 
       // if we're doing it for the first time then
       // we should send 'connect' NIP46 request
@@ -551,7 +555,7 @@ export async function init(opt: NostrLoginOptions) {
   }
 }
 
-function ensurePopup() {
+function ensurePopup(url) {
   // user might have closed it already
   if (!popup || popup.closed) {
     // NOTE: do not set noreferrer, bunker might use referrer to
@@ -559,7 +563,7 @@ function ensurePopup() {
     // NOTE: do not pass noopener, otherwise null is returned
     // and we can't pre-populate the Loading... message,
     // instead we set opener=null below
-    popup = window.open('about:blank', '_blank', 'width=100,height=50');
+    popup = window.open(url, '_blank', 'width=400,height=700');
     console.log('popup', popup);
     if (!popup) throw new Error('Popup blocked. Try again, please!');
 
@@ -568,7 +572,7 @@ function ensurePopup() {
   }
 
   // initial state
-  popup.document.write('Loading...');
+  // popup.document.write('Loading...');
 }
 
 function closePopup() {
@@ -586,14 +590,11 @@ async function fetchProfile(info: Info) {
 }
 
 function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
-
   userInfo = info;
   if (banner) {
     banner.userInfo = userInfo;
-    if (userInfo)
-      banner.titleBanner = 'You are logged in';
-    else
-      banner.titleBanner = ''; // 'Use with Nostr';
+    if (userInfo) banner.titleBanner = 'You are logged in';
+    else banner.titleBanner = ''; // 'Use with Nostr';
   }
 
   if (info) {
@@ -602,10 +603,10 @@ function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
       if (userInfo !== info) return;
       userInfo = {
         ...userInfo,
-        picture: p?.image || p?.picture
+        picture: p?.image || p?.picture,
       };
       banner.userInfo = userInfo;
-    })
+    });
   }
 
   try {
@@ -620,12 +621,10 @@ function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
       options.relays = info.relays;
     }
 
-    if (optionsModal.onAuth)
-      optionsModal.onAuth(npub, options);
+    if (optionsModal.onAuth) optionsModal.onAuth(npub, options);
 
-    const event = new CustomEvent("nlAuth", { "detail": options });
+    const event = new CustomEvent('nlAuth', { detail: options });
     document.dispatchEvent(event);
-
   } catch (e) {
     console.log('onAuth error', e);
   }

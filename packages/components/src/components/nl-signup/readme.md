@@ -16,10 +16,11 @@
 
 ## Events
 
-| Event           | Description | Type                  |
-| --------------- | ----------- | --------------------- |
-| `nlCheckSignup` |             | `CustomEvent<string>` |
-| `nlSignup`      |             | `CustomEvent<string>` |
+| Event           | Description | Type                   |
+| --------------- | ----------- | ---------------------- |
+| `fetchHandler`  |             | `CustomEvent<boolean>` |
+| `nlCheckSignup` |             | `CustomEvent<string>`  |
+| `nlSignup`      |             | `CustomEvent<string>`  |
 
 
 ## Dependencies
