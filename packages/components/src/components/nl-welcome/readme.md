@@ -18,7 +18,6 @@
 
 | Event              | Description | Type                |
 | ------------------ | ----------- | ------------------- |
-| `changeScreen`     |             | `CustomEvent<void>` |
 | `nlLoginExtension` |             | `CustomEvent<void>` |
 
 

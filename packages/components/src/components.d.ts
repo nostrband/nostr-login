@@ -18,6 +18,10 @@ export namespace Components {
         "titleBtn": string;
     }
     interface NlAuth {
+        "authUrl": string;
+        "error": string;
+        "isLoading": boolean;
+        "isLoadingExtension": boolean;
         "isSignInWithExtension": boolean;
         "startScreen": string;
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
@@ -115,7 +119,6 @@ declare global {
     };
     interface HTMLNlAuthElementEventMap {
         "nlCloseModal": any;
-        "handleRemoveWindowNostr": string;
         "handleChangeDarkMode": string;
     }
     interface HTMLNlAuthElement extends Components.NlAuth, HTMLStencilElement {
@@ -174,6 +177,7 @@ declare global {
     };
     interface HTMLNlLoadingElementEventMap {
         "stopFetchHandler": boolean;
+        "handleContinue": boolean;
     }
     interface HTMLNlLoadingElement extends Components.NlLoading, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlLoadingElementEventMap>(type: K, listener: (this: HTMLNlLoadingElement, ev: NlLoadingCustomEvent<HTMLNlLoadingElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -208,7 +212,6 @@ declare global {
     };
     interface HTMLNlSigninElementEventMap {
         "nlLogin": string;
-        "fetchHandler": boolean;
         "nlCheckLogin": string;
     }
     interface HTMLNlSigninElement extends Components.NlSignin, HTMLStencilElement {
@@ -281,7 +284,6 @@ declare global {
         new (): HTMLNlSignupElement;
     };
     interface HTMLNlWelcomeElementEventMap {
-        "changeScreen": void;
         "nlLoginExtension": void;
     }
     interface HTMLNlWelcomeElement extends Components.NlWelcome, HTMLStencilElement {
@@ -321,9 +323,12 @@ declare namespace LocalJSX {
         "titleBtn"?: string;
     }
     interface NlAuth {
+        "authUrl"?: string;
+        "error"?: string;
+        "isLoading"?: boolean;
+        "isLoadingExtension"?: boolean;
         "isSignInWithExtension"?: boolean;
         "onHandleChangeDarkMode"?: (event: NlAuthCustomEvent<string>) => void;
-        "onHandleRemoveWindowNostr"?: (event: NlAuthCustomEvent<string>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
         "startScreen"?: string;
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
@@ -352,6 +357,7 @@ declare namespace LocalJSX {
     interface NlInfoExtension {
     }
     interface NlLoading {
+        "onHandleContinue"?: (event: NlLoadingCustomEvent<boolean>) => void;
         "onStopFetchHandler"?: (event: NlLoadingCustomEvent<boolean>) => void;
     }
     interface NlSelect {
@@ -363,7 +369,6 @@ declare namespace LocalJSX {
     }
     interface NlSignin {
         "description"?: string;
-        "onFetchHandler"?: (event: NlSigninCustomEvent<boolean>) => void;
         "onNlCheckLogin"?: (event: NlSigninCustomEvent<string>) => void;
         "onNlLogin"?: (event: NlSigninCustomEvent<string>) => void;
         "titleLogin"?: string;
@@ -391,7 +396,6 @@ declare namespace LocalJSX {
     interface NlWelcome {
         "description"?: string;
         "isSignInWithExtension"?: boolean;
-        "onChangeScreen"?: (event: NlWelcomeCustomEvent<void>) => void;
         "onNlLoginExtension"?: (event: NlWelcomeCustomEvent<void>) => void;
         "titleWelcome"?: string;
     }

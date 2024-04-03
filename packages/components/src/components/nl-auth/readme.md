@@ -9,6 +9,10 @@
 
 | Property                | Attribute                   | Description | Type                                             | Default                  |
 | ----------------------- | --------------------------- | ----------- | ------------------------------------------------ | ------------------------ |
+| `authUrl`               | `auth-url`                  |             | `string`                                         | `''`                     |
+| `error`                 | `error`                     |             | `string`                                         | `''`                     |
+| `isLoading`             | `is-loading`                |             | `boolean`                                        | `false`                  |
+| `isLoadingExtension`    | `is-loading-extension`      |             | `boolean`                                        | `false`                  |
 | `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean`                                        | `true`                   |
 | `startScreen`           | `start-screen`              |             | `string`                                         | `CURRENT_MODULE.WELCOME` |
 | `theme`                 | `theme`                     |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
@@ -16,11 +20,10 @@
 
 ## Events
 
-| Event                     | Description | Type                  |
-| ------------------------- | ----------- | --------------------- |
-| `handleChangeDarkMode`    |             | `CustomEvent<string>` |
-| `handleRemoveWindowNostr` |             | `CustomEvent<string>` |
-| `nlCloseModal`            |             | `CustomEvent<any>`    |
+| Event                  | Description | Type                  |
+| ---------------------- | ----------- | --------------------- |
+| `handleChangeDarkMode` |             | `CustomEvent<string>` |
+| `nlCloseModal`         |             | `CustomEvent<any>`    |
 
 
 ## Dependencies
@@ -34,6 +37,7 @@
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
 - [nl-signin-bunker-url](../nl-signin-bunker-url)
+- [nl-loading](../nl-loading)
 
 ### Graph
 ```mermaid
@@ -45,15 +49,14 @@ graph TD;
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
   nl-auth --> nl-signin-bunker-url
+  nl-auth --> nl-loading
   nl-welcome --> button-base
-  nl-signin --> nl-loading
   nl-signin --> button-base
-  nl-loading --> button-base
-  nl-signup --> nl-loading
   nl-signup --> nl-select
   nl-signup --> button-base
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
+  nl-loading --> button-base
   style nl-auth fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

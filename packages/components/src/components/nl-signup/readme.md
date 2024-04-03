@@ -31,17 +31,14 @@
 
 ### Depends on
 
-- [nl-loading](../nl-loading)
 - [nl-select](../nl-select)
 - [button-base](../button-base)
 
 ### Graph
 ```mermaid
 graph TD;
-  nl-signup --> nl-loading
   nl-signup --> nl-select
   nl-signup --> button-base
-  nl-loading --> button-base
   nl-auth --> nl-signup
   style nl-signup fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -9,6 +9,7 @@
 
 | Event              | Description | Type                   |
 | ------------------ | ----------- | ---------------------- |
+| `handleContinue`   |             | `CustomEvent<boolean>` |
 | `stopFetchHandler` |             | `CustomEvent<boolean>` |
 
 
@@ -16,8 +17,7 @@
 
 ### Used by
 
- - [nl-signin](../nl-signin)
- - [nl-signup](../nl-signup)
+ - [nl-auth](../nl-auth)
 
 ### Depends on
 
@@ -27,8 +27,7 @@
 ```mermaid
 graph TD;
   nl-loading --> button-base
-  nl-signin --> nl-loading
-  nl-signup --> nl-loading
+  nl-auth --> nl-loading
   style nl-loading fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

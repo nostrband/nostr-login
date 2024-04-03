@@ -25,7 +25,8 @@
     "format": "npx prettier --write src"
   },
   "dependencies": {
-    "@stencil/core": "^4.11.0",
+    "@stencil/core": "^4.13.0",
+    "@stencil/store": "^2.0.15",
     "@stencil/sass": "^3.0.8",
     "@tailwindcss/forms": "^0.5.7",
     "tailwindcss": "^3.4.0"

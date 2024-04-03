@@ -1,5 +1,6 @@
-import { Component, EventEmitter, h, Event, Fragment, State, Prop } from '@stencil/core';
+import { Component, h, Fragment, State, Prop, Event, EventEmitter } from '@stencil/core';
 import { CURRENT_MODULE } from '@/types';
+import { state } from '@/store';
 
 @Component({
   tag: 'nl-welcome',
@@ -12,14 +13,11 @@ export class NlWelcome {
   @Prop() isSignInWithExtension = true;
 
   @State() isOpenAdvancedLogin: boolean = false;
-
-  @Event() changeScreen: EventEmitter<void>;
   @Event() nlLoginExtension: EventEmitter<void>;
 
   handleChangeScreen(screen) {
-    this.changeScreen.emit(screen);
-    if (screen === CURRENT_MODULE.EXTENSION)
-      this.nlLoginExtension.emit()
+    state.screen = screen;
+    if (screen === CURRENT_MODULE.EXTENSION) this.nlLoginExtension.emit();
   }
 
   handleOpenAdvanced() {
@@ -46,6 +44,17 @@ export class NlWelcome {
               />
             </svg>
           </button-base>
+          {this.isSignInWithExtension && (
+            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.EXTENSION)} titleBtn="Sign in with extension">
+              <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z"
+                />
+              </svg>
+            </button-base>
+          )}
 
           <div class="flex justify-center">
             <div
@@ -73,17 +82,6 @@ export class NlWelcome {
           <div
             class={`${this.isOpenAdvancedLogin ? 'max-h-[500px] mt-3 duration-300' : 'max-h-0 mt-0 duration-[0.25s]'} transition-max-height ease-in flex gap-3 flex-col overflow-hidden`}
           >
-            {this.isSignInWithExtension && (
-              <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.EXTENSION)} titleBtn="Sign in with extension">
-                <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z"
-                  />
-                </svg>
-              </button-base>
-            )}
             <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_BUNKER_URL)} titleBtn="Sign in with bunker URL">
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
@@ -93,7 +91,7 @@ export class NlWelcome {
                 />
               </svg>
             </button-base>
-            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_READ_ONLY)} titleBtn="Sign in to read only">
+            {/* <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_READ_ONLY)} titleBtn="Sign in to read only">
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -102,7 +100,7 @@ export class NlWelcome {
                 />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
-            </button-base>
+            </button-base> */}
           </div>
 
           <div class="nl-divider py-3 flex items-center text-xs uppercase before:flex-[1_1_0%] before:border-t before:me-6 after:flex-[1_1_0%] after:border-t  after:ms-6">Or</div>

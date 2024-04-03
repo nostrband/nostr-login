@@ -18,10 +18,11 @@ export enum METHOD_MODULE {
 
 export interface Info {
   pubkey: string;
-  sk: string;
-  relays: string[];
+  sk?: string;
+  relays?: string[];
   nip05?: string;
   picture?: string;
+  extension?: boolean;
 }
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple';
