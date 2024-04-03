@@ -6,6 +6,7 @@ const { state, onChange, on, reset } = createStore({
   prevScreen: CURRENT_MODULE.WELCOME,
   error: '',
   isLoading: false,
+  isLoadingExtension: false,
   authUrl: '',
 
   // State NlSignin

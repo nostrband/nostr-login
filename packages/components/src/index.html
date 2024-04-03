@@ -91,6 +91,8 @@
 
           modal.addEventListener('stopFetchHandler', () => {
             modal.isLoading = false;
+            console.log('stopFetchHandler');
+            // FIXME reset the modal state, return to welcome screen
           });
 
           modal.addEventListener('handleContinue', () => {

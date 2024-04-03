@@ -12,13 +12,14 @@ export class NlAuth {
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
   @Prop() isSignInWithExtension: boolean = true;
   @Prop() isLoading: boolean = false;
+  @Prop() isLoadingExtension: boolean = false;
   @Prop() authUrl: string = '';
+  @Prop() error: string = '';
 
   @State() darkMode: boolean = false;
   @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
 
   @Event() nlCloseModal: EventEmitter;
-  @Event() handleRemoveWindowNostr: EventEmitter<string>;
   @Event() handleChangeDarkMode: EventEmitter<string>;
 
   @Watch('isLoading')
@@ -26,9 +27,19 @@ export class NlAuth {
     state.isLoading = newValue;
   }
 
+  @Watch('isLoadingExtension')
+  watchLoadingExtensionHandler(newValue: boolean) {
+    state.isLoadingExtension = newValue;
+  }
+
   @Watch('authUrl')
   watchAuthUrlHandler(newValue: string) {
     state.authUrl = newValue;
+  }
+
+  @Watch('error')
+  watchErrorHandler(newValue: string) {
+    state.error = newValue;
   }
 
   handleClose() {
@@ -55,12 +66,13 @@ export class NlAuth {
     }
   }
 
-  handleRemoveWindowNostrClick() {
-    this.handleRemoveWindowNostr.emit();
-  }
-
   handleClickToBack() {
     state.screen = state.prevScreen;
+
+    // reset
+    state.isLoading = false;
+    state.isLoadingExtension = false;
+    state.authUrl = '';
   }
 
   render() {
@@ -108,7 +120,7 @@ export class NlAuth {
               </div>
 
               <div class="flex gap-1">
-                <button
+                {/* <button
                   onClick={() => this.handleChangeTheme()}
                   type="button"
                   class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
@@ -131,7 +143,7 @@ export class NlAuth {
                       />
                     </svg>
                   )}
-                </button>
+                </button> */}
                 {!state.isLoading && (
                   <button
                     onClick={() => (state.screen = CURRENT_MODULE.INFO)}

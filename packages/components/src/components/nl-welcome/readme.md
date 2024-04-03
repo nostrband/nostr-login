@@ -14,6 +14,13 @@
 | `titleWelcome`          | `title-welcome`             |             | `string`  | `'Welcome!'`                                                                                   |
 
 
+## Events
+
+| Event              | Description | Type                |
+| ------------------ | ----------- | ------------------- |
+| `nlLoginExtension` |             | `CustomEvent<void>` |
+
+
 ## Dependencies
 
 ### Used by

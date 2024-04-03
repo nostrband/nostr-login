@@ -10,7 +10,9 @@
 | Property                | Attribute                   | Description | Type                                             | Default                  |
 | ----------------------- | --------------------------- | ----------- | ------------------------------------------------ | ------------------------ |
 | `authUrl`               | `auth-url`                  |             | `string`                                         | `''`                     |
+| `error`                 | `error`                     |             | `string`                                         | `''`                     |
 | `isLoading`             | `is-loading`                |             | `boolean`                                        | `false`                  |
+| `isLoadingExtension`    | `is-loading-extension`      |             | `boolean`                                        | `false`                  |
 | `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean`                                        | `true`                   |
 | `startScreen`           | `start-screen`              |             | `string`                                         | `CURRENT_MODULE.WELCOME` |
 | `theme`                 | `theme`                     |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
@@ -18,11 +20,10 @@
 
 ## Events
 
-| Event                     | Description | Type                  |
-| ------------------------- | ----------- | --------------------- |
-| `handleChangeDarkMode`    |             | `CustomEvent<string>` |
-| `handleRemoveWindowNostr` |             | `CustomEvent<string>` |
-| `nlCloseModal`            |             | `CustomEvent<any>`    |
+| Event                  | Description | Type                  |
+| ---------------------- | ----------- | --------------------- |
+| `handleChangeDarkMode` |             | `CustomEvent<string>` |
+| `nlCloseModal`         |             | `CustomEvent<any>`    |
 
 
 ## Dependencies

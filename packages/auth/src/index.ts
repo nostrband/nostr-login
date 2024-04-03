@@ -6,9 +6,10 @@ import { getEventHash, generatePrivateKey, nip19, getPublicKey } from 'nostr-too
 import { Info } from 'nostr-login-components/dist/types/types';
 
 export interface NostrLoginAuthOptions {
-  localNsec: string;
-  relays: string[];
+  localNsec?: string;
+  relays?: string[];
   type: 'login' | 'signup' | 'logout';
+  extension?: boolean;
 }
 
 export interface NostrLoginOptions {
@@ -55,20 +56,27 @@ let optionsModal: NostrLoginOptions = {
 let banner: HTMLElement | null = null;
 const listNotifies: string[] = [];
 
+let nostrExtension = undefined;
+
 const nostr = {
   async getPublicKey() {
-    await ensureSigner();
+    await ensureAuth();
     if (userInfo) return userInfo.pubkey;
     else throw new Error('No user');
   },
   async signEvent(event) {
-    await ensureSigner();
+    await ensureAuth();
+    if (!userInfo?.extension && !signer) throw new Error('Read only');
     return wait(async () => {
-      event.pubkey = signer.remotePubkey;
-      event.id = getEventHash(event);
-      event.sig = await signer.sign(event);
-      console.log('signed', { event });
-      return event;
+      if (userInfo?.extension) {
+        return await nostrExtension.signEvent(event);
+      } else {
+        event.pubkey = signer.remotePubkey;
+        event.id = getEventHash(event);
+        event.sig = await signer.sign(event);
+        console.log('signed', { event });
+        return event;
+      }
     });
   },
   async getRelays() {
@@ -77,19 +85,27 @@ const nostr = {
   },
   nip04: {
     async encrypt(pubkey, plaintext) {
-      await ensureSigner();
-      return wait(async () => await signer.encrypt(pubkey, plaintext));
+      await ensureAuth();
+      if (!userInfo?.extension && !signer) throw new Error('Read only');
+      const module = userInfo?.extension ? nostrExtension.nip04 : signer;
+      return wait(async () => await module.encrypt(pubkey, plaintext));
     },
     async decrypt(pubkey, ciphertext) {
-      await ensureSigner();
-      return wait(async () => await signer.decrypt(pubkey, ciphertext));
+      await ensureAuth();
+      if (!userInfo?.extension && !signer) throw new Error('Read only');
+      const module = userInfo?.extension ? nostrExtension.nip04 : signer;
+      return wait(async () => await module.decrypt(pubkey, ciphertext));
     },
   },
 };
 
 export const launch = async (opt: NostrLoginOptions) => {
   // mutex
-  if (launcherPromise) await launcherPromise;
+  if (launcherPromise) {
+    try {
+      await launcherPromise;
+    } catch {}
+  }
 
   const dialog = document.createElement('dialog');
   modal = document.createElement('nl-auth');
@@ -108,12 +124,29 @@ export const launch = async (opt: NostrLoginOptions) => {
 
   if (opt.isSignInWithExtension !== undefined) {
     modal.isSignInWithExtension = opt.isSignInWithExtension;
+  } else {
+    modal.isSignInWithExtension = !!nostrExtension;
   }
+
+  modal.isLoadingExtension = false;
+  modal.isLoading = false;
 
   dialog.appendChild(modal);
   document.body.appendChild(dialog);
 
-  launcherPromise = new Promise(ok => {
+  dialog.addEventListener('close', () => {
+    // reset state
+    modal.isLoading = false;
+    modal.authUrl = '';
+    modal.error = '';
+    modal.isLoadingExtension = false;
+
+    // drop it
+    document.body.removeChild(modal.parentNode);
+    modal = null;
+  })
+
+  launcherPromise = new Promise((ok, err) => {
     const login = (name: string) => {
       // modal.error = 'Please confirm in your key storage app.';
       modal.isLoading = true;
@@ -128,13 +161,12 @@ export const launch = async (opt: NostrLoginOptions) => {
         })
         .catch(e => {
           console.log('error', e);
-          modal.isLoading = false;
           modal.error = e.toString();
         });
     };
 
     const signup = (name: string) => {
-      modal.error = 'Please confirm in your key storage app.';
+      //modal.error = 'Please confirm in your key storage app.';
       // create acc on service and get bunker url
       createAccount(name)
         // connect to bunker by url
@@ -188,6 +220,17 @@ export const launch = async (opt: NostrLoginOptions) => {
       return [available, taken, error];
     };
 
+    modal.addEventListener('handleContinue', () => {
+      modal.isLoading = true;
+      launchEnsurePopup(modal.authUrl);
+    });
+
+    modal.addEventListener('stopFetchHandler', () => {
+      modal.isLoading = false;
+      dialog.close();
+      err(new Error("Cancelled"));
+    });
+
     modal.addEventListener('nlLogin', event => {
       login(event.detail);
     });
@@ -196,8 +239,22 @@ export const launch = async (opt: NostrLoginOptions) => {
       signup(event.detail);
     });
 
-    modal.addEventListener('handleRemoveWindowNostr', () => {
-      console.log('handleRemoveWindowNostr');
+    modal.addEventListener('nlLoginExtension', async event => {
+      console.log('nostr login extension', nostrExtension);
+      if (!nostrExtension) throw new Error("No extension");
+      try {
+        modal.isLoadingExtension = true;
+        // replace our nostr with extension
+        window.nostr = nostrExtension;
+        const pubkey = await window.nostr.getPublicKey();
+        modal.isLoadingExtension = false;
+        onAuth('login', { pubkey, extension: true });
+        dialog.close();
+        ok();
+      } catch (e) {
+        console.log('test error', e);
+        modal.error = e.toString();
+      }
     });
 
     modal.addEventListener('nlCheckSignup', async event => {
@@ -217,7 +274,7 @@ export const launch = async (opt: NostrLoginOptions) => {
     modal.addEventListener('nlCloseModal', () => {
       modal.isLoading = false;
       dialog.close();
-      ok();
+      err(new Error("Cancelled"));
     });
 
     dialog.showModal();
@@ -418,10 +475,13 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
   document.body.appendChild(banner);
 };
 
-async function ensureSigner() {
+async function ensureAuth() {
   // wait until competing requests are finished
   if (signerPromise) await signerPromise;
   if (launcherPromise) await launcherPromise;
+
+  // got the sign in?
+  if (userInfo) return;
 
   // still no signer? request auth from user
   if (!signer) {
@@ -436,7 +496,11 @@ async function ensureSigner() {
 
 async function initSigner(info, { connect = false, preparePopup = false, leavePopup = false } = {}) {
   // mutex
-  if (signerPromise) await signerPromise;
+  if (signerPromise) {
+    try {
+      await signerPromise;
+    } catch {}
+  }
 
   signerPromise = new Promise(async (ok, err) => {
     try {
@@ -470,14 +534,9 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
           // if it fails we will either return 'failed'
           // to the window.nostr caller, or show proper error
           // in our modal
-          modal.authUrl = url
-          modal.isLoading = false
+          modal.authUrl = url;
+          modal.isLoading = false;
         }
-
-        modal.addEventListener('handleContinue', () => {
-          console.log('handleContinue')
-          launchEnsurePopup(url);
-        });
       });
 
       // pre-launch a popup if it won't be blocked,
@@ -519,17 +578,37 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
   return signerPromise;
 }
 
-export async function init(opt: NostrLoginOptions) {
-  // skip if it's already started or
-  // if there is nip07 extension
-  if (window.nostr) return;
+function initExtension() {
+  nostrExtension = window.nostr;
+  window.nostr = nostr;
+  // in the worst case of app saving the nostrExtension reference
+  // it will be calling it directly, not a big deal
+}
 
+export async function init(opt: NostrLoginOptions) {
+  const checkExtension = () => {
+    if (!nostrExtension && window.nostr !== nostr)
+      initExtension();
+  }
+
+  // skip if it's already started
+  if (window.nostr) {
+    checkExtension();
+    return
+  }
+
+  // set ourselves as nostr
   window.nostr = nostr;
 
+  // watch out for extension trying to overwrite us
+  setInterval(checkExtension, 100);
+
+  // force darkMode from init options
   if ('darkMode' in opt) {
     localStorage.setItem('nl-dark-mode', `${opt.darkMode}`);
   }
 
+  // launch
   if (opt.iife) {
     launchAuthBanner(opt);
   } else {
@@ -543,7 +622,11 @@ export async function init(opt: NostrLoginOptions) {
   try {
     // read conf from localstore
     const info = JSON.parse(window.localStorage.getItem(LOCALSTORE_KEY));
-    if (info && info.pubkey && info.sk && info.relays && info.relays[0]) {
+    if (!info) return;
+
+    if (info.extension && info.pubkey) {
+      onAuth('login', { pubkey: info.pubkey });
+    } else if (info.pubkey && info.sk && info.relays && info.relays[0]) {
       await initSigner(info);
       onAuth('login', info);
     } else {
@@ -593,7 +676,7 @@ function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
   userInfo = info;
   if (banner) {
     banner.userInfo = userInfo;
-    if (userInfo) banner.titleBanner = 'You are logged in';
+    if (userInfo) banner.titleBanner = info.sk ? 'You are logged in' : 'You are using extension';
     else banner.titleBanner = ''; // 'Use with Nostr';
   }
 
@@ -617,14 +700,15 @@ function onAuth(type: 'login' | 'signup' | 'logout', info: Info = null) {
     };
 
     if (type !== 'logout') {
-      options.localNsec = nip19.nsecEncode(info.sk);
+      if (info.sk) options.localNsec = nip19.nsecEncode(info.sk);
       options.relays = info.relays;
     }
 
-    if (optionsModal.onAuth) optionsModal.onAuth(npub, options);
-
     const event = new CustomEvent('nlAuth', { detail: options });
     document.dispatchEvent(event);
+
+    if (optionsModal.onAuth) optionsModal.onAuth(npub, options);
+
   } catch (e) {
     console.log('onAuth error', e);
   }
@@ -659,9 +743,13 @@ async function authNip46(type: 'login' | 'signup', name, bunkerUrl, sk = '') {
 }
 
 export async function logout() {
-  // clear localstore from user data
-  onAuth('logout');
   signer = null;
   for (const r of ndk.pool.relays.keys()) ndk.pool.removeRelay(r);
   window.localStorage.removeItem(LOCALSTORE_KEY);
+
+  // replace back
+  if (window.nostr === nostrExtension) window.nostr = nostr;
+
+  // clear localstore from user data
+  onAuth('logout');
 }
