@@ -99,6 +99,18 @@ const nostr = {
   },
 };
 
+const setExtension = async (expectedPubkey?: string) => {
+  window.nostr = nostrExtension;
+  const pubkey = await window.nostr.getPublicKey();
+  if (expectedPubkey && expectedPubkey !== pubkey) {
+    logout();
+  } else {
+    const info = { pubkey, extension: true };
+    window.localStorage.setItem(LOCALSTORE_KEY, JSON.stringify(info));
+    onAuth('login', info);
+  }
+}
+
 export const launch = async (opt: NostrLoginOptions) => {
   // mutex
   if (launcherPromise) {
@@ -134,19 +146,24 @@ export const launch = async (opt: NostrLoginOptions) => {
   dialog.appendChild(modal);
   document.body.appendChild(dialog);
 
-  dialog.addEventListener('close', () => {
-    // reset state
-    modal.isLoading = false;
-    modal.authUrl = '';
-    modal.error = '';
-    modal.isLoadingExtension = false;
-
-    // drop it
-    document.body.removeChild(modal.parentNode);
-    modal = null;
-  })
-
   launcherPromise = new Promise((ok, err) => {
+
+    dialog.addEventListener('close', () => {
+      // noop if already resolved?
+      err(new Error("Closed"))
+
+      // reset state
+      modal.isLoading = false;
+      modal.authUrl = '';
+      modal.error = '';
+      modal.isLoadingExtension = false;
+  
+      // drop it
+      document.body.removeChild(modal.parentNode);
+      modal = null;
+    })
+  
+  
     const login = (name: string) => {
       // modal.error = 'Please confirm in your key storage app.';
       modal.isLoading = true;
@@ -244,11 +261,8 @@ export const launch = async (opt: NostrLoginOptions) => {
       if (!nostrExtension) throw new Error("No extension");
       try {
         modal.isLoadingExtension = true;
-        // replace our nostr with extension
-        window.nostr = nostrExtension;
-        const pubkey = await window.nostr.getPublicKey();
+        await setExtension();
         modal.isLoadingExtension = false;
-        onAuth('login', { pubkey, extension: true });
         dialog.close();
         ok();
       } catch (e) {
@@ -441,7 +455,7 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
     const startScreen = event.detail;
     launch({
       startScreen,
-    });
+    }).catch(() => {}); // don't throw if cancelled
   });
 
   banner.addEventListener('handleLogoutBanner', () => {
@@ -459,7 +473,7 @@ const launchAuthBanner = (opt: NostrLoginOptions) => {
   });
 
   banner.addEventListener('handleOpenWelcomeModal', () => {
-    launch(optionsModal);
+    launch(optionsModal).catch(() => {});
   });
 
   banner.addEventListener('handleRetryConfirmBanner', () => {
@@ -581,6 +595,7 @@ async function initSigner(info, { connect = false, preparePopup = false, leavePo
 function initExtension() {
   nostrExtension = window.nostr;
   window.nostr = nostr;
+  if (userInfo?.extension) setExtension(userInfo.pubkey)
   // in the worst case of app saving the nostrExtension reference
   // it will be calling it directly, not a big deal
 }
@@ -625,7 +640,10 @@ export async function init(opt: NostrLoginOptions) {
     if (!info) return;
 
     if (info.extension && info.pubkey) {
-      onAuth('login', { pubkey: info.pubkey });
+      // assume we're signed in, setExtension will check if 
+      // we still have the extension and will logout if smth is wrong
+      onAuth('login', info);
+      if (nostrExtension) await setExtension(info.pubkey);
     } else if (info.pubkey && info.sk && info.relays && info.relays[0]) {
       await initSigner(info);
       onAuth('login', info);
@@ -753,3 +771,5 @@ export async function logout() {
   // clear localstore from user data
   onAuth('logout');
 }
+
+document.addEventListener('nlLogout', logout);
