@@ -22,9 +22,9 @@ export class NostrLoginInitializer {
     this.processManager = new ProcessManager(this.params);
     this.popupManager = new Popup(this.params);
     this.authNostrService = new AuthNostrService(this.params, this.popupManager);
-    this.nip46Service = new Nip46Service(this.authNostrService);
     this.extensionManager = new NostrExtensionService(this.params, this.authNostrService);
     this.accountService = new AccountService(this.params, this.authNostrService);
+    this.nip46Service = new Nip46Service(this.authNostrService);
     this.modalManager = new Modal(this.params, this.nip46Service, this.extensionManager, this.popupManager, this.accountService);
     this.test = new Test(this.params, this.modalManager);
     this.nostr = new Nostr(this.params, this.test, this.processManager);
@@ -34,7 +34,7 @@ export class NostrLoginInitializer {
   public init = async (opt: NostrLoginOptions) => {
     // skip if it's already started
     if (window.nostr) {
-      this.extensionManager.checkExtension();
+      this.extensionManager.checkExtension(this.nostr);
       return;
     }
 
@@ -44,7 +44,7 @@ export class NostrLoginInitializer {
     window.nostr = this.nostr;
 
     // watch out for extension trying to overwrite us
-    setInterval(() => this.extensionManager.checkExtension(), 100);
+    setInterval(() => this.extensionManager.checkExtension(this.nostr), 100);
 
     // force darkMode from init options
     if ('darkMode' in opt) {
@@ -70,19 +70,15 @@ export class NostrLoginInitializer {
         return;
       }
 
-      console.log('Step 1 -----------------------------');
-
       if (info.extension && info.pubkey) {
         // assume we're signed in, setExtension will check if
         // we still have the extension and will logout if smth is wrong
-        console.log('Step 2 -----------------------------');
         this.authNostrService.onAuth('login', info);
 
         if (this.params.nostrExtension) {
           await this.extensionManager.setExtension(info.pubkey);
         }
       } else if (info.pubkey && info.sk && info.relays && info.relays[0]) {
-        console.log('Step 3 -----------------------------');
         await this.authNostrService.initSigner(info);
 
         this.authNostrService.onAuth('login', info);

@@ -1,6 +1,6 @@
 import { bunkerUrlToInfo, getBunkerUrl } from '../utils';
 import { AuthNostrService, NostrParams } from './index';
-import Modal from './Modal';
+import { Response } from '../types';
 
 class AccountService {
   private authNostrService: AuthNostrService;
@@ -36,19 +36,18 @@ class AccountService {
     // the promise that it returns, so we have to provide a
     // callback and wait on it
     console.log('signer', this.params.signer);
-    const r = await new Promise(ok => {
+
+    const r: Response = await new Promise<Response>(ok => {
       this.params.signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok);
     });
 
     console.log('create_account pubkey', r);
-    // @ts-ignore
+
     if (r.result === 'error') {
-      // @ts-ignore
       throw new Error(r.error);
     }
 
     return {
-      // @ts-ignore
       bunkerUrl: `bunker://${r.result}?relay=${info.relays?.[0]}`,
       sk: info.sk, // reuse the same local key
     };

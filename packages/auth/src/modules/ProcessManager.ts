@@ -7,10 +7,8 @@ class ProcessManager {
     this.params = params;
   }
 
-  // @ts-ignore
-  public async wait(cb) {
+  public async wait(cb: () => void) {
     if (!this.params.callTimer) {
-      // @ts-ignore
       this.params.callTimer = setTimeout(() => this.onCallTimeout(), TIMEOUT);
     }
 

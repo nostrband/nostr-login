@@ -12,7 +12,7 @@ class NostrParams {
   public signerPromise: Promise<void> | null;
   public launcherPromise: Promise<void> | null;
   public callCount: number;
-  public callTimer: number | undefined;
+  public callTimer: NodeJS.Timeout | undefined;
   public banner: TypeBanner | null;
   public popup: Window | null;
   public modal: TypeModal | null;

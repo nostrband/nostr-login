@@ -1,7 +1,6 @@
 import { localStorageSetItem } from '../utils';
 import { LOCAL_STORE_KEY } from '../const';
-import { NostrLoginInitializer } from '../index';
-import { AuthNostrService, NostrParams } from './';
+import { AuthNostrService, Nostr, NostrParams } from './';
 
 class NostrExtensionService {
   private params: NostrParams;
@@ -12,19 +11,19 @@ class NostrExtensionService {
     this.authNostrService = authNostrService;
   }
 
-  public checkExtension() {
+  public checkExtension(nostr: Nostr) {
     console.log('checkExtension');
     // @ts-ignore
-    if (!this.params.nostrExtension && window.nostr !== this.nostr) {
-      this.initExtension();
+    if (!this.params.nostrExtension && window.nostr !== nostr) {
+      this.initExtension(nostr);
     }
   }
 
-  private initExtension() {
+  private initExtension(nostr: Nostr) {
     // @ts-ignore
     this.params.nostrExtension = window.nostr;
     // @ts-ignore
-    window.nostr = this.nostr;
+    window.nostr = nostr;
     if (this.params.userInfo?.extension) {
       this.setExtension(this.params.userInfo.pubkey);
     }

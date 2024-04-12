@@ -51,3 +51,8 @@ export interface IModal {
 }
 
 export type TypeModal = IModal & HTMLElement;
+
+export interface Response {
+  result?: string;
+  error?: string;
+}

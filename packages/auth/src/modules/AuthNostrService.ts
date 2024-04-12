@@ -1,8 +1,8 @@
-import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageRemoveItem, localStorageSetItem } from '../utils';
+import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageRemoveItem } from '../utils';
 import { LOCAL_STORE_KEY } from '../const';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { getPublicKey, nip19 } from 'nostr-tools';
-import { NostrLoginAuthOptions } from '../types';
+import { NostrLoginAuthOptions, Response } from '../types';
 import { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse } from '@nostr-dev-kit/ndk';
 import { NostrParams, Popup } from './';
 
@@ -41,19 +41,16 @@ class AuthNostrService {
     // the promise that it returns, so we have to provide a
     // callback and wait on it
     console.log('signer', this.params.signer);
-    const r = await new Promise(ok => {
+    const r = await new Promise<Response>(ok => {
       this.params.signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok);
     });
 
     console.log('create_account pubkey', r);
-    // @ts-ignore
     if (r.result === 'error') {
-      // @ts-ignore
       throw new Error(r.error);
     }
 
     return {
-      // @ts-ignore
       bunkerUrl: `bunker://${r.result}?relay=${info.relays?.[0]}`,
       sk: info.sk, // reuse the same local key
     };
@@ -136,20 +133,16 @@ class AuthNostrService {
 
   public async initSigner(info: Info, { connect = false, preparePopup = false, leavePopup = false } = {}) {
     // mutex
-    console.log('Step 4 -----------------------------');
     if (this.params.signerPromise) {
       try {
         await this.params.signerPromise;
       } catch {}
     }
-    console.log('Step 5 -----------------------------');
+
     this.params.signerPromise = new Promise<void>(async (ok, err) => {
-      console.log('Step 6 -----------------------------');
       try {
         if (info.relays) {
-          console.log('Step 7 -----------------------------');
           for (const r of info.relays) {
-            console.log('relay -----------------------------', r);
             this.params.ndk.addExplicitRelay(r, undefined);
           }
         }
@@ -159,13 +152,10 @@ class AuthNostrService {
         await this.params.ndk.connect();
 
         // console.log('creating signer', { info, connect });
-        console.log('this.params.signer', this.params.signer);
         // create and prepare the signer
         this.params.signer = new NDKNip46Signer(this.params.ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
-        console.log('this.params.signer', this.params.signer);
         // OAuth flow
         this.params.signer.on('authUrl', url => {
-          console.log('Step 8 -----------------------------'); // не попадает сюда
           console.log('nostr login auth url', url);
 
           if (Boolean(this.params.callTimer)) {
