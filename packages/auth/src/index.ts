@@ -1,5 +1,5 @@
 import 'nostr-login-components';
-import { Modal, AuthNostrService, NostrExtensionService, Banner, Popup, NostrParams, Nostr, ProcessManager } from './modules';
+import { Modal, AuthNostrService, NostrExtensionService, Banner, Popup, NostrParams, Nostr, ProcessManager, Test, Nip46Service, AccountService } from './modules';
 import { NostrLoginOptions } from './types';
 import { localStorageGetItem, localStorageSetItem } from './utils';
 import { LOCAL_STORE_KEY } from './const';
@@ -13,16 +13,22 @@ export class NostrLoginInitializer {
   public popupManager: Popup;
   public bannerManager: Banner;
   public modalManager: Modal;
+  public test: Test;
+  public nip46Service: Nip46Service;
+  public accountService: AccountService;
 
   constructor() {
     this.params = new NostrParams();
-    this.nostr = new Nostr(this);
-    this.popupManager = new Popup(this);
-    this.authNostrService = new AuthNostrService(this);
-    this.extensionManager = new NostrExtensionService(this);
-    this.processManager = new ProcessManager(this);
-    this.modalManager = new Modal(this);
-    this.bannerManager = new Banner(this);
+    this.processManager = new ProcessManager(this.params);
+    this.popupManager = new Popup(this.params);
+    this.authNostrService = new AuthNostrService(this.params, this.popupManager);
+    this.nip46Service = new Nip46Service(this.authNostrService);
+    this.extensionManager = new NostrExtensionService(this.params, this.authNostrService);
+    this.accountService = new AccountService(this.params, this.authNostrService);
+    this.modalManager = new Modal(this.params, this.nip46Service, this.extensionManager, this.popupManager, this.accountService);
+    this.test = new Test(this.params, this.modalManager);
+    this.nostr = new Nostr(this.params, this.test, this.processManager);
+    this.bannerManager = new Banner(this.params, this.authNostrService, this.popupManager, this.modalManager);
   }
 
   public init = async (opt: NostrLoginOptions) => {

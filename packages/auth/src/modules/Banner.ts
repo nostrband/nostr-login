@@ -8,11 +8,11 @@ class Banner {
   private popupManager: Popup;
   private modalManager: Modal;
 
-  constructor(props: NostrLoginInitializer) {
-    this.params = props.params;
-    this.authNostrService = props.authNostrService;
-    this.popupManager = props.popupManager;
-    this.modalManager = props.modalManager;
+  constructor(params: NostrParams, authNostrService: AuthNostrService, popupManager: Popup, modalManager: Modal) {
+    this.params = params;
+    this.authNostrService = authNostrService;
+    this.popupManager = popupManager;
+    this.modalManager = modalManager;
   }
 
   public launchAuthBanner(opt: NostrLoginOptions) {

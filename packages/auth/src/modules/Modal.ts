@@ -1,19 +1,21 @@
 import { NostrLoginOptions } from '../types';
 import { getBunkerUrl } from '../utils';
 import { NostrLoginInitializer } from '../index';
-import { AuthNostrService, NostrExtensionService, Popup, NostrParams } from './';
+import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Test, Nip46Service, AccountService } from './';
 
 class Modal {
   private params: NostrParams;
   private popupManager: Popup;
   private extensionManager: NostrExtensionService;
-  private authNostrService: AuthNostrService;
+  private nip46Service: Nip46Service;
+  private accountService: AccountService;
 
-  constructor(props: NostrLoginInitializer) {
-    this.params = props.params;
-    this.popupManager = props.popupManager;
-    this.extensionManager = props.extensionManager;
-    this.authNostrService = props.authNostrService;
+  constructor(params: NostrParams, nip46Service: Nip46Service, extensionManager: NostrExtensionService, popupManager: Popup, accountService: AccountService) {
+    this.params = params;
+    this.popupManager = popupManager;
+    this.extensionManager = extensionManager;
+    this.nip46Service = nip46Service;
+    this.accountService = accountService;
   }
 
   public async launch(opt: NostrLoginOptions) {
@@ -78,7 +80,7 @@ class Modal {
         // convert name to bunker url
         getBunkerUrl(name, this.params.optionsModal)
           // connect to bunker by url
-          .then(bunkerUrl => this.authNostrService.authNip46('login', name, bunkerUrl))
+          .then(bunkerUrl => this.nip46Service.authNip46('login', name, bunkerUrl))
           .then(() => {
             if (this.params.modal) {
               this.params.modal.isLoading = false;
@@ -98,10 +100,10 @@ class Modal {
       const signup = (name: string) => {
         //modal.error = 'Please confirm in your key storage app.';
         // create acc on service and get bunker url
-        this.authNostrService
+        this.accountService
           .createAccount(name)
           // connect to bunker by url
-          .then(({ bunkerUrl, sk }) => this.authNostrService.authNip46('signup', name, bunkerUrl, sk))
+          .then(({ bunkerUrl, sk }) => this.nip46Service.authNip46('signup', name, bunkerUrl, sk))
           .then(() => {
             if (this.params.modal) {
               this.params.modal.isFetchCreateAccount = false;

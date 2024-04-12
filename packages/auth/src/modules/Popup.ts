@@ -1,11 +1,10 @@
-import { NostrLoginInitializer } from '../index';
 import { NostrParams } from './';
 
 class Popup {
   private params: NostrParams;
 
-  constructor(props: NostrLoginInitializer) {
-    this.params = props.params;
+  constructor(params: NostrParams) {
+    this.params = params;
   }
 
   public ensurePopup(url?: string) {

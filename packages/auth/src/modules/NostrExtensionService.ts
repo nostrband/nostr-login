@@ -7,9 +7,9 @@ class NostrExtensionService {
   private params: NostrParams;
   private authNostrService: AuthNostrService;
 
-  constructor(props: NostrLoginInitializer) {
-    this.params = props.params;
-    this.authNostrService = props.authNostrService;
+  constructor(params: NostrParams, authNostrService: AuthNostrService) {
+    this.params = params;
+    this.authNostrService = authNostrService;
   }
 
   public checkExtension() {

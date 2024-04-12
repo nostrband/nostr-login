@@ -1,9 +1,8 @@
 import { getEventHash } from 'nostr-tools';
-import { NostrLoginInitializer } from '../index';
-import { AuthNostrService, NostrParams, ProcessManager } from './';
+import { NostrParams, ProcessManager, Test } from './';
 
 class Nostr {
-  #authNostrService: AuthNostrService;
+  #test: Test;
   #params: NostrParams;
   #processManager: ProcessManager;
   private nip04: {
@@ -11,10 +10,10 @@ class Nostr {
     decrypt: (pubkey: string, ciphertext: string) => Promise<any>;
   };
 
-  constructor(props: NostrLoginInitializer) {
-    this.#params = props.params;
-    this.#authNostrService = props.authNostrService;
-    this.#processManager = props.processManager;
+  constructor(params: NostrParams, test: Test, processManager: ProcessManager) {
+    this.#params = params;
+    this.#test = test;
+    this.#processManager = processManager;
 
     this.getPublicKey = this.getPublicKey.bind(this);
     this.signEvent = this.signEvent.bind(this);
@@ -26,7 +25,7 @@ class Nostr {
   }
 
   async getPublicKey() {
-    await this.#authNostrService.ensureAuth();
+    await this.#test.ensureAuth();
     if (this.#params.userInfo) {
       return this.#params.userInfo.pubkey;
     } else {
@@ -36,7 +35,7 @@ class Nostr {
 
   // @ts-ignore
   async signEvent(event) {
-    await this.#authNostrService.ensureAuth();
+    await this.#test.ensureAuth();
 
     if (!this.#params.userInfo?.extension && !this.#params.signer) {
       throw new Error('Read only');
@@ -62,7 +61,7 @@ class Nostr {
   }
 
   async encrypt(pubkey: string, plaintext: string) {
-    await this.#authNostrService.ensureAuth();
+    await this.#test.ensureAuth();
 
     if (!this.#params.userInfo?.extension && !this.#params.signer) {
       throw new Error('Read only');
@@ -75,7 +74,7 @@ class Nostr {
   }
 
   async decrypt(pubkey: string, ciphertext: string) {
-    await this.#authNostrService.ensureAuth();
+    await this.#test.ensureAuth();
 
     if (!this.#params.userInfo?.extension && !this.#params.signer) {
       throw new Error('Read only');

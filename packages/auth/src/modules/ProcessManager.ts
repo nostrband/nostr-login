@@ -1,11 +1,10 @@
 import { TIMEOUT } from '../const';
-import { NostrLoginInitializer } from '../index';
 import { NostrParams } from './';
 
 class ProcessManager {
   private params: NostrParams;
-  constructor(props: NostrLoginInitializer) {
-    this.params = props.params;
+  constructor(params: NostrParams) {
+    this.params = params;
   }
 
   // @ts-ignore

@@ -4,18 +4,15 @@ import { Info } from 'nostr-login-components/dist/types/types';
 import { getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions } from '../types';
 import { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse } from '@nostr-dev-kit/ndk';
-import { NostrLoginInitializer } from '../index';
-import { NostrParams, Popup, Modal } from './';
+import { NostrParams, Popup } from './';
 
 class AuthNostrService {
   private params: NostrParams;
   private popupManager: Popup;
-  private modalManager: Modal;
 
-  constructor(props: NostrLoginInitializer) {
-    this.params = props.params;
-    this.popupManager = props.popupManager;
-    this.modalManager = props.modalManager;
+  constructor(params: NostrParams, popupManager: Popup) {
+    this.params = params;
+    this.popupManager = popupManager;
   }
 
   public async createAccount(nip05: string) {
@@ -137,60 +134,6 @@ class AuthNostrService {
     }
   }
 
-  public async ensureAuth() {
-    // wait until competing requests are finished
-    if (this.params.signerPromise) {
-      await this.params.signerPromise;
-    }
-
-    if (this.params.launcherPromise) {
-      await this.params.launcherPromise;
-    }
-
-    // got the sign in?
-    if (this.params.userInfo) return;
-
-    // still no signer? request auth from user
-    if (!this.params.signer) {
-      await this.modalManager.launch({
-        ...this.params.optionsModal,
-      });
-    }
-
-    // give up
-    if (!this.params.signer) {
-      throw new Error('Rejected by user');
-    }
-  }
-
-  public async authNip46(type: 'login' | 'signup', name: string, bunkerUrl: string, sk = '') {
-    try {
-      const info = bunkerUrlToInfo(bunkerUrl, sk);
-      info.nip05 = name;
-
-      // console.log('nostr login auth info', info);
-      if (!info.pubkey || !info.sk || !info.relays?.[0]) {
-        throw new Error(`Bad bunker url ${bunkerUrl}`);
-      }
-
-      const r = await this.initSigner(info, { connect: true });
-
-      // only save after successfull login
-      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
-
-      // callback
-      this.onAuth(type, info);
-
-      // result
-      return r;
-    } catch (e) {
-      console.log('nostr login auth failed', e);
-      // make ure it's closed
-      this.popupManager.closePopup();
-      throw e;
-    }
-  }
-
   public async initSigner(info: Info, { connect = false, preparePopup = false, leavePopup = false } = {}) {
     // mutex
     console.log('Step 4 -----------------------------');
@@ -216,10 +159,10 @@ class AuthNostrService {
         await this.params.ndk.connect();
 
         // console.log('creating signer', { info, connect });
-console.log('this.params.signer', this.params.signer)
+        console.log('this.params.signer', this.params.signer);
         // create and prepare the signer
         this.params.signer = new NDKNip46Signer(this.params.ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
-        console.log('this.params.signer', this.params.signer)
+        console.log('this.params.signer', this.params.signer);
         // OAuth flow
         this.params.signer.on('authUrl', url => {
           console.log('Step 8 -----------------------------'); // не попадает сюда
