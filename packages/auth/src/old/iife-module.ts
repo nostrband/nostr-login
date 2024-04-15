@@ -1,5 +1,4 @@
-import { init } from './index';
-import { NostrLoginOptions } from './types';
+import { NostrLoginOptions, init } from './index';
 
 // wrap to hide local vars
 (() => {
