@@ -1,18 +1,50 @@
-import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageRemoveItem } from '../utils';
+import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageRemoveItem, localStorageSetItem } from '../utils';
 import { LOCAL_STORE_KEY } from '../const';
 import { Info } from 'nostr-login-components/dist/types/types';
-import { getPublicKey, nip19 } from 'nostr-tools';
+import { getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
-import { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse } from '@nostr-dev-kit/ndk';
-import { NostrParams, Popup } from './';
+import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser } from '@nostr-dev-kit/ndk';
+import { NostrParams } from './';
+import { EventEmitter } from 'tseep';
 
-class AuthNostrService {
+class AuthNostrService extends EventEmitter {
+  private ndk: NDK;
+  public profileNdk: NDK;
+  private signer: NDKNip46Signer | null = null;
   private params: NostrParams;
-  private popupManager: Popup;
+  public signerPromise?: Promise<void>
+  public launcherPromise?: Promise<void>
 
-  constructor(params: NostrParams, popupManager: Popup) {
+  constructor(params: NostrParams) {
+    super();
     this.params = params;
-    this.popupManager = popupManager;
+    this.ndk = new NDK({
+      enableOutboxModel: false,
+    });
+
+    this.profileNdk = new NDK({
+      enableOutboxModel: true,
+      explicitRelayUrls: ['wss://relay.nostr.band/all', 'wss://purplepag.es'],
+    });
+    this.profileNdk.connect();
+  }
+
+  public hasSigner() {
+    return !!this.signer;
+  }
+
+  public async waitReady() {
+    if (this.signerPromise) {
+      try {
+        await this.signerPromise;
+      } catch {}
+    }
+
+    if (this.launcherPromise) {
+      try {
+        await this.launcherPromise;
+      } catch {}
+    }
   }
 
   public async createAccount(nip05: string) {
@@ -28,7 +60,7 @@ class AuthNostrService {
     const info = bunkerUrlToInfo(bunkerUrl);
 
     // init signer to talk to the bunker (not the user!)
-    await this.initSigner(info, { preparePopup: true, leavePopup: true });
+    await this.initSigner(info);
 
     const params = [
       name,
@@ -40,9 +72,9 @@ class AuthNostrService {
     // due to a buggy sendRequest implementation it never resolves
     // the promise that it returns, so we have to provide a
     // callback and wait on it
-    console.log('signer', this.params.signer);
+    console.log('signer', this.signer);
     const r = await new Promise<Response>(ok => {
-      this.params.signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok);
+      this.signer!.rpc.sendRequest(info.pubkey, 'create_account', params, undefined, ok);
     });
 
     console.log('create_account pubkey', r);
@@ -57,19 +89,13 @@ class AuthNostrService {
   }
 
   public async logout() {
-    this.params.signer = null;
+    this.signer = null;
 
-    for (const r of this.params.ndk.pool.relays.keys()) {
-      this.params.ndk.pool.removeRelay(r);
+    for (const r of this.ndk.pool.relays.keys()) {
+      this.ndk.pool.removeRelay(r);
     }
 
     localStorageRemoveItem(LOCAL_STORE_KEY);
-
-    // replace back
-    if (window.nostr === this.params.nostrExtension) {
-      // @ts-ignore
-      window.nostr = this.nostr;
-    }
 
     // clear localstore from user data
     this.onAuth('logout');
@@ -78,18 +104,11 @@ class AuthNostrService {
   public onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
     this.params.userInfo = info;
 
-    if (this.params.banner) {
-      this.params.banner.userInfo = this.params.userInfo;
-      if (this.params.userInfo) {
-        this.params.banner.titleBanner = this.params.userInfo.sk ? 'You are logged in' : 'You are using extension';
-      } else {
-        this.params.banner.titleBanner = '';
-      } // 'Use with Nostr';
-    }
+    this.emit('onUserInfo', info);
 
     if (info) {
       // async profile fetch
-      fetchProfile(info, this.params.profileNdk).then(p => {
+      fetchProfile(info, this.profileNdk).then(p => {
         if (this.params.userInfo !== info) return;
 
         this.params.userInfo = {
@@ -97,9 +116,7 @@ class AuthNostrService {
           picture: p?.image || p?.picture,
         };
 
-        if (this.params.banner) {
-          this.params.banner.userInfo = this.params.userInfo;
-        }
+        this.emit('onUserInfo', info);
       });
     }
 
@@ -131,60 +148,35 @@ class AuthNostrService {
     }
   }
 
-  public async initSigner(info: Info, { connect = false, preparePopup = false, leavePopup = false } = {}) {
+  public async initSigner(info: Info, { connect = false } = {}) {
     // mutex
-    if (this.params.signerPromise) {
+    if (this.signerPromise) {
       try {
-        await this.params.signerPromise;
+        await this.signerPromise;
       } catch {}
     }
 
-    this.params.signerPromise = new Promise<void>(async (ok, err) => {
+    this.signerPromise = new Promise<void>(async (ok, err) => {
       try {
         if (info.relays) {
           for (const r of info.relays) {
-            this.params.ndk.addExplicitRelay(r, undefined);
+            this.ndk.addExplicitRelay(r, undefined);
           }
         }
 
         // wait until we connect, otherwise
         // signer won't start properly
-        await this.params.ndk.connect();
+        await this.ndk.connect();
 
         // console.log('creating signer', { info, connect });
         // create and prepare the signer
-        this.params.signer = new NDKNip46Signer(this.params.ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
+        this.signer = new NDKNip46Signer(this.ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
+
         // OAuth flow
-        this.params.signer.on('authUrl', url => {
+        this.signer.on('authUrl', url => {
           console.log('nostr login auth url', url);
-
-          if (Boolean(this.params.callTimer)) {
-            clearTimeout(this.params.callTimer);
-          }
-
-          if (this.params.userInfo) {
-            // show the 'Please confirm' banner
-            if (this.params.banner) {
-              // banner.isLoading = false;
-              this.params.banner.notify = {
-                confirm: Date.now(),
-                url,
-              };
-            }
-          } else {
-            // if it fails we will either return 'failed'
-            // to the window.nostr caller, or show proper error
-            // in our modal
-            if (this.params.modal) {
-              this.params.modal.authUrl = url;
-              this.params.modal.isLoading = false;
-            }
-          }
+          this.emit('onAuthUrl', url);
         });
-
-        // pre-launch a popup if it won't be blocked,
-        // only when we're expecting it
-        // if (connect || preparePopup) if (navigator.userActivation.isActive) ensurePopup(); ?????????????????
 
         // if we're doing it for the first time then
         // we should send 'connect' NIP46 request
@@ -194,10 +186,10 @@ class AuthNostrService {
           // await signer.blockUntilReady();
 
           await new Promise<void>((ok, err) => {
-            if (this.params.signer && info.sk) {
+            if (this.signer && info.sk) {
               const connectParams = [getPublicKey(info.sk), '', this.params.optionsModal.perms || ''];
 
-              this.params.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
+              this.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
                 if (response.result === 'ack') {
                   ok();
                 } else {
@@ -208,23 +200,61 @@ class AuthNostrService {
           });
         }
 
-        // console.log('created signer');
-
-        // make sure it's closed
-        if (!leavePopup) {
-          this.popupManager.closePopup();
-        }
-
         ok();
       } catch (e) {
         // make sure signer isn't set
-        this.params.signer = null;
+        this.signer = null;
         err(e);
       }
     });
 
-    return this.params.signerPromise;
+    return this.signerPromise;
   }
+
+  public async authNip46(type: 'login' | 'signup', name: string, bunkerUrl: string, sk = '') {
+    try {
+      const info = bunkerUrlToInfo(bunkerUrl, sk);
+      info.nip05 = name;
+
+      // console.log('nostr login auth info', info);
+      if (!info.pubkey || !info.sk || !info.relays?.[0]) {
+        throw new Error(`Bad bunker url ${bunkerUrl}`);
+      }
+
+      const r = await this.initSigner(info, { connect: true });
+
+      // only save after successfull login
+      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+
+      // callback
+      this.onAuth(type, info);
+
+      // result
+      return r;
+    } catch (e) {
+      console.log('nostr login auth failed', e);
+      // make ure it's closed
+      // this.popupManager.closePopup();
+      throw e;
+    }
+  }
+
+  public async signEvent(event: any) {
+    event.pubkey = this.signer?.remotePubkey;
+    event.id = getEventHash(event);
+    event.sig = await this.signer?.sign(event);
+    console.log('signed', { event });
+    return event;
+  }
+
+  public async encrypt(pubkey: string, plaintext: string) {
+    return this.signer?.encrypt(new NDKUser({ pubkey }), plaintext)
+  }
+
+  public async decrypt(pubkey: string, ciphertext: string) {
+    return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext)
+  }
+
 }
 
 export default AuthNostrService;

@@ -1,22 +1,31 @@
+import { EventEmitter } from 'tseep';
 import { TIMEOUT } from '../const';
 import { NostrParams } from './';
 
-class ProcessManager {
-  private params: NostrParams;
-  constructor(params: NostrParams) {
-    this.params = params;
+class ProcessManager extends EventEmitter {
+  private callCount: number = 0;
+  private callTimer: NodeJS.Timeout | undefined;
+
+  constructor() {
+    super()
+  }
+
+  public onAuthUrl() {
+    if (Boolean(this.callTimer)) {
+      clearTimeout(this.callTimer);
+    }
   }
 
   public async wait(cb: () => void) {
-    if (!this.params.callTimer) {
-      this.params.callTimer = setTimeout(() => this.onCallTimeout(), TIMEOUT);
+    if (!this.callTimer) {
+      this.callTimer = setTimeout(() => this.emit('onCallTimeout'), TIMEOUT);
     }
 
-    if (!this.params.callCount) {
-      await this.onCallStart();
+    if (!this.callCount) {
+      await this.emit('onCallStart');
     }
 
-    this.params.callCount++;
+    this.callCount++;
 
     let error;
     let result;
@@ -27,15 +36,15 @@ class ProcessManager {
       error = e;
     }
 
-    this.params.callCount--;
+    this.callCount--;
 
-    await this.onCallEnd();
+    await this.emit('onCallEnd');
 
-    if (this.params.callTimer) {
-      clearTimeout(this.params.callTimer);
+    if (this.callTimer) {
+      clearTimeout(this.callTimer);
     }
 
-    this.params.callTimer = undefined;
+    this.callTimer = undefined;
 
     if (error) {
       throw error;
@@ -44,26 +53,6 @@ class ProcessManager {
     return result;
   }
 
-  public async onCallTimeout() {
-    if (this.params.banner) {
-      this.params.banner.notify = {
-        confirm: Date.now(),
-        timeOut: { domain: this.params.userInfo?.nip05?.split('@')[1] },
-      };
-    }
-  }
-
-  public async onCallEnd() {
-    if (this.params.banner) {
-      this.params.banner.isLoading = false;
-    }
-  }
-
-  public async onCallStart() {
-    if (this.params.banner) {
-      this.params.banner.isLoading = true;
-    }
-  }
 }
 
 export default ProcessManager;

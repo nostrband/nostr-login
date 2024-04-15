@@ -1,40 +1,86 @@
 import 'nostr-login-components';
-import { Modal, AuthNostrService, NostrExtensionService, Banner, Popup, NostrParams, Nostr, ProcessManager, Test, Nip46Service, AccountService } from './modules';
+import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, ProcessManager, BannerManager, ModalManager } from './modules';
 import { NostrLoginOptions } from './types';
 import { localStorageGetItem, localStorageSetItem } from './utils';
 import { LOCAL_STORE_KEY } from './const';
 
 export class NostrLoginInitializer {
-  public extensionManager: NostrExtensionService;
+  public extensionService: NostrExtensionService;
   public params: NostrParams;
   public authNostrService: AuthNostrService;
   public nostr: Nostr;
   public processManager: ProcessManager;
   public popupManager: Popup;
-  public bannerManager: Banner;
-  public modalManager: Modal;
-  public test: Test;
-  public nip46Service: Nip46Service;
-  public accountService: AccountService;
+  public bannerManager: BannerManager;
+  public modalManager: ModalManager;
 
   constructor() {
     this.params = new NostrParams();
-    this.processManager = new ProcessManager(this.params);
-    this.popupManager = new Popup(this.params);
-    this.authNostrService = new AuthNostrService(this.params, this.popupManager);
-    this.extensionManager = new NostrExtensionService(this.params, this.authNostrService);
-    this.accountService = new AccountService(this.params, this.authNostrService);
-    this.nip46Service = new Nip46Service(this.authNostrService);
-    this.modalManager = new Modal(this.params, this.nip46Service, this.extensionManager, this.popupManager, this.accountService);
-    this.test = new Test(this.params, this.modalManager);
-    this.nostr = new Nostr(this.params, this.test, this.processManager);
-    this.bannerManager = new Banner(this.params, this.authNostrService, this.popupManager, this.modalManager);
+    this.processManager = new ProcessManager();
+    this.popupManager = new Popup();
+    this.bannerManager = new BannerManager(this.params);
+    this.authNostrService = new AuthNostrService(this.params);
+    this.extensionService = new NostrExtensionService(this.params, this.authNostrService);
+    this.modalManager = new ModalManager(this.params, this.authNostrService, this.extensionService);
+    this.nostr = new Nostr(this.params, this.processManager, this.extensionService, this.authNostrService, this.modalManager);
+
+    this.processManager.on('onCallTimeout', () => {
+      this.bannerManager.onCallTimeout();
+    });
+
+    this.processManager.on('onCallEnd', () => {
+      this.bannerManager.onCallEnd();
+    });
+
+    this.processManager.on('onCallStart', () => {
+      this.bannerManager.onCallStart();
+    });
+
+    this.authNostrService.on('onAuthUrl', url => {
+      this.processManager.onAuthUrl();
+
+      if (this.params.userInfo) {
+        // show the 'Please confirm' banner
+        this.bannerManager.onAuthUrl(url);
+      } else {
+        // if it fails we will either return 'failed'
+        // to the window.nostr caller, or show proper error
+        // in our modal
+        this.modalManager.onAuthUrl(url);
+      }
+    });
+
+    this.authNostrService.on('onUserInfo', info => {
+      this.bannerManager.onUserInfo(info);
+    });
+
+    this.modalManager.on('onAuthUrlClick', url => {
+      this.popupManager.ensurePopup(url);
+    });
+
+    this.bannerManager.on('logout', () => {
+      this.authNostrService.logout();
+    });
+
+    this.bannerManager.on('onAuthUrlClick', url => {
+      this.popupManager.ensurePopup(url);
+    });
+
+    this.bannerManager.on('launch', startScreen => {
+      const options = startScreen
+        ? {
+            startScreen,
+          }
+        : this.params.optionsModal;
+
+      this.modalManager.launch(options).catch(() => {}); // don't throw if cancelled
+    });
   }
 
   public init = async (opt: NostrLoginOptions) => {
     // skip if it's already started
     if (window.nostr) {
-      this.extensionManager.checkExtension(this.nostr);
+      this.extensionService.checkExtension(this.nostr);
       return;
     }
 
@@ -44,7 +90,7 @@ export class NostrLoginInitializer {
     window.nostr = this.nostr;
 
     // watch out for extension trying to overwrite us
-    setInterval(() => this.extensionManager.checkExtension(this.nostr), 100);
+    setInterval(() => this.extensionService.checkExtension(this.nostr), 100);
 
     // force darkMode from init options
     if ('darkMode' in opt) {
@@ -75,9 +121,7 @@ export class NostrLoginInitializer {
         // we still have the extension and will logout if smth is wrong
         this.authNostrService.onAuth('login', info);
 
-        if (this.params.nostrExtension) {
-          await this.extensionManager.setExtension(info.pubkey);
-        }
+        await this.extensionService.trySetExtensionForPubkey(info.pubkey);
       } else if (info.pubkey && info.sk && info.relays && info.relays[0]) {
         await this.authNostrService.initSigner(info);
 
@@ -93,6 +137,9 @@ export class NostrLoginInitializer {
   };
 
   public logout = async () => {
+    // replace back
+    this.extensionService.unsetExtension();
+
     await this.authNostrService.logout();
   };
 }

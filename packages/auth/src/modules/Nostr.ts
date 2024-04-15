@@ -1,19 +1,22 @@
-import { getEventHash } from 'nostr-tools';
-import { NostrParams, ProcessManager, Test } from './';
+import { AuthNostrService, ModalManager, NostrExtensionService, NostrParams, ProcessManager } from './';
 
 class Nostr {
-  #test: Test;
   #params: NostrParams;
   #processManager: ProcessManager;
+  #authNostrService: AuthNostrService;
+  #extensionService: NostrExtensionService;
+  #modalManager: ModalManager;
   private nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<any>;
     decrypt: (pubkey: string, ciphertext: string) => Promise<any>;
   };
 
-  constructor(params: NostrParams, test: Test, processManager: ProcessManager) {
+  constructor(params: NostrParams, processManager: ProcessManager, extensionService: NostrExtensionService, authNostrService: AuthNostrService, modalManager: ModalManager) {
     this.#params = params;
-    this.#test = test;
     this.#processManager = processManager;
+    this.#extensionService = extensionService;
+    this.#authNostrService = authNostrService;
+    this.#modalManager = modalManager;
 
     this.getPublicKey = this.getPublicKey.bind(this);
     this.signEvent = this.signEvent.bind(this);
@@ -24,8 +27,29 @@ class Nostr {
     };
   }
 
+  private async ensureAuth() {
+    // wait until competing requests are finished
+    await this.#authNostrService.waitReady()
+    await this.#modalManager.waitReady()
+
+    // got the sign in?
+    if (this.#params.userInfo) return;
+
+    // still no signer? request auth from user
+    if (!this.#authNostrService.hasSigner()) {
+      await this.#modalManager.launch({
+        ...this.#params.optionsModal,
+      });
+    }
+
+    // give up
+    if (!this.#authNostrService.hasSigner()) {
+      throw new Error('Rejected by user');
+    }
+  }
+
   async getPublicKey() {
-    await this.#test.ensureAuth();
+    await this.ensureAuth();
     if (this.#params.userInfo) {
       return this.#params.userInfo.pubkey;
     } else {
@@ -35,24 +59,15 @@ class Nostr {
 
   // @ts-ignore
   async signEvent(event) {
-    await this.#test.ensureAuth();
+    await this.ensureAuth();
 
-    if (!this.#params.userInfo?.extension && !this.#params.signer) {
+    if (!this.#params.userInfo?.extension && !this.#authNostrService.hasSigner()) {
       throw new Error('Read only');
     }
 
-    return this.#processManager.wait(async () => {
-      if (this.#params.userInfo?.extension) {
-        // @ts-ignore
-        return await this.#params.nostrExtension.signEvent(event);
-      } else {
-        event.pubkey = this.#params.signer?.remotePubkey;
-        event.id = getEventHash(event);
-        event.sig = await this.#params.signer?.sign(event);
-        console.log('signed', { event });
-        return event;
-      }
-    });
+    const module = this.#params.userInfo?.extension ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
+
+    return this.#processManager.wait(async () => await module.signEvent(event));
   }
 
   async getRelays() {
@@ -61,27 +76,27 @@ class Nostr {
   }
 
   async encrypt(pubkey: string, plaintext: string) {
-    await this.#test.ensureAuth();
+    await this.ensureAuth();
 
-    if (!this.#params.userInfo?.extension && !this.#params.signer) {
+    if (!this.#params.userInfo?.extension && !this.#authNostrService.hasSigner()) {
       throw new Error('Read only');
     }
 
     // @ts-ignore
-    const module = this.#params.userInfo?.extension ? this.#params.nostrExtension.nip04 : this.#params.signer;
+    const module = this.#params.userInfo?.extension ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
 
     return this.#processManager.wait(async () => await module.encrypt(pubkey, plaintext));
   }
 
   async decrypt(pubkey: string, ciphertext: string) {
-    await this.#test.ensureAuth();
+    await this.ensureAuth();
 
-    if (!this.#params.userInfo?.extension && !this.#params.signer) {
+    if (!this.#params.userInfo?.extension && !this.#authNostrService.hasSigner()) {
       throw new Error('Read only');
     }
 
     // @ts-ignore
-    const module = this.#params.userInfo?.extension ? this.#params.nostrExtension.nip04 : this.#params.signer;
+    const module = this.#params.userInfo?.extension ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
 
     return this.#processManager.wait(async () => await module.decrypt(pubkey, ciphertext));
   }
