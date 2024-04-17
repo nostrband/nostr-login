@@ -120,6 +120,9 @@ export class NostrLoginInitializer {
         await this.authNostrService.initSigner(info);
 
         this.authNostrService.onAuth('login', info);
+      } else if (info.pubkey) {
+        // read only
+        this.authNostrService.onAuth('login', info);
       } else {
         console.log('nostr login bad stored info', info);
       }

@@ -28,7 +28,7 @@ class BannerManager extends EventEmitter {
     if (this.banner) {
       this.banner.userInfo = info;
       if (info) {
-        this.banner.titleBanner = info.sk ? 'You are logged in' : 'You are using extension';
+        this.banner.titleBanner = info.extension ? 'You are using extension' : info.sk ? 'You are logged in' : 'You are read only';
       } else {
         this.banner.titleBanner = '';
       } // 'Use with Nostr';

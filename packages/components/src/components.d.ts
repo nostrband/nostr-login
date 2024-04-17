@@ -247,7 +247,7 @@ declare global {
         new (): HTMLNlSigninBunkerUrlElement;
     };
     interface HTMLNlSigninReadOnlyElementEventMap {
-        "nlLogin": string;
+        "nlLoginReadOnly": string;
         "nlCheckLogin": string;
     }
     interface HTMLNlSigninReadOnlyElement extends Components.NlSigninReadOnly, HTMLStencilElement {
@@ -382,7 +382,7 @@ declare namespace LocalJSX {
     interface NlSigninReadOnly {
         "description"?: string;
         "onNlCheckLogin"?: (event: NlSigninReadOnlyCustomEvent<string>) => void;
-        "onNlLogin"?: (event: NlSigninReadOnlyCustomEvent<string>) => void;
+        "onNlLoginReadOnly"?: (event: NlSigninReadOnlyCustomEvent<string>) => void;
         "titleLogin"?: string;
     }
     interface NlSignup {

@@ -47,6 +47,12 @@ class AuthNostrService extends EventEmitter {
     }
   }
 
+  public setReadOnly(pubkey: string) {
+    const info = { pubkey };
+    localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+    this.onAuth('login', info);
+  }
+
   public async createAccount(nip05: string) {
     const [name, domain] = nip05.split('@');
     // we're gonna need it

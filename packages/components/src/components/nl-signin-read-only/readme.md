@@ -7,18 +7,18 @@
 
 ## Properties
 
-| Property      | Attribute     | Description | Type     | Default                              |
-| ------------- | ------------- | ----------- | -------- | ------------------------------------ |
-| `description` | `description` |             | `string` | `'Please enter your read only key.'` |
-| `titleLogin`  | `title-login` |             | `string` | `'Log in read only'`                 |
+| Property      | Attribute     | Description | Type     | Default                                                   |
+| ------------- | ------------- | ----------- | -------- | --------------------------------------------------------- |
+| `description` | `description` |             | `string` | `'Please enter the user name or npub of any Nostr user.'` |
+| `titleLogin`  | `title-login` |             | `string` | `'Log in to read only'`                                   |
 
 
 ## Events
 
-| Event          | Description | Type                  |
-| -------------- | ----------- | --------------------- |
-| `nlCheckLogin` |             | `CustomEvent<string>` |
-| `nlLogin`      |             | `CustomEvent<string>` |
+| Event             | Description | Type                  |
+| ----------------- | ----------- | --------------------- |
+| `nlCheckLogin`    |             | `CustomEvent<string>` |
+| `nlLoginReadOnly` |             | `CustomEvent<string>` |
 
 
 ## Dependencies
