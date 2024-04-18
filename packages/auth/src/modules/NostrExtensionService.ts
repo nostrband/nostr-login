@@ -20,11 +20,11 @@ class NostrExtensionService {
   }
 
   public getExtension() {
-    return this.nostrExtension
+    return this.nostrExtension;
   }
 
   public hasExtension() {
-    return !!this.nostrExtension
+    return !!this.nostrExtension;
   }
 
   private initExtension(nostr: Nostr) {
@@ -42,12 +42,12 @@ class NostrExtensionService {
 
   public async trySetExtensionForPubkey(expectedPubkey: string) {
     if (this.nostrExtension) {
-      this.setExtensionReadPubkey(expectedPubkey)
+      this.setExtensionReadPubkey(expectedPubkey);
     }
   }
 
   public async setExtension() {
-    this.setExtensionReadPubkey()
+    this.setExtensionReadPubkey();
   }
 
   public unsetExtension() {

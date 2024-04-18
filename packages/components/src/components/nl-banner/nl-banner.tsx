@@ -25,6 +25,7 @@ export class NlBanner {
   @Prop() notify: { confirm: number; url?: string; timeOut?: { link: string } } | null = null;
   @State() isNotConfirmToSend: boolean = false;
   @Prop() userInfo: Info | null = null;
+  @Prop({ mutable: true }) accounts: Info[] = [];
 
   @Event() handleRetryConfirmBanner: EventEmitter<string>;
   @Event() handleNotifyConfirmBanner: EventEmitter<string>;
@@ -54,7 +55,11 @@ export class NlBanner {
   watchPropHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
     this.themeState = newValue;
   }
+
   connectedCallback() {
+    setTimeout(() => {
+      this.accounts = JSON.parse(localStorage.getItem('logged_in_accounts'))
+    }, 0)
     this.themeState = this.nlTheme;
     const getDarkMode = localStorage.getItem('nl-dark-mode');
 
@@ -126,7 +131,7 @@ export class NlBanner {
       <div class={`theme-${this.themeState}`}>
         <div class={this.darkMode && 'dark'}>
           <div
-            class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block overflow-hidden gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}
+            class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}
           >
             <div class="block w-[48px] h-[46px] relative z-10">
               <div onClick={() => this.handleOpen()} class="flex w-52 h-[46px] items-center pl-[11px]">
@@ -234,6 +239,9 @@ export class NlBanner {
               ) : (
                 <div>
                   <div>
+                    <div class="mb-2">
+                      <nl-change-account currentAccount={this.userInfo?.pubkey} accounts={this.accounts} />
+                    </div>
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     {Boolean(this.listNotifies.length) && (
                       <div

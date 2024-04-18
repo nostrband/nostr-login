@@ -7,7 +7,7 @@ class ProcessManager extends EventEmitter {
   private callTimer: NodeJS.Timeout | undefined;
 
   constructor() {
-    super()
+    super();
   }
 
   public onAuthUrl() {
@@ -52,7 +52,6 @@ class ProcessManager extends EventEmitter {
 
     return result;
   }
-
 }
 
 export default ProcessManager;

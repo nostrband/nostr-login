@@ -1,7 +1,5 @@
 # nl-auth
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -50,6 +48,7 @@ graph TD;
   nl-auth --> nl-signin-read-only
   nl-auth --> nl-signin-bunker-url
   nl-auth --> nl-loading
+  nl-welcome --> nl-change-account
   nl-welcome --> button-base
   nl-signin --> button-base
   nl-signup --> nl-select

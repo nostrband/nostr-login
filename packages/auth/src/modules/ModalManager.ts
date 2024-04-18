@@ -11,7 +11,7 @@ class ModalManager extends EventEmitter {
   private launcherPromise?: Promise<void>;
 
   constructor(params: NostrParams, authNostrService: AuthNostrService, extensionManager: NostrExtensionService) {
-    super()
+    super();
     this.params = params;
     this.extensionService = extensionManager;
     this.authNostrService = authNostrService;

@@ -3,8 +3,7 @@ import { NostrParams } from './';
 class Popup {
   private popup: Window | null = null;
 
-  constructor() {
-  }
+  constructor() {}
 
   public ensurePopup(url?: string) {
     // user might have closed it already

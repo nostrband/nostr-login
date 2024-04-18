@@ -1,5 +1,5 @@
-import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageRemoveItem, localStorageSetItem } from '../utils';
-import { LOCAL_STORE_KEY } from '../const';
+import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageGetItem, localStorageRemoveItem, localStorageSetItem } from '../utils';
+import { LOCAL_STORE_KEY, LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
@@ -12,8 +12,8 @@ class AuthNostrService extends EventEmitter {
   public profileNdk: NDK;
   private signer: NDKNip46Signer | null = null;
   private params: NostrParams;
-  public signerPromise?: Promise<void>
-  public launcherPromise?: Promise<void>
+  public signerPromise?: Promise<void>;
+  public launcherPromise?: Promise<void>;
 
   constructor(params: NostrParams) {
     super();
@@ -102,6 +102,11 @@ class AuthNostrService extends EventEmitter {
   }
 
   public onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
+    if (info?.pubkey !== this.params.userInfo?.pubkey) {
+      const event = new CustomEvent('nlAuth', { detail: {type: 'logout'} });
+      document.dispatchEvent(event);
+    }
+
     this.params.userInfo = info;
 
     this.emit('onUserInfo', info);
@@ -226,6 +231,25 @@ class AuthNostrService extends EventEmitter {
       // only save after successfull login
       localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
 
+      const loggedInAccounts = localStorageGetItem(LOGGED_IN_ACCOUNTS);
+      let accounts: Info[] = [];
+
+      if (loggedInAccounts) {
+        const index = loggedInAccounts.findIndex((el: Info) => el.pubkey === info.pubkey)
+
+        if (index !== -1) {
+          accounts = [...loggedInAccounts];
+          accounts[index] = info
+        } else {
+          accounts = [...loggedInAccounts, info];
+        }
+      } else {
+        accounts = [info];
+      }
+
+      localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(accounts));
+      this.emit('onSetAccounts', accounts);
+
       // callback
       this.onAuth(type, info);
 
@@ -248,13 +272,12 @@ class AuthNostrService extends EventEmitter {
   }
 
   public async encrypt(pubkey: string, plaintext: string) {
-    return this.signer?.encrypt(new NDKUser({ pubkey }), plaintext)
+    return this.signer?.encrypt(new NDKUser({ pubkey }), plaintext);
   }
 
   public async decrypt(pubkey: string, ciphertext: string) {
-    return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext)
+    return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext);
   }
-
 }
 
 export default AuthNostrService;

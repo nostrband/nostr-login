@@ -107,6 +107,10 @@
   @apply text-gray-800 hover:bg-gray-200;
 }
 
+.theme-default .nl-select-option.active-option {
+  @apply text-blue-900 bg-gray-300;
+}
+
 .theme-default .dark .nl-select-option {
   @apply text-gray-400 hover:bg-gray-800 hover:text-gray-300;
 }

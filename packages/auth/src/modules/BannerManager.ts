@@ -1,7 +1,9 @@
 import { NostrLoginOptions, TypeBanner } from '../types';
-import { ModalManager, NostrParams, Popup, AuthNostrService } from '.';
+import { NostrParams } from '.';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { EventEmitter } from 'tseep';
+import { localStorageGetItem } from '../utils';
+import { LOGGED_IN_ACCOUNTS } from '../const';
 
 class BannerManager extends EventEmitter {
   private banner: TypeBanner | null = null;
@@ -56,6 +58,12 @@ class BannerManager extends EventEmitter {
     }
   }
 
+  public onSetAccounts(accounts: Info[]) {
+    if (this.banner) {
+      this.banner.accounts = accounts;
+    }
+  }
+
   public launchAuthBanner(opt: NostrLoginOptions) {
     this.banner = document.createElement('nl-banner');
 
@@ -77,6 +85,10 @@ class BannerManager extends EventEmitter {
       if (this.banner) {
         this.banner.listNotifies = this.listNotifies;
       }
+    });
+
+    this.banner.addEventListener('handleSwitchAccount', (event: any) => {
+      this.emit('onSwitchAccount', event.detail);
     });
 
     this.banner.addEventListener('handleOpenWelcomeModal', () => {

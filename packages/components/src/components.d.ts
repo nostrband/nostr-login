@@ -5,10 +5,10 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { NlTheme } from "./types/index";
+import { Info as Info1, NlTheme } from "./types/index";
 import { Info } from "./types";
 import { OptionType } from "./components/nl-select/nl-select";
-export { NlTheme } from "./types/index";
+export { Info as Info1, NlTheme } from "./types/index";
 export { Info } from "./types";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
@@ -27,6 +27,7 @@ export namespace Components {
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlBanner {
+        "accounts": Info[];
         "isLoading": boolean;
         "listNotifies": string[];
         "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
@@ -38,6 +39,12 @@ export namespace Components {
         "disabled": boolean;
         "nlTheme": NlTheme;
         "titleBtn": string;
+    }
+    interface NlChangeAccount {
+        "accounts": Info[];
+        "currentAccount": string;
+        "darkMode": boolean;
+        "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlInfo {
     }
@@ -81,6 +88,10 @@ export interface NlAuthCustomEvent<T> extends CustomEvent<T> {
 export interface NlBannerCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlBannerElement;
+}
+export interface NlChangeAccountCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlChangeAccountElement;
 }
 export interface NlLoadingCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -162,6 +173,24 @@ declare global {
     var HTMLNlButtonElement: {
         prototype: HTMLNlButtonElement;
         new (): HTMLNlButtonElement;
+    };
+    interface HTMLNlChangeAccountElementEventMap {
+        "handleOpenWelcomeModal": string;
+        "handleSwitchAccount": Info;
+    }
+    interface HTMLNlChangeAccountElement extends Components.NlChangeAccount, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlChangeAccountElementEventMap>(type: K, listener: (this: HTMLNlChangeAccountElement, ev: NlChangeAccountCustomEvent<HTMLNlChangeAccountElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlChangeAccountElementEventMap>(type: K, listener: (this: HTMLNlChangeAccountElement, ev: NlChangeAccountCustomEvent<HTMLNlChangeAccountElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlChangeAccountElement: {
+        prototype: HTMLNlChangeAccountElement;
+        new (): HTMLNlChangeAccountElement;
     };
     interface HTMLNlInfoElement extends Components.NlInfo, HTMLStencilElement {
     }
@@ -305,6 +334,7 @@ declare global {
         "nl-auth": HTMLNlAuthElement;
         "nl-banner": HTMLNlBannerElement;
         "nl-button": HTMLNlButtonElement;
+        "nl-change-account": HTMLNlChangeAccountElement;
         "nl-info": HTMLNlInfoElement;
         "nl-info-extension": HTMLNlInfoExtensionElement;
         "nl-loading": HTMLNlLoadingElement;
@@ -334,6 +364,7 @@ declare namespace LocalJSX {
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlBanner {
+        "accounts"?: Info[];
         "isLoading"?: boolean;
         "listNotifies"?: string[];
         "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
@@ -351,6 +382,14 @@ declare namespace LocalJSX {
         "disabled"?: boolean;
         "nlTheme"?: NlTheme;
         "titleBtn"?: string;
+    }
+    interface NlChangeAccount {
+        "accounts"?: Info[];
+        "currentAccount"?: string;
+        "darkMode"?: boolean;
+        "onHandleOpenWelcomeModal"?: (event: NlChangeAccountCustomEvent<string>) => void;
+        "onHandleSwitchAccount"?: (event: NlChangeAccountCustomEvent<Info>) => void;
+        "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlInfo {
     }
@@ -404,6 +443,7 @@ declare namespace LocalJSX {
         "nl-auth": NlAuth;
         "nl-banner": NlBanner;
         "nl-button": NlButton;
+        "nl-change-account": NlChangeAccount;
         "nl-info": NlInfo;
         "nl-info-extension": NlInfoExtension;
         "nl-loading": NlLoading;
@@ -423,6 +463,7 @@ declare module "@stencil/core" {
             "nl-auth": LocalJSX.NlAuth & JSXBase.HTMLAttributes<HTMLNlAuthElement>;
             "nl-banner": LocalJSX.NlBanner & JSXBase.HTMLAttributes<HTMLNlBannerElement>;
             "nl-button": LocalJSX.NlButton & JSXBase.HTMLAttributes<HTMLNlButtonElement>;
+            "nl-change-account": LocalJSX.NlChangeAccount & JSXBase.HTMLAttributes<HTMLNlChangeAccountElement>;
             "nl-info": LocalJSX.NlInfo & JSXBase.HTMLAttributes<HTMLNlInfoElement>;
             "nl-info-extension": LocalJSX.NlInfoExtension & JSXBase.HTMLAttributes<HTMLNlInfoExtensionElement>;
             "nl-loading": LocalJSX.NlLoading & JSXBase.HTMLAttributes<HTMLNlLoadingElement>;

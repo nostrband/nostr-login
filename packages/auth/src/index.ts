@@ -2,7 +2,7 @@ import 'nostr-login-components';
 import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, ProcessManager, BannerManager, ModalManager } from './modules';
 import { NostrLoginOptions } from './types';
 import { localStorageGetItem, localStorageSetItem } from './utils';
-import { LOCAL_STORE_KEY } from './const';
+import {LOCAL_STORE_KEY} from './const';
 
 export class NostrLoginInitializer {
   public extensionService: NostrExtensionService;
@@ -50,6 +50,10 @@ export class NostrLoginInitializer {
       }
     });
 
+    this.authNostrService.on('onSetAccounts', accounts => {
+      this.bannerManager.onSetAccounts(accounts);
+    });
+
     this.authNostrService.on('onUserInfo', info => {
       this.bannerManager.onUserInfo(info);
     });
@@ -64,6 +68,12 @@ export class NostrLoginInitializer {
 
     this.bannerManager.on('onAuthUrlClick', url => {
       this.popupManager.ensurePopup(url);
+    });
+
+    this.bannerManager.on('onSwitchAccount', async (info) => {
+      await this.authNostrService.initSigner(info);
+
+      this.authNostrService.onAuth("login", info);
     });
 
     this.bannerManager.on('launch', startScreen => {

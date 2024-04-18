@@ -29,8 +29,8 @@ class Nostr {
 
   private async ensureAuth() {
     // wait until competing requests are finished
-    await this.#authNostrService.waitReady()
-    await this.#modalManager.waitReady()
+    await this.#authNostrService.waitReady();
+    await this.#modalManager.waitReady();
 
     // got the sign in?
     if (this.#params.userInfo) return;
