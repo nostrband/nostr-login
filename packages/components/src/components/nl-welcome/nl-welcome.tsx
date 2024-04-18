@@ -96,7 +96,7 @@ export class NlWelcome {
                 />
               </svg>
             </button-base>
-            {/* <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_READ_ONLY)} titleBtn="Sign in to read only">
+            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_READ_ONLY)} titleBtn="Sign in to read only">
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -105,7 +105,7 @@ export class NlWelcome {
                 />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
-            </button-base> */}
+            </button-base>
           </div>
 
           <div class="nl-divider py-3 flex items-center text-xs uppercase before:flex-[1_1_0%] before:border-t before:me-6 after:flex-[1_1_0%] after:border-t  after:ms-6">Or</div>

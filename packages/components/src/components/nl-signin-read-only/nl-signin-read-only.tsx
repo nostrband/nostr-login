@@ -7,11 +7,11 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlSigninReadOnly {
-  @Prop() titleLogin = 'Log in read only';
-  @Prop() description = 'Please enter your read only key.';
+  @Prop() titleLogin = 'Log in to read only';
+  @Prop() description = 'Please enter the user name or npub of any Nostr user.';
   @State() isGood = false;
 
-  @Event() nlLogin: EventEmitter<string>;
+  @Event() nlLoginReadOnly: EventEmitter<string>;
   @Event() nlCheckLogin: EventEmitter<string>;
 
   handleInputChange(event: Event) {
@@ -21,8 +21,8 @@ export class NlSigninReadOnly {
 
   handleLogin(e: MouseEvent) {
     e.preventDefault();
-
-    this.nlLogin.emit(state.nlSigninReadOnly.loginName);
+console.log("emit nlLoginReadOnly", state.nlSigninReadOnly.loginName)
+    this.nlLoginReadOnly.emit(state.nlSigninReadOnly.loginName);
   }
 
   render() {

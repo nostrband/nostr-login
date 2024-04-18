@@ -88,19 +88,13 @@ export class NostrLoginInitializer {
   }
 
   public init = async (opt: NostrLoginOptions) => {
-    // skip if it's already started
-    if (window.nostr) {
-      this.extensionService.checkExtension(this.nostr);
-      return;
-    }
+    // watch for extension trying to overwrite our window.nostr
+    this.extensionService.startCheckingExtension(this.nostr);
 
     // set ourselves as nostr
 
     // @ts-ignore
     window.nostr = this.nostr;
-
-    // watch out for extension trying to overwrite us
-    setInterval(() => this.extensionService.checkExtension(this.nostr), 100);
 
     // force darkMode from init options
     if ('darkMode' in opt) {
@@ -135,6 +129,9 @@ export class NostrLoginInitializer {
       } else if (info.pubkey && info.sk && info.relays && info.relays[0]) {
         await this.authNostrService.initSigner(info);
 
+        this.authNostrService.onAuth('login', info);
+      } else if (info.pubkey) {
+        // read only
         this.authNostrService.onAuth('login', info);
       } else {
         console.log('nostr login bad stored info', info);
