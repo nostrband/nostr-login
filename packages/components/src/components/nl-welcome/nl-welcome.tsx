@@ -8,8 +8,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlWelcome {
-  @Prop() titleWelcome = 'Welcome!';
-  @Prop() description = 'This app is part of the Nostr network. Log in with your Nostr account or join the network.';
+  @Prop() titleWelcome = 'Join Nostr!';
+  @Prop() description = 'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.';
   @Prop() isSignInWithExtension = true;
 
   @State() isOpenAdvancedLogin: boolean = false;

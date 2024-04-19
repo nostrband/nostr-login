@@ -8,8 +8,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlPreviouslyLogged {
-  @Prop() titlePage = 'Previously logged';
-  @Prop() description = 'You can switch between active accounts or use them under pre-existing accounts.';
+  @Prop() titlePage = 'Your accounts';
+  @Prop() description = 'Switch between active accounts or choose recent ones for fast login.';
 
   @State() accounts: Info[] = [];
   @State() recents: RecentType[] = [];
@@ -89,7 +89,7 @@ export class NlPreviouslyLogged {
                       </div>
                       <div class="truncate overflow-hidden">{userName}</div>
                     </div>
-                    <div class="w-full max-w-6">
+                    {/* <div class="w-full max-w-6">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full hover:text-blue-600">
                         <path
                           stroke-linecap="round"
@@ -97,7 +97,7 @@ export class NlPreviouslyLogged {
                           d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
                         />
                       </svg>
-                    </div>
+                    </div> */}
                   </li>
                 );
               })}
@@ -145,13 +145,13 @@ export class NlPreviouslyLogged {
                       <div class="truncate overflow-hidden">{userName}</div>
                     </div>
                     <div class="flex gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 hover:text-gray-600">
+                      {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 hover:text-gray-600">
                         <path
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
                         />
-                      </svg>
+                      </svg> */}
 
                       <svg
                         onClick={e => {
@@ -181,9 +181,9 @@ export class NlPreviouslyLogged {
 
         <div class="p-4 overflow-y-auto">
           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-            You can choose a different login{' '}
+            You can also{' '}
             <span onClick={() => this.handleGoToWelcome()} class="cursor-pointer text-blue-400">
-              method
+              add another account
             </span>
             .
           </p>

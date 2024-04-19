@@ -5,10 +5,10 @@
 
 ## Properties
 
-| Property      | Attribute     | Description | Type     | Default                                                                             |
-| ------------- | ------------- | ----------- | -------- | ----------------------------------------------------------------------------------- |
-| `description` | `description` |             | `string` | `'You can switch between active accounts or use them under pre-existing accounts.'` |
-| `titlePage`   | `title-page`  |             | `string` | `'Previously logged'`                                                               |
+| Property      | Attribute     | Description | Type     | Default                                                                  |
+| ------------- | ------------- | ----------- | -------- | ------------------------------------------------------------------------ |
+| `description` | `description` |             | `string` | `'Switch between active accounts or choose recent ones for fast login.'` |
+| `titlePage`   | `title-page`  |             | `string` | `'Your accounts'`                                                        |
 
 
 ## Events

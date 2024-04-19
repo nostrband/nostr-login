@@ -244,10 +244,10 @@ export class NlBanner {
               ) : (
                 <div>
                   <div>
+                    {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     <div class="mb-2">
                       <nl-change-account currentAccount={this.userInfo?.pubkey} accounts={this.accounts} />
                     </div>
-                    {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     {Boolean(this.listNotifies.length) && (
                       <div
                         onClick={() => this.handleRetryConfirm()}
