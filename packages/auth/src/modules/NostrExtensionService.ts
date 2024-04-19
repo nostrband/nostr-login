@@ -12,9 +12,16 @@ class NostrExtensionService {
     this.authNostrService = authNostrService;
   }
 
-  public checkExtension(nostr: Nostr) {
+  public startCheckingExtension(nostr: Nostr) {
+    this.checkExtension(nostr);
+
+    // watch out for extension trying to overwrite us
+    setInterval(() => this.checkExtension(nostr), 100);
+  }
+
+  private checkExtension(nostr: Nostr) {
     // @ts-ignore
-    if (!this.nostrExtension && window.nostr !== nostr) {
+    if (!this.nostrExtension && window.nostr && window.nostr !== nostr) {
       this.initExtension(nostr);
     }
   }

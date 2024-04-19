@@ -1,9 +1,10 @@
-import { NostrLoginOptions, RecentType, TypeModal } from '../types';
-import { getBunkerUrl, localStorageGetItem } from '../utils';
-import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
+import {NostrLoginOptions, RecentType, TypeModal} from '../types';
+import {getBunkerUrl, localStorageGetItem} from '../utils';
+import { AuthNostrService, NostrExtensionService, Popup, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
 import { Info } from 'nostr-login-components/dist/types/types';
+import { nip19 } from 'nostr-tools';
 
 class ModalManager extends EventEmitter {
   private modal: TypeModal | null = null;
@@ -131,8 +132,8 @@ class ModalManager extends EventEmitter {
 
       const checkNip05 = async (nip05: string) => {
         let available = false;
-        let taken = false;
         let error = '';
+        let pubkey = '';
         await (async () => {
           if (!nip05 || !nip05.includes('@')) return;
 
@@ -155,7 +156,7 @@ class ModalManager extends EventEmitter {
             const r = await fetch(url);
             const d = await r.json();
             if (d.names[name]) {
-              taken = true;
+              pubkey = d.names[name];
               return;
             }
           } catch {}
@@ -163,7 +164,12 @@ class ModalManager extends EventEmitter {
           available = true;
         })();
 
-        return [available, taken, error];
+        return {
+          available,
+          taken: pubkey != '',
+          error,
+          pubkey,
+        };
       };
 
       if (this.modal) {
@@ -210,6 +216,37 @@ class ModalManager extends EventEmitter {
           }
         });
 
+        this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
+          console.log('nlLoginReadOnly', event.detail);
+          if (!this.modal) return;
+
+          this.modal.isLoading = true;
+
+          const nameNpub = event.detail;
+          try {
+            let pubkey = '';
+            if (nameNpub.includes('@')) {
+              const { error, pubkey: nip05pubkey } = await checkNip05(nameNpub);
+              if (nip05pubkey) pubkey = nip05pubkey;
+              else throw new Error(error);
+            } else {
+              const { type, data } = nip19.decode(nameNpub);
+              if (type === 'npub') pubkey = data as string;
+              else throw new Error('Bad npub');
+            }
+
+            this.authNostrService.setReadOnly(pubkey);
+
+            this.modal.isLoading = false;
+            dialog.close();
+            ok();
+          } catch (e: any) {
+            console.log('error', e);
+            this.modal.isLoading = false;
+            this.modal.error = e.toString() || e;
+          }
+        });
+
         this.modal.addEventListener('nlLoginExtension', async () => {
           if (!this.extensionService.hasExtension()) {
             throw new Error('No extension');
@@ -235,7 +272,7 @@ class ModalManager extends EventEmitter {
         });
 
         this.modal.addEventListener('nlCheckSignup', async (event: any) => {
-          const [available, taken, error] = await checkNip05(event.detail);
+          const { available, taken, error } = await checkNip05(event.detail);
           if (this.modal) {
             this.modal.error = String(error);
 
@@ -248,7 +285,7 @@ class ModalManager extends EventEmitter {
         });
 
         this.modal.addEventListener('nlCheckLogin', async (event: any) => {
-          const [available, taken, error] = await checkNip05(event.detail);
+          const { available, taken, error } = await checkNip05(event.detail);
           if (this.modal) {
             this.modal.error = String(error);
             if (available) {
