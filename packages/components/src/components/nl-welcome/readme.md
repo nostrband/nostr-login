@@ -27,13 +27,11 @@
 
 ### Depends on
 
-- [nl-change-account](../nl-change-account)
 - [button-base](../button-base)
 
 ### Graph
 ```mermaid
 graph TD;
-  nl-welcome --> nl-change-account
   nl-welcome --> button-base
   nl-auth --> nl-welcome
   style nl-welcome fill:#f9f,stroke:#333,stroke-width:4px

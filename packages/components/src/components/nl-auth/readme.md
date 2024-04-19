@@ -35,6 +35,7 @@
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
 - [nl-signin-bunker-url](../nl-signin-bunker-url)
+- [nl-previously-logged](../nl-previously-logged)
 - [nl-loading](../nl-loading)
 
 ### Graph
@@ -47,8 +48,8 @@ graph TD;
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
   nl-auth --> nl-signin-bunker-url
+  nl-auth --> nl-previously-logged
   nl-auth --> nl-loading
-  nl-welcome --> nl-change-account
   nl-welcome --> button-base
   nl-signin --> button-base
   nl-signup --> nl-select

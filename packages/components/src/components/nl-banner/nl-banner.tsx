@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, h, Prop, State, Watch } from '@stencil/core';
+import { Component, Event, EventEmitter, h, Listen, Prop, State, Watch } from '@stencil/core';
 import { Info, METHOD_MODULE } from '../../types';
 
 @Component({
@@ -56,10 +56,15 @@ export class NlBanner {
     this.themeState = newValue;
   }
 
+  @Listen('isOpen')
+  watchOpenHandler() {
+    this.accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
+  }
+
   connectedCallback() {
     setTimeout(() => {
-      this.accounts = JSON.parse(localStorage.getItem('logged_in_accounts'))
-    }, 0)
+      this.accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
+    }, 0);
     this.themeState = this.nlTheme;
     const getDarkMode = localStorage.getItem('nl-dark-mode');
 

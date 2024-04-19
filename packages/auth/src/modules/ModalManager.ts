@@ -1,7 +1,9 @@
-import { NostrLoginOptions, TypeModal } from '../types';
-import { getBunkerUrl } from '../utils';
-import { AuthNostrService, NostrExtensionService, Popup, NostrParams } from '.';
+import { NostrLoginOptions, RecentType, TypeModal } from '../types';
+import { getBunkerUrl, localStorageGetItem } from '../utils';
+import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
+import { LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
+import { Info } from 'nostr-login-components/dist/types/types';
 
 class ModalManager extends EventEmitter {
   private modal: TypeModal | null = null;
@@ -186,6 +188,26 @@ class ModalManager extends EventEmitter {
 
         this.modal.addEventListener('nlSignup', (event: any) => {
           signup(event.detail);
+        });
+
+        this.modal.addEventListener('nlSwitchAccount', (event: any) => {
+          const accounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS);
+
+          const userInfo = accounts.find(el => el.pubkey === event.detail);
+
+          this.emit('onSwitchAccount', userInfo);
+
+          dialog.close();
+        });
+
+        this.modal.addEventListener('nlLoginRecentAccount', (event: any) => {
+          const recents: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS);
+
+          const userInfo = recents.find(el => el.pubkey === event.detail);
+
+          if (userInfo && userInfo.nip05) {
+            login(userInfo.nip05);
+          }
         });
 
         this.modal.addEventListener('nlLoginExtension', async () => {

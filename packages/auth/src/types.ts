@@ -57,3 +57,5 @@ export interface Response {
   result?: string;
   error?: string;
 }
+
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey'>;

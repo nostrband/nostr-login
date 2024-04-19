@@ -99,7 +99,7 @@
             modal.authUrl = '';
           });
 
-          dialog.showModal();
+          // dialog.showModal();
           if (opt && opt.theme) {
             modal.theme = opt.theme;
           }
@@ -132,10 +132,21 @@
       });
 
       banner.addEventListener('handleOpenWelcomeModal', () => {
-        launch({
+        const recent = JSON.parse(localStorage.getItem('__nostrlogin_recent'));
+        const accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
+
+        let options = {
           // theme: 'lemonade',
+
           isSignInWithExtension: false,
-        });
+        };
+
+        if (Boolean(recent?.length) || Boolean(accounts?.length)) {
+          options = { ...options, startScreen: 'previously-logged' };
+        }
+
+        console.log({ options });
+        launch(options);
       });
 
       banner.addEventListener('handleSetConfirmBanner', event => {
@@ -184,6 +195,53 @@
           testBtn.nlTheme = 'purple';
         }, 2000);
       }, 2000);
+
+      const addAccounts = document.getElementById('add-accounts');
+
+      addAccounts.addEventListener('click', () => {
+        localStorage.setItem(
+          '__nostrlogin_accounts',
+          JSON.stringify([
+            {
+              pubkey: '41d13ffaa4388536c767a5b2479c400a9e6dc672b7a4085c4e0dd0a06c72123c',
+              sk: '57b3e32bbc6c99a10bf8247124d10bb681d7d25dd46dd4e1fdfa68ab89275e73',
+              relays: ['wss://relay.nsec.app'],
+              nip05: 'qqq@nsec.app',
+            },
+            {
+              pubkey: '610ff636a54fab5f0196cb1135b7955a6e5fc16390ed40776a53fd5f8a2fa12e',
+              sk: '1d8fa6b3863decec107ff1b8fa39d2b8e55ca3015744940f19f9b3d1b0b3ca9b',
+              relays: ['wss://relay.nsec.app'],
+              nip05: 'oneis@nsec.app',
+            },
+          ]),
+        );
+      });
+
+      const addRecent = document.getElementById('add-recent');
+
+      addRecent.addEventListener('click', () => {
+        localStorage.setItem(
+          '__nostrlogin_recent',
+          JSON.stringify([
+            {
+              nip05: 'rome@nsec.app',
+              picture: '',
+              pubkey: '575d25046b535c5eb93ca23852636c4b61f16786079c9cd51f920550de5b8a9e',
+            },
+            {
+              nip05: 'misterband@nsec.app',
+              picture: '',
+              pubkey: 'bcce12ab52dfbeefdf0a964efdb78ec05d2daf5d8865bcf427facf96071cf1d1',
+            },
+            {
+              nip05: 'alex007@nsec.app',
+              picture: '',
+              pubkey: '3261a8f820d59bc262bce544789ab6b9cbe0f5d2c1347ef5a410e27fae662208',
+            },
+          ]),
+        );
+      });
     </script>
   </head>
   <body class="dark">
@@ -191,6 +249,9 @@
     <button id="startloading">start loading</button>
     <button id="stoploading">stop loading</button>
     <button id="notify">notify</button>
+
+    <button id="add-accounts">add __nostrlogin_accounts</button>
+    <button id="add-recent">add __nostrlogin_recent</button>
 
     <div style="position: fixed; z-index: 9999">
       <button id="startloadingmodal">start loading modal</button>

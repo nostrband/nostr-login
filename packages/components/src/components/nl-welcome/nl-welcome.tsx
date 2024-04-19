@@ -35,9 +35,6 @@ export class NlWelcome {
         </div>
 
         <div class="max-w-52 mx-auto pb-5">
-          <div class="mb-2">
-            <nl-change-account is-login={false} />
-          </div>
           <button-base titleBtn="Log in" onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN)}>
             <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path
