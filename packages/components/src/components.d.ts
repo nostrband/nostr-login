@@ -52,6 +52,10 @@ export namespace Components {
     }
     interface NlLoading {
     }
+    interface NlPreviouslyLogged {
+        "description": string;
+        "titlePage": string;
+    }
     interface NlSelect {
         "darkMode": boolean;
         "options": OptionType[];
@@ -96,6 +100,10 @@ export interface NlChangeAccountCustomEvent<T> extends CustomEvent<T> {
 export interface NlLoadingCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlLoadingElement;
+}
+export interface NlPreviouslyLoggedCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlPreviouslyLoggedElement;
 }
 export interface NlSelectCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -222,6 +230,24 @@ declare global {
         prototype: HTMLNlLoadingElement;
         new (): HTMLNlLoadingElement;
     };
+    interface HTMLNlPreviouslyLoggedElementEventMap {
+        "nlSwitchAccount": string;
+        "nlLoginRecentAccount": string;
+    }
+    interface HTMLNlPreviouslyLoggedElement extends Components.NlPreviouslyLogged, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlPreviouslyLoggedElementEventMap>(type: K, listener: (this: HTMLNlPreviouslyLoggedElement, ev: NlPreviouslyLoggedCustomEvent<HTMLNlPreviouslyLoggedElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlPreviouslyLoggedElementEventMap>(type: K, listener: (this: HTMLNlPreviouslyLoggedElement, ev: NlPreviouslyLoggedCustomEvent<HTMLNlPreviouslyLoggedElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlPreviouslyLoggedElement: {
+        prototype: HTMLNlPreviouslyLoggedElement;
+        new (): HTMLNlPreviouslyLoggedElement;
+    };
     interface HTMLNlSelectElementEventMap {
         "selectDomain": string;
     }
@@ -338,6 +364,7 @@ declare global {
         "nl-info": HTMLNlInfoElement;
         "nl-info-extension": HTMLNlInfoExtensionElement;
         "nl-loading": HTMLNlLoadingElement;
+        "nl-previously-logged": HTMLNlPreviouslyLoggedElement;
         "nl-select": HTMLNlSelectElement;
         "nl-signin": HTMLNlSigninElement;
         "nl-signin-bunker-url": HTMLNlSigninBunkerUrlElement;
@@ -399,6 +426,12 @@ declare namespace LocalJSX {
         "onHandleContinue"?: (event: NlLoadingCustomEvent<boolean>) => void;
         "onStopFetchHandler"?: (event: NlLoadingCustomEvent<boolean>) => void;
     }
+    interface NlPreviouslyLogged {
+        "description"?: string;
+        "onNlLoginRecentAccount"?: (event: NlPreviouslyLoggedCustomEvent<string>) => void;
+        "onNlSwitchAccount"?: (event: NlPreviouslyLoggedCustomEvent<string>) => void;
+        "titlePage"?: string;
+    }
     interface NlSelect {
         "darkMode"?: boolean;
         "onSelectDomain"?: (event: NlSelectCustomEvent<string>) => void;
@@ -447,6 +480,7 @@ declare namespace LocalJSX {
         "nl-info": NlInfo;
         "nl-info-extension": NlInfoExtension;
         "nl-loading": NlLoading;
+        "nl-previously-logged": NlPreviouslyLogged;
         "nl-select": NlSelect;
         "nl-signin": NlSignin;
         "nl-signin-bunker-url": NlSigninBunkerUrl;
@@ -467,6 +501,7 @@ declare module "@stencil/core" {
             "nl-info": LocalJSX.NlInfo & JSXBase.HTMLAttributes<HTMLNlInfoElement>;
             "nl-info-extension": LocalJSX.NlInfoExtension & JSXBase.HTMLAttributes<HTMLNlInfoExtensionElement>;
             "nl-loading": LocalJSX.NlLoading & JSXBase.HTMLAttributes<HTMLNlLoadingElement>;
+            "nl-previously-logged": LocalJSX.NlPreviouslyLogged & JSXBase.HTMLAttributes<HTMLNlPreviouslyLoggedElement>;
             "nl-select": LocalJSX.NlSelect & JSXBase.HTMLAttributes<HTMLNlSelectElement>;
             "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;
             "nl-signin-bunker-url": LocalJSX.NlSigninBunkerUrl & JSXBase.HTMLAttributes<HTMLNlSigninBunkerUrlElement>;

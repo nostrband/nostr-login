@@ -26,13 +26,11 @@
 ### Used by
 
  - [nl-banner](../nl-banner)
- - [nl-welcome](../nl-welcome)
 
 ### Graph
 ```mermaid
 graph TD;
   nl-banner --> nl-change-account
-  nl-welcome --> nl-change-account
   style nl-change-account fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

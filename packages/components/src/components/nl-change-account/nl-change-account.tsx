@@ -1,11 +1,6 @@
 import { Component, h, Listen, Prop, State, Watch, Element, Event, EventEmitter } from '@stencil/core';
 import { Info } from '@/types';
 
-export type OptionType = {
-  name: string;
-  value: string;
-};
-
 @Component({
   tag: 'nl-change-account',
   styleUrl: 'nl-change-account.css',
@@ -13,7 +8,6 @@ export type OptionType = {
 })
 export class NLChangeAccount {
   @State() isOpen: boolean = false;
-  @State() value: Info = null;
   @State() options: Info[] = [];
   @Prop() accounts: Info[] = [];
   @Prop() currentAccount: string = '';
@@ -61,7 +55,7 @@ export class NLChangeAccount {
     this.themeState = this.theme;
     this.mode = this.darkMode;
 
-    // this.selectDomain.emit(this.value.value);
+    // this.options = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
   }
 
   calculateDropdownPosition() {
@@ -72,7 +66,7 @@ export class NLChangeAccount {
   }
 
   handleChange(el: Info) {
-    console.log(el)
+    console.log(el);
 
     this.handleSwitchAccount.emit(el);
   }
@@ -114,36 +108,40 @@ export class NLChangeAccount {
           </button>
 
           <ul ref={el => (this.ulRef = el)} class={listClass}>
-            {this.options.map(el => {
-              const isShowImg = Boolean(el?.picture);
-              const userName = el.nip05;
-              const isShowUserName = Boolean(userName);
+            {this.options &&
+              this.options.map(el => {
+                const isShowImg = Boolean(el?.picture);
+                const userName = el.nip05;
+                const isShowUserName = Boolean(userName);
 
-              return (
-                <li onClick={() => {
-                  if (this.currentAccount !== el.pubkey) {
-                    this.handleChange(el)
-                  }
-                }} class={setClassOption(el)}>
-                  <div class="uppercase font-bold w-full max-w-6 h-6 rounded-full border border-gray-400 flex justify-center items-center">
-                    {isShowImg ? (
-                      <img class="w-full rounded-full" src={'this.userInfo.picture'} alt="Logo" />
-                    ) : isShowUserName ? (
-                      userName[0]
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <div class="truncate overflow-hidden">{userName}</div>
-                </li>
-              );
-            })}
+                return (
+                  <li
+                    onClick={() => {
+                      if (this.currentAccount !== el.pubkey) {
+                        this.handleChange(el);
+                      }
+                    }}
+                    class={setClassOption(el)}
+                  >
+                    <div class="uppercase font-bold w-full max-w-6 h-6 rounded-full border border-gray-400 flex justify-center items-center">
+                      {isShowImg ? (
+                        <img class="w-full rounded-full" src={'this.userInfo.picture'} alt="Logo" />
+                      ) : isShowUserName ? (
+                        userName[0]
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <div class="truncate overflow-hidden">{userName}</div>
+                  </li>
+                );
+              })}
             <li class="first:pt-0 pt-2 border-t-[1px] first:border-none border-gray-300">
               <div onClick={() => this.handleOpenModal()} class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm">
                 <div class="uppercase font-bold w-6 h-6 rounded-full border border-gray-400 flex justify-center items-center">

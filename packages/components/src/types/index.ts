@@ -7,6 +7,7 @@ export enum CURRENT_MODULE {
   SIGNUP = 'signup',
   EXTENSION = 'extension',
   LOADING = 'loading',
+  PREVIOUSLY_LOGGED = 'previously-logged',
 }
 
 export enum METHOD_MODULE {
@@ -24,5 +25,7 @@ export interface Info {
   picture?: string;
   extension?: boolean;
 }
+
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey'>;
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple';

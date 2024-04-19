@@ -2,7 +2,7 @@ import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageGetItem, local
 import { LOCAL_STORE_KEY, LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { getEventHash, getPublicKey, nip19 } from 'nostr-tools';
-import { NostrLoginAuthOptions, Response } from '../types';
+import { NostrLoginAuthOptions, RecentType, Response } from '../types';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
@@ -64,9 +64,10 @@ class AuthNostrService extends EventEmitter {
 
     // parse bunker url and generate local nsec
     const info = bunkerUrlToInfo(bunkerUrl);
+    const eventToAddAccount = Boolean(this.params.userInfo);
 
     // init signer to talk to the bunker (not the user!)
-    await this.initSigner(info);
+    await this.initSigner(info, { eventToAddAccount });
 
     const params = [
       name,
@@ -101,6 +102,29 @@ class AuthNostrService extends EventEmitter {
       this.ndk.pool.removeRelay(r);
     }
 
+    const user: Info = localStorageGetItem(LOCAL_STORE_KEY);
+    const recentUser = { nip05: user.nip05, picture: user.picture ? user.picture : '', pubkey: user.pubkey };
+
+    const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS);
+    const recentsAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS);
+    let recents: RecentType[] = [];
+
+    if (recentsAccounts) {
+      const index = recentsAccounts.findIndex((el: RecentType) => el.pubkey === recentUser.pubkey);
+
+      if (index !== -1) {
+        recents = [...recentsAccounts];
+        recents[index] = recentUser;
+      } else {
+        recents = [...recentsAccounts, recentUser];
+      }
+    } else {
+      recents = [recentUser];
+    }
+
+    localStorageSetItem(RECENT_ACCOUNTS, JSON.stringify(recents));
+
+    localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(loggedInAccounts.filter(el => el.pubkey !== user.pubkey)));
     localStorageRemoveItem(LOCAL_STORE_KEY);
 
     // clear localstore from user data
@@ -109,7 +133,7 @@ class AuthNostrService extends EventEmitter {
 
   public onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
     if (info?.pubkey !== this.params.userInfo?.pubkey) {
-      const event = new CustomEvent('nlAuth', { detail: {type: 'logout'} });
+      const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
       document.dispatchEvent(event);
     }
 
@@ -159,7 +183,7 @@ class AuthNostrService extends EventEmitter {
     }
   }
 
-  public async initSigner(info: Info, { connect = false } = {}) {
+  public async initSigner(info: Info, { connect = false, eventToAddAccount = false } = {}) {
     // mutex
     if (this.signerPromise) {
       try {
@@ -186,7 +210,7 @@ class AuthNostrService extends EventEmitter {
         // OAuth flow
         this.signer.on('authUrl', url => {
           console.log('nostr login auth url', url);
-          this.emit('onAuthUrl', url);
+          this.emit('onAuthUrl', { url, eventToAddAccount });
         });
 
         // if we're doing it for the first time then
@@ -232,20 +256,23 @@ class AuthNostrService extends EventEmitter {
         throw new Error(`Bad bunker url ${bunkerUrl}`);
       }
 
-      const r = await this.initSigner(info, { connect: true });
+      const eventToAddAccount = Boolean(this.params.userInfo);
+
+      const r = await this.initSigner(info, { connect: true, eventToAddAccount });
 
       // only save after successfull login
       localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
 
-      const loggedInAccounts = localStorageGetItem(LOGGED_IN_ACCOUNTS);
+      const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS);
+      const recentAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS);
       let accounts: Info[] = [];
 
       if (loggedInAccounts) {
-        const index = loggedInAccounts.findIndex((el: Info) => el.pubkey === info.pubkey)
+        const index = loggedInAccounts.findIndex((el: Info) => el.pubkey === info.pubkey);
 
         if (index !== -1) {
           accounts = [...loggedInAccounts];
-          accounts[index] = info
+          accounts[index] = info;
         } else {
           accounts = [...loggedInAccounts, info];
         }
@@ -253,6 +280,7 @@ class AuthNostrService extends EventEmitter {
         accounts = [info];
       }
 
+      localStorageSetItem(RECENT_ACCOUNTS, JSON.stringify(recentAccounts.filter(el => el.pubkey !== info.pubkey)));
       localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(accounts));
       this.emit('onSetAccounts', accounts);
 
