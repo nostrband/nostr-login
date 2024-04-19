@@ -55,7 +55,7 @@ export class NLChangeAccount {
     this.themeState = this.theme;
     this.mode = this.darkMode;
 
-    // this.options = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
+    this.options = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
   }
 
   calculateDropdownPosition() {
@@ -78,8 +78,7 @@ export class NLChangeAccount {
   render() {
     const listClass = `${this.isOpen ? 'listClass flex flex-col gap-2' : 'hidden'} w-full nl-select-list absolute z-10 left-0 shadow-md rounded-lg p-2 mt-1 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full`;
     const arrowClass = `${this.isOpen ? 'rotate-180' : 'rotate-0'} duration-300 flex-shrink-0 w-4 h-4 text-gray-500`;
-    const setClassOption = (el: Info) =>
-      `${this.currentAccount === el.pubkey && 'active-option'} nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm`;
+    const filteredOptions = this.options.filter((el) => el.pubkey !== this.currentAccount)
 
     return (
       <div class={`theme-${this.themeState}`}>
@@ -109,19 +108,15 @@ export class NLChangeAccount {
 
           <ul ref={el => (this.ulRef = el)} class={listClass}>
             {this.options &&
-              this.options.map(el => {
+              filteredOptions.map(el => {
                 const isShowImg = Boolean(el?.picture);
                 const userName = el.nip05;
                 const isShowUserName = Boolean(userName);
 
                 return (
                   <li
-                    onClick={() => {
-                      if (this.currentAccount !== el.pubkey) {
-                        this.handleChange(el);
-                      }
-                    }}
-                    class={setClassOption(el)}
+                    onClick={() => this.handleChange(el)}
+                    class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm"
                   >
                     <div class="uppercase font-bold w-full max-w-6 h-6 rounded-full border border-gray-400 flex justify-center items-center">
                       {isShowImg ? (

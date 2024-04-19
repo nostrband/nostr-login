@@ -9,6 +9,7 @@
 | -------------- | -------------- | ----------- | ----------------------------------------------------------------- | ----------- |
 | `accounts`     | --             |             | `Info[]`                                                          | `[]`        |
 | `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`     |
+| `isOpen`       | `is-open`      |             | `boolean`                                                         | `false`     |
 | `listNotifies` | --             |             | `string[]`                                                        | `[]`        |
 | `nlTheme`      | `nl-theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"`                  | `'default'` |
 | `notify`       | --             |             | `{ confirm: number; url?: string; timeOut?: { link: string; }; }` | `null`      |

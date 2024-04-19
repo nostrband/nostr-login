@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, h, Listen, Prop, State, Watch } from '@stencil/core';
-import { Info, METHOD_MODULE } from '../../types';
+import { Info, METHOD_MODULE } from '@/types';
 
 @Component({
   tag: 'nl-banner',
@@ -17,7 +17,7 @@ export class NlBanner {
   @Prop() listNotifies: string[] = [];
   @State() isOpenNotifyTimeOut: boolean = false;
   // @State() imgUrl: string = '';
-  @State() isOpen: boolean = false;
+  @Prop({mutable: true}) isOpen: boolean = false;
   @State() isConfirm: boolean = true;
   @State() isOpenConfirm: boolean = false;
 
@@ -58,13 +58,13 @@ export class NlBanner {
 
   @Listen('isOpen')
   watchOpenHandler() {
-    this.accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
+    this.accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts')) || [];
   }
 
   connectedCallback() {
-    setTimeout(() => {
-      this.accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
-    }, 0);
+    // setTimeout(() => {
+    //   this.accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
+    // }, 0);
     this.themeState = this.nlTheme;
     const getDarkMode = localStorage.getItem('nl-dark-mode');
 

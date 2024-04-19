@@ -29,6 +29,7 @@ export interface IBanner {
   isLoading?: boolean;
   listNotifies?: string[];
   accounts?: Info[];
+  isOpen?: boolean;
   notify?: {
     confirm?: number;
     url?: string;

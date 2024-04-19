@@ -105,11 +105,11 @@ class AuthNostrService extends EventEmitter {
     const user: Info = localStorageGetItem(LOCAL_STORE_KEY);
     const recentUser = { nip05: user.nip05, picture: user.picture ? user.picture : '', pubkey: user.pubkey };
 
-    const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS);
-    const recentsAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS);
+    const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
+    const recentsAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS) || [];
     let recents: RecentType[] = [];
 
-    if (recentsAccounts) {
+    if (Boolean(recentsAccounts.length)) {
       const index = recentsAccounts.findIndex((el: RecentType) => el.pubkey === recentUser.pubkey);
 
       if (index !== -1) {
@@ -263,11 +263,11 @@ class AuthNostrService extends EventEmitter {
       // only save after successfull login
       localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
 
-      const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS);
-      const recentAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS);
+      const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
+      const recentAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS) || [];
       let accounts: Info[] = [];
 
-      if (loggedInAccounts) {
+      if (Boolean(loggedInAccounts.length)) {
         const index = loggedInAccounts.findIndex((el: Info) => el.pubkey === info.pubkey);
 
         if (index !== -1) {

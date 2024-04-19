@@ -93,8 +93,8 @@ export class NostrLoginInitializer {
     });
 
     this.bannerManager.on('launch', startScreen => {
-      const recent = localStorageGetItem(RECENT_ACCOUNTS);
-      const accounts = localStorageGetItem(LOGGED_IN_ACCOUNTS);
+      const recent = localStorageGetItem(RECENT_ACCOUNTS) || [];
+      const accounts = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
 
       let options = startScreen
         ? {

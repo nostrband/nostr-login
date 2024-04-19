@@ -5,11 +5,9 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Info as Info1, NlTheme } from "./types/index";
-import { Info } from "./types";
+import { Info, NlTheme } from "./types/index";
 import { OptionType } from "./components/nl-select/nl-select";
-export { Info as Info1, NlTheme } from "./types/index";
-export { Info } from "./types";
+export { Info, NlTheme } from "./types/index";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface ButtonBase {
@@ -29,6 +27,7 @@ export namespace Components {
     interface NlBanner {
         "accounts": Info[];
         "isLoading": boolean;
+        "isOpen": boolean;
         "listNotifies": string[];
         "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
         "notify": { confirm: number; url?: string; timeOut?: { link: string } } | null;
@@ -393,6 +392,7 @@ declare namespace LocalJSX {
     interface NlBanner {
         "accounts"?: Info[];
         "isLoading"?: boolean;
+        "isOpen"?: boolean;
         "listNotifies"?: string[];
         "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
         "notify"?: { confirm: number; url?: string; timeOut?: { link: string } } | null;

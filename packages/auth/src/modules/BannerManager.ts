@@ -2,8 +2,6 @@ import { NostrLoginOptions, TypeBanner } from '../types';
 import { NostrParams } from '.';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { EventEmitter } from 'tseep';
-import { localStorageGetItem } from '../utils';
-import { LOGGED_IN_ACCOUNTS } from '../const';
 
 class BannerManager extends EventEmitter {
   private banner: TypeBanner | null = null;
@@ -93,6 +91,10 @@ class BannerManager extends EventEmitter {
 
     this.banner.addEventListener('handleOpenWelcomeModal', () => {
       this.emit('launch');
+
+    if(this.banner) {
+      this.banner.isOpen = false
+    }
     });
 
     this.banner.addEventListener('handleRetryConfirmBanner', () => {
