@@ -12,6 +12,8 @@ get a nice UI for users to login with an extension, with Nostr Connect (nip46), 
 account switching, OAuth-like sign up, etc. Your app just talks to the `window.nostr`, the
 rest is handled by `nostr-login`.
 
+See it in action on [nostr.band](https://nostr.band).
+
 ## Advanced usage
 
 To use as a module:
