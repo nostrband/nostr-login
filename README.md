@@ -1,12 +1,21 @@
 Nostr-Login
 ===========
 
-This library enables NIP-46 Nostr Connect in your app. It installs a custom window.nostr object that will proxy your NIP-07 calls to
-the NIP-46 calls for remote signing. The library provides several UI
-screens to let users set up the NIP-46 connection, it also supports
-the new OAuth-like flow that is very smooth.
+This library is a powerful `window.nostr` provider.
 
-Usage:
+```
+<script src='https://www.unpkg.com/nostr-login@latest/dist/unpkg.js'></script>
+```
+
+Just add the above script to your HTML and 
+get a nice UI for users to login with an extension, with Nostr Connect (nip46), read-only login,
+account switching, OAuth-like sign up, etc. Your app just talks to the `window.nostr`, the
+rest is handled by `nostr-login`.
+
+## Advanced usage
+
+To use as a module:
+
 ```
 import { init as initNostrLogin } from "nostr-login"
 
@@ -17,7 +26,7 @@ initNostrLogin({/*options*/})
 ```
 
 That's it, now whenever window.nostr call is made, it will be proxied
-to the user's key storage app. On the first call, a dialog is shown to
+to the user's key storage app or extension. On the first call, a dialog is shown to
 let users go through sign up or log in flow.
 
 You can also customize the experience and trigger the login dialogs 
@@ -50,5 +59,4 @@ Options:
 
 TODO:
 - fetch bunker list using NIP-89
-- improve handling of popup blocks
 - add timeout handling
