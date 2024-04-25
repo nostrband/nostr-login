@@ -3,6 +3,7 @@ import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, Pro
 import { NostrLoginOptions } from './types';
 import { localStorageGetItem, localStorageSetItem } from './utils';
 import { LOCAL_STORE_KEY, LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from './const';
+import { Info } from 'nostr-login-components/dist/types/types';
 
 export class NostrLoginInitializer {
   public extensionService: NostrExtensionService;
@@ -76,20 +77,48 @@ export class NostrLoginInitializer {
       this.popupManager.ensurePopup(url);
     });
 
-    this.bannerManager.on('onSwitchAccount', async info => {
-      await this.authNostrService.initSigner(info);
-
-      this.authNostrService.onAuth('login', info);
-
-      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+    this.bannerManager.on('onSetTypeAuthMethod', typeAuthMethod => {
+      this.params.typeAuthMethod = typeAuthMethod;
     });
 
-    this.modalManager.on('onSwitchAccount', async info => {
+    this.bannerManager.on('onSwitchAccount', async (info: Info) => {
+      if (info.readonly) {
+        this.authNostrService.setReadOnly(info.pubkey);
+
+        return;
+      }
+
+      if (info.extension) {
+        await this.extensionService.setExtension();
+
+        return;
+      }
+
       await this.authNostrService.initSigner(info);
 
       this.authNostrService.onAuth('login', info);
 
-      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+      // localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+    });
+
+    this.modalManager.on('onSwitchAccount', async (info: Info) => {
+      if (info.readonly) {
+        this.authNostrService.setReadOnly(info.pubkey);
+
+        return;
+      }
+
+      if (info.extension) {
+        await this.extensionService.setExtension();
+
+        return;
+      }
+
+      await this.authNostrService.initSigner(info);
+
+      this.authNostrService.onAuth('login', info);
+
+      // localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
     });
 
     this.bannerManager.on('launch', startScreen => {
@@ -142,6 +171,8 @@ export class NostrLoginInitializer {
       if (!info) {
         return;
       }
+
+      this.params.typeAuthMethod = info.typeAuthMethod;
 
       if (info.extension && info.pubkey) {
         // assume we're signed in, setExtension will check if

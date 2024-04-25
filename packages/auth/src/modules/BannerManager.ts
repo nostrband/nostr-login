@@ -86,15 +86,17 @@ class BannerManager extends EventEmitter {
     });
 
     this.banner.addEventListener('handleSwitchAccount', (event: any) => {
+      this.params.typeAuthMethod = event.detail.typeAuthMethod;
+
       this.emit('onSwitchAccount', event.detail);
     });
 
     this.banner.addEventListener('handleOpenWelcomeModal', () => {
       this.emit('launch');
 
-    if(this.banner) {
-      this.banner.isOpen = false
-    }
+      if (this.banner) {
+        this.banner.isOpen = false;
+      }
     });
 
     this.banner.addEventListener('handleRetryConfirmBanner', () => {

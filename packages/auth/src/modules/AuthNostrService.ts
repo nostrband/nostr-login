@@ -1,4 +1,4 @@
-import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageGetItem, localStorageRemoveItem, localStorageSetItem } from '../utils';
+import { accountLocalStorageRecord, bunkerUrlToInfo, checkBunkerUrl, fetchProfile, getBunkerUrl, localStorageGetItem, localStorageRemoveItem, localStorageSetItem } from '../utils';
 import { LOCAL_STORE_KEY, LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { getEventHash, getPublicKey, nip19 } from 'nostr-tools';
@@ -48,8 +48,8 @@ class AuthNostrService extends EventEmitter {
   }
 
   public setReadOnly(pubkey: string) {
-    const info = { pubkey };
-    localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+    const info: Info = { pubkey, readonly: true };
+
     this.onAuth('login', info);
   }
 
@@ -103,14 +103,14 @@ class AuthNostrService extends EventEmitter {
     }
 
     const user: Info = localStorageGetItem(LOCAL_STORE_KEY);
-    const recentUser = { nip05: user.nip05, picture: user.picture ? user.picture : '', pubkey: user.pubkey };
+    const recentUser: RecentType = user;
 
     const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
     const recentsAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS) || [];
     let recents: RecentType[] = [];
 
     if (Boolean(recentsAccounts.length)) {
-      const index = recentsAccounts.findIndex((el: RecentType) => el.pubkey === recentUser.pubkey);
+      const index = recentsAccounts.findIndex((el: RecentType) => el.pubkey === recentUser.pubkey && el.typeAuthMethod === recentUser.typeAuthMethod);
 
       if (index !== -1) {
         recents = [...recentsAccounts];
@@ -124,7 +124,7 @@ class AuthNostrService extends EventEmitter {
 
     localStorageSetItem(RECENT_ACCOUNTS, JSON.stringify(recents));
 
-    localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(loggedInAccounts.filter(el => el.pubkey !== user.pubkey)));
+    localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(loggedInAccounts.filter(el => el.pubkey !== user.pubkey || el.typeAuthMethod !== user.typeAuthMethod)));
     localStorageRemoveItem(LOCAL_STORE_KEY);
 
     // clear localstore from user data
@@ -146,12 +146,21 @@ class AuthNostrService extends EventEmitter {
       fetchProfile(info, this.profileNdk).then(p => {
         if (this.params.userInfo !== info) return;
 
-        this.params.userInfo = {
+        const userInfo = {
           ...this.params.userInfo,
           picture: p?.image || p?.picture,
+          name: p?.name || p?.displayName || p?.nip05 || nip19.npubEncode(info.pubkey),
+          nip05: p?.nip05,
+          typeAuthMethod: this.params.typeAuthMethod,
         };
 
-        this.emit('onUserInfo', info);
+        this.params.userInfo = userInfo;
+
+        const { accounts } = accountLocalStorageRecord(userInfo);
+
+        this.emit('onSetAccounts', accounts);
+        this.emit('onUserInfo', userInfo);
+        this.params.typeAuthMethod = '';
       });
     }
 
@@ -251,6 +260,10 @@ class AuthNostrService extends EventEmitter {
       const info = bunkerUrlToInfo(bunkerUrl, sk);
       info.nip05 = name;
 
+      if (checkBunkerUrl(name)) {
+        info.bunkerUrl = bunkerUrl;
+      }
+
       // console.log('nostr login auth info', info);
       if (!info.pubkey || !info.sk || !info.relays?.[0]) {
         throw new Error(`Bad bunker url ${bunkerUrl}`);
@@ -259,30 +272,6 @@ class AuthNostrService extends EventEmitter {
       const eventToAddAccount = Boolean(this.params.userInfo);
 
       const r = await this.initSigner(info, { connect: true, eventToAddAccount });
-
-      // only save after successfull login
-      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
-
-      const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
-      const recentAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS) || [];
-      let accounts: Info[] = [];
-
-      if (Boolean(loggedInAccounts.length)) {
-        const index = loggedInAccounts.findIndex((el: Info) => el.pubkey === info.pubkey);
-
-        if (index !== -1) {
-          accounts = [...loggedInAccounts];
-          accounts[index] = info;
-        } else {
-          accounts = [...loggedInAccounts, info];
-        }
-      } else {
-        accounts = [info];
-      }
-
-      localStorageSetItem(RECENT_ACCOUNTS, JSON.stringify(recentAccounts.filter(el => el.pubkey !== info.pubkey)));
-      localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(accounts));
-      this.emit('onSetAccounts', accounts);
 
       // callback
       this.onAuth(type, info);

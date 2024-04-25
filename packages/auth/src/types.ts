@@ -59,4 +59,4 @@ export interface Response {
   error?: string;
 }
 
-export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey'>;
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'extension' | 'readonly' | 'name' | 'bunkerUrl' | 'typeAuthMethod'>;

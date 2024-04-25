@@ -1,13 +1,13 @@
-import { localStorageSetItem } from '../utils';
-import { LOCAL_STORE_KEY } from '../const';
 import { AuthNostrService, Nostr, NostrParams } from './';
+import { EventEmitter } from 'tseep';
 
-class NostrExtensionService {
+class NostrExtensionService extends EventEmitter {
   private params: NostrParams;
   private authNostrService: AuthNostrService;
   private nostrExtension: any | undefined;
 
   constructor(params: NostrParams, authNostrService: AuthNostrService) {
+    super();
     this.params = params;
     this.authNostrService = authNostrService;
   }
@@ -72,7 +72,6 @@ class NostrExtensionService {
       await this.authNostrService.logout();
     } else {
       const info = { pubkey, extension: true };
-      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
 
       this.authNostrService.onAuth('login', info);
     }

@@ -17,7 +17,7 @@ export class NlBanner {
   @Prop() listNotifies: string[] = [];
   @State() isOpenNotifyTimeOut: boolean = false;
   // @State() imgUrl: string = '';
-  @Prop({mutable: true}) isOpen: boolean = false;
+  @Prop({ mutable: true }) isOpen: boolean = false;
   @State() isConfirm: boolean = true;
   @State() isOpenConfirm: boolean = false;
 
@@ -129,7 +129,7 @@ export class NlBanner {
 
   render() {
     const isShowImg = Boolean(this.userInfo?.picture);
-    const userName = this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
+    const userName = this.userInfo?.name || this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
     const isShowUserName = Boolean(userName);
 
     return (
@@ -246,7 +246,7 @@ export class NlBanner {
                   <div>
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     <div class="mb-2">
-                      <nl-change-account currentAccount={this.userInfo?.pubkey} accounts={this.accounts} />
+                      <nl-change-account currentAccount={this.userInfo} accounts={this.accounts} />
                     </div>
                     {Boolean(this.listNotifies.length) && (
                       <div

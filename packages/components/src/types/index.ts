@@ -24,8 +24,12 @@ export interface Info {
   nip05?: string;
   picture?: string;
   extension?: boolean;
+  readonly?: boolean;
+  name?: string;
+  bunkerUrl?: string;
+  typeAuthMethod?: string;
 }
 
-export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey'>;
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'readonly' | 'extension' | 'name' | 'bunkerUrl' | 'typeAuthMethod'>;
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple';

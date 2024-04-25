@@ -1,7 +1,8 @@
 import { Info } from 'nostr-login-components/dist/types/types';
 import NDK, { NDKUser } from '@nostr-dev-kit/ndk';
 import { generatePrivateKey } from 'nostr-tools';
-import { NostrLoginOptions } from '../types';
+import { NostrLoginOptions, RecentType } from '../types';
+import { LOCAL_STORE_KEY, LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
 
 export const localStorageSetItem = (key: string, value: string) => {
   localStorage.setItem(key, value);
@@ -39,12 +40,14 @@ export const bunkerUrlToInfo = (bunkerUrl: string, sk = ''): Info => {
   };
 };
 
+export const checkBunkerUrl = (value: string) => value.startsWith('bunker://');
+
 export const getBunkerUrl = async (value: string, optionsModal: NostrLoginOptions) => {
   if (!value) {
     return '';
   }
 
-  if (value.startsWith('bunker://')) {
+  if (checkBunkerUrl(value)) {
     return value;
   }
 
@@ -72,4 +75,30 @@ export const getBunkerUrl = async (value: string, optionsModal: NostrLoginOption
   }
 
   throw new Error('Invalid user name or bunker url');
+};
+
+export const accountLocalStorageRecord = (info: Info) => {
+  localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+
+  const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
+  const recentAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS) || [];
+  let accounts: Info[] = [];
+
+  if (Boolean(loggedInAccounts.length)) {
+    const index = loggedInAccounts.findIndex((el: Info) => el.pubkey === info.pubkey && el.typeAuthMethod === info.typeAuthMethod);
+
+    if (index !== -1) {
+      accounts = [...loggedInAccounts];
+      accounts[index] = info;
+    } else {
+      accounts = [...loggedInAccounts, info];
+    }
+  } else {
+    accounts = [info];
+  }
+
+  localStorageSetItem(RECENT_ACCOUNTS, JSON.stringify(recentAccounts.filter(el => el.pubkey !== info.pubkey || el.typeAuthMethod !== info.typeAuthMethod)));
+  localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(accounts));
+
+  return { accounts };
 };

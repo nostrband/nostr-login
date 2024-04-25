@@ -1,5 +1,5 @@
 import { Component, h, Listen, Prop, State, Watch, Element, Event, EventEmitter } from '@stencil/core';
-import { Info } from '@/types';
+import { Info, RecentType } from '@/types';
 
 @Component({
   tag: 'nl-change-account',
@@ -10,7 +10,7 @@ export class NLChangeAccount {
   @State() isOpen: boolean = false;
   @State() options: Info[] = [];
   @Prop() accounts: Info[] = [];
-  @Prop() currentAccount: string = '';
+  @Prop() currentAccount: Info = null;
 
   @Element() element: HTMLElement;
   @Event() handleOpenWelcomeModal: EventEmitter<string>;
@@ -78,7 +78,40 @@ export class NLChangeAccount {
   render() {
     const listClass = `${this.isOpen ? 'listClass flex flex-col gap-2' : 'hidden'} w-full nl-select-list absolute z-10 left-0 shadow-md rounded-lg p-2 mt-1 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full`;
     const arrowClass = `${this.isOpen ? 'rotate-180' : 'rotate-0'} duration-300 flex-shrink-0 w-4 h-4 text-gray-500`;
-    const filteredOptions = this.options.filter((el) => el.pubkey !== this.currentAccount)
+    const filteredOptions =
+      this.options && this.currentAccount ? this.options.filter(el => el.pubkey !== this.currentAccount.pubkey || el.typeAuthMethod !== this.currentAccount.typeAuthMethod) : [];
+
+    const getStatusLogin = (el: RecentType | Info) => {
+      const isBunkerUrl = Boolean(el.bunkerUrl);
+
+      if (!(isBunkerUrl || el.extension || el.readonly)) {
+        return null;
+      }
+
+      let text = '';
+
+      if (isBunkerUrl) {
+        text = 'Bunker URL';
+      }
+
+      if (el.extension) {
+        text = 'Extension';
+      }
+
+      if (el.readonly) {
+        text = 'Read only';
+      }
+
+      return (
+        <div>
+          <span
+            class={`${isBunkerUrl && 'border-purple-300 text-purple-400 bg-purple-100'} ${el.readonly && 'border-gray-300 text-gray-400 bg-gray-100'} ${el.extension && 'border-yellow-300 text-yellow-500 bg-yellow-100'} rounded-xl border  w-auto text-[10px] px-1 `}
+          >
+            {text}
+          </span>
+        </div>
+      );
+    };
 
     return (
       <div class={`theme-${this.themeState}`}>
@@ -110,17 +143,14 @@ export class NLChangeAccount {
             {this.options &&
               filteredOptions.map(el => {
                 const isShowImg = Boolean(el?.picture);
-                const userName = el.nip05;
+                const userName = el.name || el.nip05 || el.pubkey;
                 const isShowUserName = Boolean(userName);
 
                 return (
-                  <li
-                    onClick={() => this.handleChange(el)}
-                    class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm"
-                  >
+                  <li onClick={() => this.handleChange(el)} class="nl-select-option flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm">
                     <div class="uppercase font-bold w-full max-w-6 h-6 rounded-full border border-gray-400 flex justify-center items-center">
                       {isShowImg ? (
-                        <img class="w-full rounded-full" src={'this.userInfo.picture'} alt="Logo" />
+                        <img class="w-full rounded-full" src={el.picture} alt="Logo" />
                       ) : isShowUserName ? (
                         userName[0]
                       ) : (
@@ -133,7 +163,12 @@ export class NLChangeAccount {
                         </svg>
                       )}
                     </div>
-                    <div class="truncate overflow-hidden">{userName}</div>
+                    {/*<div class="truncate overflow-hidden w-full">{userName}</div>*/}
+
+                    <div class="overflow-hidden flex flex-col w-full">
+                      {getStatusLogin(el)}
+                      <div class="truncate overflow-hidden">{userName}</div>
+                    </div>
                   </li>
                 );
               })}

@@ -5,12 +5,12 @@
 
 ## Properties
 
-| Property         | Attribute         | Description | Type                                             | Default     |
-| ---------------- | ----------------- | ----------- | ------------------------------------------------ | ----------- |
-| `accounts`       | --                |             | `Info[]`                                         | `[]`        |
-| `currentAccount` | `current-account` |             | `string`                                         | `''`        |
-| `darkMode`       | `dark-mode`       |             | `boolean`                                        | `false`     |
-| `theme`          | `theme`           |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'` |
+| Property         | Attribute   | Description | Type                                             | Default     |
+| ---------------- | ----------- | ----------- | ------------------------------------------------ | ----------- |
+| `accounts`       | --          |             | `Info[]`                                         | `[]`        |
+| `currentAccount` | --          |             | `Info`                                           | `null`      |
+| `darkMode`       | `dark-mode` |             | `boolean`                                        | `false`     |
+| `theme`          | `theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'` |
 
 
 ## Events

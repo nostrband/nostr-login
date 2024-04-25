@@ -5,9 +5,9 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Info, NlTheme } from "./types/index";
+import { Info, NlTheme, RecentType } from "./types/index";
 import { OptionType } from "./components/nl-select/nl-select";
-export { Info, NlTheme } from "./types/index";
+export { Info, NlTheme, RecentType } from "./types/index";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface ButtonBase {
@@ -41,7 +41,7 @@ export namespace Components {
     }
     interface NlChangeAccount {
         "accounts": Info[];
-        "currentAccount": string;
+        "currentAccount": Info;
         "darkMode": boolean;
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
@@ -230,8 +230,8 @@ declare global {
         new (): HTMLNlLoadingElement;
     };
     interface HTMLNlPreviouslyLoggedElementEventMap {
-        "nlSwitchAccount": string;
-        "nlLoginRecentAccount": string;
+        "nlSwitchAccount": Info;
+        "nlLoginRecentAccount": RecentType;
     }
     interface HTMLNlPreviouslyLoggedElement extends Components.NlPreviouslyLogged, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlPreviouslyLoggedElementEventMap>(type: K, listener: (this: HTMLNlPreviouslyLoggedElement, ev: NlPreviouslyLoggedCustomEvent<HTMLNlPreviouslyLoggedElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -412,7 +412,7 @@ declare namespace LocalJSX {
     }
     interface NlChangeAccount {
         "accounts"?: Info[];
-        "currentAccount"?: string;
+        "currentAccount"?: Info;
         "darkMode"?: boolean;
         "onHandleOpenWelcomeModal"?: (event: NlChangeAccountCustomEvent<string>) => void;
         "onHandleSwitchAccount"?: (event: NlChangeAccountCustomEvent<Info>) => void;
@@ -428,8 +428,8 @@ declare namespace LocalJSX {
     }
     interface NlPreviouslyLogged {
         "description"?: string;
-        "onNlLoginRecentAccount"?: (event: NlPreviouslyLoggedCustomEvent<string>) => void;
-        "onNlSwitchAccount"?: (event: NlPreviouslyLoggedCustomEvent<string>) => void;
+        "onNlLoginRecentAccount"?: (event: NlPreviouslyLoggedCustomEvent<RecentType>) => void;
+        "onNlSwitchAccount"?: (event: NlPreviouslyLoggedCustomEvent<Info>) => void;
         "titlePage"?: string;
     }
     interface NlSelect {

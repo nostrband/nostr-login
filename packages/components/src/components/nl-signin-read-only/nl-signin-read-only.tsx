@@ -21,7 +21,7 @@ export class NlSigninReadOnly {
 
   handleLogin(e: MouseEvent) {
     e.preventDefault();
-console.log("emit nlLoginReadOnly", state.nlSigninReadOnly.loginName)
+    console.log('emit nlLoginReadOnly', state.nlSigninReadOnly.loginName);
     this.nlLoginReadOnly.emit(state.nlSigninReadOnly.loginName);
   }
 

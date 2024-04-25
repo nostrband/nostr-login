@@ -13,10 +13,10 @@
 
 ## Events
 
-| Event                  | Description | Type                  |
-| ---------------------- | ----------- | --------------------- |
-| `nlLoginRecentAccount` |             | `CustomEvent<string>` |
-| `nlSwitchAccount`      |             | `CustomEvent<string>` |
+| Event                  | Description | Type                                                                                                                                                                      |
+| ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nlLoginRecentAccount` |             | `CustomEvent<{ name?: string; picture?: string; readonly?: boolean; extension?: boolean; nip05?: string; pubkey: string; bunkerUrl?: string; typeAuthMethod?: string; }>` |
+| `nlSwitchAccount`      |             | `CustomEvent<Info>`                                                                                                                                                       |
 
 
 ## Dependencies

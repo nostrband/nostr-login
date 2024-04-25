@@ -1,5 +1,5 @@
-import {NostrLoginOptions, RecentType, TypeModal} from '../types';
-import {getBunkerUrl, localStorageGetItem} from '../utils';
+import { NostrLoginOptions, RecentType, TypeModal } from '../types';
+import { checkBunkerUrl, getBunkerUrl, localStorageGetItem } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
@@ -189,17 +189,27 @@ class ModalManager extends EventEmitter {
         });
 
         this.modal.addEventListener('nlLogin', (event: any) => {
+          if (checkBunkerUrl(event.detail)) {
+            this.params.typeAuthMethod = 'bunkerUrl';
+          } else {
+            this.params.typeAuthMethod = 'login';
+          }
+
           login(event.detail);
         });
 
         this.modal.addEventListener('nlSignup', (event: any) => {
+          this.params.typeAuthMethod = 'login';
+
           signup(event.detail);
         });
 
         this.modal.addEventListener('nlSwitchAccount', (event: any) => {
           const accounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
 
-          const userInfo = accounts.find(el => el.pubkey === event.detail);
+          const userInfo = accounts.find(el => el.pubkey === event.detail.pubkey && el.typeAuthMethod === event.detail.typeAuthMethod);
+
+          this.params.typeAuthMethod = userInfo?.typeAuthMethod ? userInfo.typeAuthMethod : '';
 
           this.emit('onSwitchAccount', userInfo);
 
@@ -209,7 +219,29 @@ class ModalManager extends EventEmitter {
         this.modal.addEventListener('nlLoginRecentAccount', (event: any) => {
           const recents: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS) || [];
 
-          const userInfo = recents.find(el => el.pubkey === event.detail);
+          const userInfo = recents.find(el => el.pubkey === event.detail.pubkey && el.typeAuthMethod === event.detail.typeAuthMethod);
+
+          this.params.typeAuthMethod = userInfo?.typeAuthMethod ? userInfo.typeAuthMethod : '';
+
+          if (userInfo && userInfo.readonly) {
+            this.authNostrService.setReadOnly(userInfo.pubkey);
+
+            dialog.close();
+            return;
+          }
+
+          if (userInfo && userInfo.extension) {
+            this.extensionService.setExtension();
+
+            dialog.close();
+            return;
+          }
+
+          if (userInfo && userInfo.bunkerUrl) {
+            login(userInfo.bunkerUrl);
+
+            return;
+          }
 
           if (userInfo && userInfo.nip05) {
             login(userInfo.nip05);
@@ -217,7 +249,8 @@ class ModalManager extends EventEmitter {
         });
 
         this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
-          console.log('nlLoginReadOnly', event.detail);
+          this.params.typeAuthMethod = 'readOnly';
+
           if (!this.modal) return;
 
           this.modal.isLoading = true;
@@ -251,6 +284,8 @@ class ModalManager extends EventEmitter {
           if (!this.extensionService.hasExtension()) {
             throw new Error('No extension');
           }
+
+          this.params.typeAuthMethod = 'extension';
 
           if (this.modal) {
             try {

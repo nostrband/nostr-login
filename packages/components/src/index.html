@@ -202,17 +202,62 @@
         localStorage.setItem(
           '__nostrlogin_accounts',
           JSON.stringify([
+            // {
+            //   pubkey: '41d13ffaa4388536c767a5b2479c400a9e6dc672b7a4085c4e0dd0a06c72123c',
+            //   sk: '57b3e32bbc6c99a10bf8247124d10bb681d7d25dd46dd4e1fdfa68ab89275e73',
+            //   relays: ['wss://relay.nsec.app'],
+            //   nip05: 'qqq@nsec.app',
+            // },
+            // {
+            //   pubkey: '610ff636a54fab5f0196cb1135b7955a6e5fc16390ed40776a53fd5f8a2fa12e',
+            //   sk: '1d8fa6b3863decec107ff1b8fa39d2b8e55ca3015744940f19f9b3d1b0b3ca9b',
+            //   relays: ['wss://relay.nsec.app'],
+            //   nip05: 'oneis@nsec.app',
+            // },
+            // {
+            //   picture: '',
+            //   pubkey: 'b27aca0e3558b2fa1bf45c0c102e45dcff83a205031fb548bf96b3402e4c3462',
+            //   readonly: true,
+            //   extension: false,
+            // },
+            // {
+            //   picture: '',
+            //   pubkey: '829a4640b299eb25670a92b81272715118ffd3da560678e746f9041937b8fedc',
+            //   readonly: false,
+            //   extension: true,
+            // },
+            // {
+            //   nip05: 'bunker://3261a8f820d59bc262bce544789ab6b9cbe0f5d2c1347ef5a410e27fae662208?relay=wss://relay.nsec.app&secret=a1556474ebb35dba7b0b99c2c39caa62',
+            //   picture: 'https://img.freepik.com/free-photo/the-adorable-illustration-of-kittens-playing-in-the-forest-generative-ai_260559-483.jpg?size=338&ext=jpg&ga=GA1.1.1413502914.1713830400&semt=ais',
+            //   pubkey: '3261a8f820d59bc262bce544789ab6b9cbe0f5d2c1347ef5a410e27fae662208',
+            //   readonly: false,
+            //   extension: false,
+            // },
+            // {
+            //   pubkey: 'bcce12ab52dfbeefdf0a964efdb78ec05d2daf5d8865bcf427facf96071cf1d1',
+            //   readonly: true,
+            //   picture:
+            //     'https://img.freepik.com/free-photo/the-adorable-illustration-of-kittens-playing-in-the-forest-generative-ai_260559-483.jpg?size=338&ext=jpg&ga=GA1.1.1413502914.1713830400&semt=ais',
+            //   name: 'misterband',
+            //   nip05: 'misterband@nsec.app',
+            // },
+
             {
-              pubkey: '41d13ffaa4388536c767a5b2479c400a9e6dc672b7a4085c4e0dd0a06c72123c',
-              sk: '57b3e32bbc6c99a10bf8247124d10bb681d7d25dd46dd4e1fdfa68ab89275e73',
+              pubkey: 'bcce12ab52dfbeefdf0a964efdb78ec05d2daf5d8865bcf427facf96071cf1d1',
+              sk: 'a5c7b1133b13143f9aa204ce9d4f11a7b4d6c1771b8199d660e7bb183ed01e01',
               relays: ['wss://relay.nsec.app'],
-              nip05: 'qqq@nsec.app',
+              nip05: 'misterband@nsec.app',
+              picture:
+                'https://img.freepik.com/free-photo/the-adorable-illustration-of-kittens-playing-in-the-forest-generative-ai_260559-483.jpg?size=338&ext=jpg&ga=GA1.1.1413502914.1713830400&semt=ais',
+              name: 'misterband',
             },
             {
-              pubkey: '610ff636a54fab5f0196cb1135b7955a6e5fc16390ed40776a53fd5f8a2fa12e',
-              sk: '1d8fa6b3863decec107ff1b8fa39d2b8e55ca3015744940f19f9b3d1b0b3ca9b',
-              relays: ['wss://relay.nsec.app'],
-              nip05: 'oneis@nsec.app',
+              pubkey: 'bcce12ab52dfbeefdf0a964efdb78ec05d2daf5d8865bcf427facf96071cf1d1',
+              readonly: true,
+              picture:
+                'https://img.freepik.com/free-photo/the-adorable-illustration-of-kittens-playing-in-the-forest-generative-ai_260559-483.jpg?size=338&ext=jpg&ga=GA1.1.1413502914.1713830400&semt=ais',
+              name: 'misterband',
+              nip05: 'misterband@nsec.app',
             },
           ]),
         );
@@ -230,14 +275,29 @@
               pubkey: '575d25046b535c5eb93ca23852636c4b61f16786079c9cd51f920550de5b8a9e',
             },
             {
-              nip05: 'misterband@nsec.app',
-              picture: '',
-              pubkey: 'bcce12ab52dfbeefdf0a964efdb78ec05d2daf5d8865bcf427facf96071cf1d1',
-            },
-            {
               nip05: 'alex007@nsec.app',
               picture: '',
               pubkey: '3261a8f820d59bc262bce544789ab6b9cbe0f5d2c1347ef5a410e27fae662208',
+            },
+            {
+              picture: '',
+              pubkey: 'b27aca0e3558b2fa1bf45c0c102e45dcff83a205031fb548bf96b3402e4c3462',
+              readonly: true,
+              extension: false,
+            },
+            {
+              picture: '',
+              pubkey: '829a4640b299eb25670a92b81272715118ffd3da560678e746f9041937b8fedc',
+              readonly: false,
+              extension: true,
+            },
+            {
+              pubkey: 'bcce12ab52dfbeefdf0a964efdb78ec05d2daf5d8865bcf427facf96071cf1d1',
+              readonly: true,
+              picture:
+                'https://img.freepik.com/free-photo/the-adorable-illustration-of-kittens-playing-in-the-forest-generative-ai_260559-483.jpg?size=338&ext=jpg&ga=GA1.1.1413502914.1713830400&semt=ais',
+              name: 'misterband',
+              nip05: 'misterband@nsec.app',
             },
           ]),
         );
