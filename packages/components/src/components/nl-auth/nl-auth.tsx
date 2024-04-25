@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Fragment, h, Prop, State, Watch } from '@stencil/core';
-import { CURRENT_MODULE } from '@/types';
+import { CURRENT_MODULE, Info, RecentType } from '@/types';
 import { state } from '@/store';
 
 @Component({
@@ -15,6 +15,8 @@ export class NlAuth {
   @Prop() isLoadingExtension: boolean = false;
   @Prop() authUrl: string = '';
   @Prop() error: string = '';
+  @Prop({ mutable: true }) accounts: Info[] = [];
+  @Prop({ mutable: true }) recents: RecentType[] = [];
 
   @State() darkMode: boolean = false;
   @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
@@ -95,7 +97,7 @@ export class NlAuth {
         case CURRENT_MODULE.SIGNIN_BUNKER_URL:
           return <nl-signin-bunker-url />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
-          return <nl-previously-logged />;
+          return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
         default:
           return <nl-welcome isSignInWithExtension={this.isSignInWithExtension} />;
       }

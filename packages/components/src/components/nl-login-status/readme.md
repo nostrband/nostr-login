@@ -7,9 +7,9 @@
 
 ## Properties
 
-| Property | Attribute | Description | Type                                                                                                                                                                 | Default     |
-| -------- | --------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `info`   | --        |             | `Info \| { name?: string; picture?: string; readonly?: boolean; extension?: boolean; nip05?: string; pubkey: string; bunkerUrl?: string; typeAuthMethod?: string; }` | `undefined` |
+| Property | Attribute | Description | Type                                                                                                                                                   | Default     |
+| -------- | --------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `info`   | --        |             | `Info \| { name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: "readOnly" \| "extension" \| "connect"; }` | `undefined` |
 
 
 ## Dependencies

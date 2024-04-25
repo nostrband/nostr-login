@@ -61,11 +61,9 @@ class Nostr {
   async signEvent(event) {
     await this.ensureAuth();
 
-    if (!this.#params.userInfo?.extension && !this.#authNostrService.hasSigner()) {
-      throw new Error('Read only');
-    }
+    if (this.#params.userInfo!.authMethod === 'readOnly') throw new Error('Read only');
 
-    const module = this.#params.userInfo?.extension ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
+    const module = this.#params.userInfo!.authMethod === 'extension' ? this.#extensionService.getExtension() : this.#authNostrService;
 
     return this.#processManager.wait(async () => await module.signEvent(event));
   }
@@ -78,12 +76,9 @@ class Nostr {
   async encrypt(pubkey: string, plaintext: string) {
     await this.ensureAuth();
 
-    if (!this.#params.userInfo?.extension && !this.#authNostrService.hasSigner()) {
-      throw new Error('Read only');
-    }
+    if (this.#params.userInfo!.authMethod === 'readOnly') throw new Error('Read only');
 
-    // @ts-ignore
-    const module = this.#params.userInfo?.extension ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
+    const module = this.#params.userInfo!.authMethod === 'extension' ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
 
     return this.#processManager.wait(async () => await module.encrypt(pubkey, plaintext));
   }
@@ -91,12 +86,9 @@ class Nostr {
   async decrypt(pubkey: string, ciphertext: string) {
     await this.ensureAuth();
 
-    if (!this.#params.userInfo?.extension && !this.#authNostrService.hasSigner()) {
-      throw new Error('Read only');
-    }
+    if (this.#params.userInfo!.authMethod === 'readOnly') throw new Error('Read only');
 
-    // @ts-ignore
-    const module = this.#params.userInfo?.extension ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
+    const module = this.#params.userInfo!.authMethod === 'extension' ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
 
     return this.#processManager.wait(async () => await module.decrypt(pubkey, ciphertext));
   }

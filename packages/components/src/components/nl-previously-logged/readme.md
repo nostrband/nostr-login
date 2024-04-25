@@ -5,18 +5,21 @@
 
 ## Properties
 
-| Property      | Attribute     | Description | Type     | Default                                                                   |
-| ------------- | ------------- | ----------- | -------- | ------------------------------------------------------------------------- |
-| `description` | `description` |             | `string` | `'Switch between active accounts or choose a recent one for fast login.'` |
-| `titlePage`   | `title-page`  |             | `string` | `'Your accounts'`                                                         |
+| Property      | Attribute     | Description | Type           | Default                                                                   |
+| ------------- | ------------- | ----------- | -------------- | ------------------------------------------------------------------------- |
+| `accounts`    | --            |             | `Info[]`       | `[]`                                                                      |
+| `description` | `description` |             | `string`       | `'Switch between active accounts or choose a recent one for fast login.'` |
+| `recents`     | --            |             | `RecentType[]` | `[]`                                                                      |
+| `titlePage`   | `title-page`  |             | `string`       | `'Your accounts'`                                                         |
 
 
 ## Events
 
-| Event                  | Description | Type                                                                                                                                                                      |
-| ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `nlLoginRecentAccount` |             | `CustomEvent<{ name?: string; picture?: string; readonly?: boolean; extension?: boolean; nip05?: string; pubkey: string; bunkerUrl?: string; typeAuthMethod?: string; }>` |
-| `nlSwitchAccount`      |             | `CustomEvent<Info>`                                                                                                                                                       |
+| Event                  | Description | Type                                                                                                                                                        |
+| ---------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nlLoginRecentAccount` |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: "readOnly" \| "extension" \| "connect"; }>` |
+| `nlRemoveRecent`       |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: "readOnly" \| "extension" \| "connect"; }>` |
+| `nlSwitchAccount`      |             | `CustomEvent<Info>`                                                                                                                                         |
 
 
 ## Dependencies

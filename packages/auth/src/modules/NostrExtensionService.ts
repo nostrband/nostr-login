@@ -1,15 +1,14 @@
+import { Info } from 'nostr-login-components/dist/types/types';
 import { AuthNostrService, Nostr, NostrParams } from './';
 import { EventEmitter } from 'tseep';
 
 class NostrExtensionService extends EventEmitter {
   private params: NostrParams;
-  private authNostrService: AuthNostrService;
   private nostrExtension: any | undefined;
 
-  constructor(params: NostrParams, authNostrService: AuthNostrService) {
+  constructor(params: NostrParams) {
     super();
     this.params = params;
-    this.authNostrService = authNostrService;
   }
 
   public startCheckingExtension(nostr: Nostr) {
@@ -40,7 +39,7 @@ class NostrExtensionService extends EventEmitter {
     // @ts-ignore
     window.nostr = nostr;
     // we're signed in with extesions? well execute that
-    if (this.params.userInfo?.extension) {
+    if (this.params.userInfo?.authMethod === 'extension') {
       this.trySetExtensionForPubkey(this.params.userInfo.pubkey);
     }
     // in the worst case of app saving the nostrExtension reference
@@ -57,10 +56,10 @@ class NostrExtensionService extends EventEmitter {
     this.setExtensionReadPubkey();
   }
 
-  public unsetExtension() {
+  public unsetExtension(nostr: Nostr) {
     if (window.nostr === this.nostrExtension) {
       // @ts-ignore
-      window.nostr = this.nostr;
+      window.nostr = nostr;
     }
   }
 
@@ -69,11 +68,9 @@ class NostrExtensionService extends EventEmitter {
     // @ts-ignore
     const pubkey = await window.nostr.getPublicKey();
     if (expectedPubkey && expectedPubkey !== pubkey) {
-      await this.authNostrService.logout();
+      this.emit("extensionLogout");
     } else {
-      const info = { pubkey, extension: true };
-
-      this.authNostrService.onAuth('login', info);
+      this.emit("extensionLogin", pubkey);
     }
   }
 }

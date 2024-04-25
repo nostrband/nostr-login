@@ -18,18 +18,27 @@ export enum METHOD_MODULE {
 }
 
 export interface Info {
-  pubkey: string;
-  sk?: string;
-  relays?: string[];
-  nip05?: string;
-  picture?: string;
-  extension?: boolean;
-  readonly?: boolean;
-  name?: string;
-  bunkerUrl?: string;
-  typeAuthMethod?: string;
+    // must be present
+    pubkey: string;
+
+    // connect method only
+    sk?: string;
+    relays?: string[];
+
+    // connect/readOnly
+    nip05?: string;
+
+    // connect w/ bunkerUrl
+    bunkerUrl?: string;
+
+    // from kind:0 profile
+    picture?: string;
+    name?: string;
+
+    // session type
+    authMethod: 'connect' | 'readOnly' | 'extension';
 }
 
-export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'readonly' | 'extension' | 'name' | 'bunkerUrl' | 'typeAuthMethod'>;
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple';

@@ -1,8 +1,7 @@
-import { accountLocalStorageRecord, bunkerUrlToInfo, checkBunkerUrl, fetchProfile, getBunkerUrl, localStorageGetItem, localStorageRemoveItem, localStorageSetItem } from '../utils';
-import { LOCAL_STORE_KEY, LOGGED_IN_ACCOUNTS, RECENT_ACCOUNTS } from '../const';
+import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount } from '../utils';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { getEventHash, getPublicKey, nip19 } from 'nostr-tools';
-import { NostrLoginAuthOptions, RecentType, Response } from '../types';
+import { NostrLoginAuthOptions, Response } from '../types';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
@@ -48,8 +47,17 @@ class AuthNostrService extends EventEmitter {
   }
 
   public setReadOnly(pubkey: string) {
-    const info: Info = { pubkey, readonly: true };
+    const info: Info = { pubkey, authMethod: 'readOnly' };
+    this.onAuth('login', info);
+  }
 
+  public setExtension(pubkey: string) {
+    const info: Info = { pubkey, authMethod: 'extension' };
+    this.onAuth('login', info);
+  }
+
+  public async setConnect(info: Info) {
+    await this.initSigner(info);
     this.onAuth('login', info);
   }
 
@@ -98,48 +106,39 @@ class AuthNostrService extends EventEmitter {
   public async logout() {
     this.signer = null;
 
+    // disconnect from signer relays
     for (const r of this.ndk.pool.relays.keys()) {
       this.ndk.pool.removeRelay(r);
     }
 
-    const user: Info = localStorageGetItem(LOCAL_STORE_KEY);
-    const recentUser: RecentType = user;
+    // move current to recent
+    localStorageRemoveCurrentAccount();
 
-    const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];
-    const recentsAccounts: RecentType[] = localStorageGetItem(RECENT_ACCOUNTS) || [];
-    let recents: RecentType[] = [];
-
-    if (Boolean(recentsAccounts.length)) {
-      const index = recentsAccounts.findIndex((el: RecentType) => el.pubkey === recentUser.pubkey && el.typeAuthMethod === recentUser.typeAuthMethod);
-
-      if (index !== -1) {
-        recents = [...recentsAccounts];
-        recents[index] = recentUser;
-      } else {
-        recents = [...recentsAccounts, recentUser];
-      }
-    } else {
-      recents = [recentUser];
-    }
-
-    localStorageSetItem(RECENT_ACCOUNTS, JSON.stringify(recents));
-
-    localStorageSetItem(LOGGED_IN_ACCOUNTS, JSON.stringify(loggedInAccounts.filter(el => el.pubkey !== user.pubkey || el.typeAuthMethod !== user.typeAuthMethod)));
-    localStorageRemoveItem(LOCAL_STORE_KEY);
-
-    // clear localstore from user data
+    // notify everyone
     this.onAuth('logout');
+
+    this.emit('updateAccounts');  
   }
 
-  public onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
+  private setUserInfo(userInfo: Info | null) {
+    this.params.userInfo = userInfo;
+    this.emit('onUserInfo', userInfo);
+
+    if (userInfo) {
+      localStorageAddAccount(userInfo);
+      this.emit('updateAccounts');  
+    }
+  }
+
+  private onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
+    if (type !== 'logout' && !info) throw new Error("No user info in onAuth");
+
     if (info?.pubkey !== this.params.userInfo?.pubkey) {
       const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
       document.dispatchEvent(event);
     }
 
-    this.params.userInfo = info;
-
-    this.emit('onUserInfo', info);
+    this.setUserInfo(info);
 
     if (info) {
       // async profile fetch
@@ -153,17 +152,10 @@ class AuthNostrService extends EventEmitter {
           // NOTE: do not overwrite info.nip05 with the one from profile!
           // info.nip05 refers to nip46 provider,
           // profile.nip05 is just a fancy name that user has chosen
-          // nip05: p?.nip05,
-          typeAuthMethod: this.params.typeAuthMethod,
+          // nip05: p?.nip05
         };
 
-        this.params.userInfo = userInfo;
-
-        const { accounts } = accountLocalStorageRecord(userInfo);
-
-        this.emit('onSetAccounts', accounts);
-        this.emit('onUserInfo', userInfo);
-        this.params.typeAuthMethod = '';
+        this.setUserInfo(userInfo);
       });
     }
 
@@ -182,6 +174,8 @@ class AuthNostrService extends EventEmitter {
         if (info && info.relays) {
           options.relays = info.relays;
         }
+
+        options.method = info!.authMethod || 'connect';
       }
 
       const event = new CustomEvent('nlAuth', { detail: options });
@@ -261,11 +255,10 @@ class AuthNostrService extends EventEmitter {
   public async authNip46(type: 'login' | 'signup', name: string, bunkerUrl: string, sk = '') {
     try {
       const info = bunkerUrlToInfo(bunkerUrl, sk);
-      info.nip05 = name;
-
-      if (checkBunkerUrl(name)) {
-        info.bunkerUrl = bunkerUrl;
-      }
+      if (isBunkerUrl(name))
+        info.bunkerUrl = name;
+      else
+        info.nip05 = name;
 
       // console.log('nostr login auth info', info);
       if (!info.pubkey || !info.sk || !info.relays?.[0]) {

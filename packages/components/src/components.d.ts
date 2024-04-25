@@ -16,11 +16,13 @@ export namespace Components {
         "titleBtn": string;
     }
     interface NlAuth {
+        "accounts": Info[];
         "authUrl": string;
         "error": string;
         "isLoading": boolean;
         "isLoadingExtension": boolean;
         "isSignInWithExtension": boolean;
+        "recents": RecentType[];
         "startScreen": string;
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
@@ -55,7 +57,9 @@ export namespace Components {
         "info": RecentType | Info | undefined;
     }
     interface NlPreviouslyLogged {
+        "accounts": Info[];
         "description": string;
+        "recents": RecentType[];
         "titlePage": string;
     }
     interface NlSelect {
@@ -241,6 +245,7 @@ declare global {
     interface HTMLNlPreviouslyLoggedElementEventMap {
         "nlSwitchAccount": Info;
         "nlLoginRecentAccount": RecentType;
+        "nlRemoveRecent": RecentType;
     }
     interface HTMLNlPreviouslyLoggedElement extends Components.NlPreviouslyLogged, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlPreviouslyLoggedElementEventMap>(type: K, listener: (this: HTMLNlPreviouslyLoggedElement, ev: NlPreviouslyLoggedCustomEvent<HTMLNlPreviouslyLoggedElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -389,6 +394,7 @@ declare namespace LocalJSX {
         "titleBtn"?: string;
     }
     interface NlAuth {
+        "accounts"?: Info[];
         "authUrl"?: string;
         "error"?: string;
         "isLoading"?: boolean;
@@ -396,6 +402,7 @@ declare namespace LocalJSX {
         "isSignInWithExtension"?: boolean;
         "onHandleChangeDarkMode"?: (event: NlAuthCustomEvent<string>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
+        "recents"?: RecentType[];
         "startScreen"?: string;
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
     }
@@ -440,9 +447,12 @@ declare namespace LocalJSX {
         "info"?: RecentType | Info | undefined;
     }
     interface NlPreviouslyLogged {
+        "accounts"?: Info[];
         "description"?: string;
         "onNlLoginRecentAccount"?: (event: NlPreviouslyLoggedCustomEvent<RecentType>) => void;
+        "onNlRemoveRecent"?: (event: NlPreviouslyLoggedCustomEvent<RecentType>) => void;
         "onNlSwitchAccount"?: (event: NlPreviouslyLoggedCustomEvent<Info>) => void;
+        "recents"?: RecentType[];
         "titlePage"?: string;
     }
     interface NlSelect {

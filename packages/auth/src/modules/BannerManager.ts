@@ -56,7 +56,7 @@ class BannerManager extends EventEmitter {
     }
   }
 
-  public onSetAccounts(accounts: Info[]) {
+  public onUpdateAccounts(accounts: Info[]) {
     if (this.banner) {
       this.banner.accounts = accounts;
     }
@@ -86,8 +86,6 @@ class BannerManager extends EventEmitter {
     });
 
     this.banner.addEventListener('handleSwitchAccount', (event: any) => {
-      this.params.typeAuthMethod = event.detail.typeAuthMethod;
-
       this.emit('onSwitchAccount', event.detail);
     });
 

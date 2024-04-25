@@ -3,11 +3,9 @@ import { NostrLoginOptions } from '../types';
 
 class NostrParams {
   public userInfo: Info | null;
-  public typeAuthMethod: string;
   public optionsModal: NostrLoginOptions;
   constructor() {
     this.userInfo = null;
-    this.typeAuthMethod = '';
 
     this.optionsModal = {
       theme: 'default',

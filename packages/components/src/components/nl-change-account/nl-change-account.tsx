@@ -54,8 +54,6 @@ export class NLChangeAccount {
   connectedCallback() {
     this.themeState = this.theme;
     this.mode = this.darkMode;
-
-    this.options = JSON.parse(localStorage.getItem('__nostrlogin_accounts'));
   }
 
   calculateDropdownPosition() {
@@ -66,8 +64,6 @@ export class NLChangeAccount {
   }
 
   handleChange(el: Info) {
-    console.log(el);
-
     this.handleSwitchAccount.emit(el);
   }
 
@@ -79,7 +75,7 @@ export class NLChangeAccount {
     const listClass = `${this.isOpen ? 'listClass flex flex-col gap-2' : 'hidden'} w-full nl-select-list absolute z-10 left-0 shadow-md rounded-lg p-2 mt-1 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full`;
     const arrowClass = `${this.isOpen ? 'rotate-180' : 'rotate-0'} duration-300 flex-shrink-0 w-4 h-4 text-gray-500`;
     const filteredOptions =
-      this.options && this.currentAccount ? this.options.filter(el => el.pubkey !== this.currentAccount.pubkey || el.typeAuthMethod !== this.currentAccount.typeAuthMethod) : [];
+      this.options && this.currentAccount ? this.options.filter(el => el.pubkey !== this.currentAccount.pubkey || el.authMethod !== this.currentAccount.authMethod) : [];
 
     return (
       <div class={`theme-${this.themeState}`}>

@@ -4,7 +4,7 @@ export interface NostrLoginAuthOptions {
   localNsec?: string;
   relays?: string[];
   type: 'login' | 'signup' | 'logout';
-  extension?: boolean;
+  method?: 'connect' | 'readOnly' | 'extension';
 }
 
 export interface NostrLoginOptions {
@@ -50,6 +50,8 @@ export interface IModal {
   signupNameIsAvailable?: string | boolean;
   loginIsGood?: string | boolean;
   isFetchCreateAccount?: boolean;
+  recents?: RecentType[];
+  accounts?: Info[];
 }
 
 export type TypeModal = IModal & HTMLElement;
@@ -59,4 +61,4 @@ export interface Response {
   error?: string;
 }
 
-export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'extension' | 'readonly' | 'name' | 'bunkerUrl' | 'typeAuthMethod'>;
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;

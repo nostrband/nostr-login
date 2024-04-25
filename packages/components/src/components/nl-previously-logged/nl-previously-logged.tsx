@@ -1,4 +1,4 @@
-import { Component, h, Fragment, Prop, State, Event, EventEmitter } from '@stencil/core';
+import { Component, h, Fragment, Prop, Event, EventEmitter, Watch } from '@stencil/core';
 import { CURRENT_MODULE, Info, RecentType } from '@/types';
 import { state } from '@/store';
 
@@ -11,29 +11,35 @@ export class NlPreviouslyLogged {
   @Prop() titlePage = 'Your accounts';
   @Prop() description = 'Switch between active accounts or choose a recent one for fast login.';
 
-  @State() accounts: Info[] = [];
-  @State() recents: RecentType[] = [];
+  @Prop() accounts: Info[] = [];
+  @Prop() recents: RecentType[] = [];
 
   @Event() nlSwitchAccount: EventEmitter<Info>;
   @Event() nlLoginRecentAccount: EventEmitter<RecentType>;
+  @Event() nlRemoveRecent: EventEmitter<RecentType>;
 
   handleGoToWelcome() {
     state.screen = CURRENT_MODULE.WELCOME;
   }
 
-  connectedCallback() {
-    this.accounts = JSON.parse(localStorage.getItem('__nostrlogin_accounts')) || [];
-    this.recents = JSON.parse(localStorage.getItem('__nostrlogin_recent')) || [];
+  switchToWelcomeIfEmpty() {
+    if (!this.recents.length && !this.accounts.length) {
+      state.screen = CURRENT_MODULE.WELCOME;
+    }
+  }
+
+  @Watch('accounts')
+  watchAccounts() {
+    this.switchToWelcomeIfEmpty();
+  }
+
+  @Watch('recents')
+  watchRecents() {
+    this.switchToWelcomeIfEmpty();
   }
 
   handleRemoveRecent(user: Info) {
-    const recents = this.recents.filter(el => el.pubkey !== user.pubkey || el.typeAuthMethod !== user.typeAuthMethod);
-    this.recents = recents;
-    localStorage.setItem('__nostrlogin_recent', JSON.stringify(recents));
-
-    if (!recents.length && !this.accounts.length) {
-      state.screen = CURRENT_MODULE.WELCOME;
-    }
+    this.nlRemoveRecent.emit(user);
   }
 
   handleSwitch(el: Info) {

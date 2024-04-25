@@ -1,6 +1,5 @@
 import { EventEmitter } from 'tseep';
-import { TIMEOUT } from '../const';
-import { NostrParams } from './';
+import { CALL_TIMEOUT } from '../const';
 
 class ProcessManager extends EventEmitter {
   private callCount: number = 0;
@@ -18,7 +17,7 @@ class ProcessManager extends EventEmitter {
 
   public async wait(cb: () => void) {
     if (!this.callTimer) {
-      this.callTimer = setTimeout(() => this.emit('onCallTimeout'), TIMEOUT);
+      this.callTimer = setTimeout(() => this.emit('onCallTimeout'), CALL_TIMEOUT);
     }
 
     if (!this.callCount) {

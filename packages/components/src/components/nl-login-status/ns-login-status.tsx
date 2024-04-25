@@ -14,18 +14,18 @@ export class NlLoginStatus {
 
     let text = '';
     let color = '';
-    if (Boolean(this.info.bunkerUrl)) {
-      text = 'Bunker URL';
-      color = 'border-purple-300 text-purple-400 bg-purple-100';
-    } else if (this.info.extension) {
+    if (this.info.authMethod === 'extension') {
       text = 'Extension';
       color = 'border-yellow-300 text-yellow-500 bg-yellow-100';
-    } else if (this.info.readonly) {
+    } else if (this.info.authMethod === 'readOnly') {
       text = 'Read only';
       color = 'border-gray-300 text-gray-400 bg-gray-100';
-    } else {
+    } else if (this.info.authMethod === 'connect') {
       text = 'Connect';
       color = 'border-teal-300 text-teal-600 bg-teal-100';
+    } else {
+      console.log("unknown auth method", this.info)
+      throw new Error("Unknown auth method")
     }
   
     return (
