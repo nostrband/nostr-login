@@ -180,6 +180,7 @@ export class NlBanner {
                 )}
 
                 {isShowUserName && <div class="show-slow truncate w-16 text-xs">{userName}</div>}
+                {isShowUserName && <nl-login-status info={this.userInfo} /> }
               </div>
             </div>
 
@@ -245,7 +246,6 @@ export class NlBanner {
                 <div>
                   <div>
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
-                    {this.userInfo && <nl-login-status info={this.userInfo} /> }
                     <div class="mb-2">
                       <nl-change-account currentAccount={this.userInfo} accounts={this.accounts} />
                     </div>

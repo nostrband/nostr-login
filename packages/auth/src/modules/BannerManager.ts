@@ -27,11 +27,11 @@ class BannerManager extends EventEmitter {
   public onUserInfo(info: Info | null) {
     if (this.banner) {
       this.banner.userInfo = info;
-      if (info) {
-        this.banner.titleBanner = info.extension ? 'You are using extension' : info.sk ? 'You are logged in' : 'You are read only';
-      } else {
-        this.banner.titleBanner = '';
-      } // 'Use with Nostr';
+      // if (info) {
+      //   this.banner.titleBanner = info.extension ? 'You are using extension' : info.sk ? 'You are logged in' : 'You are read only';
+      // } else {
+      //   this.banner.titleBanner = '';
+      // } // 'Use with Nostr';
     }
   }
 
