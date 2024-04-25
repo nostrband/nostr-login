@@ -9,7 +9,7 @@ import { state } from '@/store';
 })
 export class NlPreviouslyLogged {
   @Prop() titlePage = 'Your accounts';
-  @Prop() description = 'Switch between active accounts or choose recent ones for fast login.';
+  @Prop() description = 'Switch between active accounts or choose a recent one for fast login.';
 
   @State() accounts: Info[] = [];
   @State() recents: RecentType[] = [];
@@ -45,41 +45,9 @@ export class NlPreviouslyLogged {
   }
 
   render() {
-    const getStatusLogin = (el: RecentType | Info) => {
-      const isBunkerUrl = Boolean(el.bunkerUrl);
-
-      if (!(isBunkerUrl || el.extension || el.readonly)) {
-        return null;
-      }
-
-      let text = '';
-
-      if (isBunkerUrl) {
-        text = 'Bunker URL';
-      }
-
-      if (el.extension) {
-        text = 'Extension';
-      }
-
-      if (el.readonly) {
-        text = 'Read only';
-      }
-
-      return (
-        <div>
-          <span
-            class={`${isBunkerUrl && 'border-purple-300 text-purple-400 bg-purple-100'} ${el.readonly && 'border-gray-300 text-gray-400 bg-gray-100'} ${el.extension && 'border-yellow-300 text-yellow-500 bg-yellow-100'} rounded-xl border w-auto text-[11px] px-1`}
-          >
-            {text}
-          </span>
-        </div>
-      );
-    };
-
     return (
       <Fragment>
-        <div class="p-4 overflow-y-auto">
+        <div class="p-4 pt-0 overflow-y-auto">
           <h1 class="nl-title font-bold text-center text-4xl">{this.titlePage}</h1>
           <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{this.description}</p>
         </div>
@@ -121,8 +89,8 @@ export class NlPreviouslyLogged {
                       </div>
 
                       <div class="overflow-hidden flex flex-col w-full">
-                        {getStatusLogin(el)}
                         <div class="truncate overflow-hidden">{userName}</div>
+                        <nl-login-status info={el} />
                       </div>
                     </div>
                     {/* <div class="w-full max-w-6">
@@ -178,7 +146,7 @@ export class NlPreviouslyLogged {
                       </div>
                     </div>
                     <div class="overflow-hidden flex flex-col w-full">
-                      {getStatusLogin(el)}
+                      <nl-login-status info={el} />
                       <div class="truncate overflow-hidden">{userName}</div>
                     </div>
                     <svg
@@ -207,12 +175,11 @@ export class NlPreviouslyLogged {
         )}
 
         <div class="p-4 overflow-y-auto">
-          <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+          <p class="nl-footer font-light text-center text-sm max-w-96 mx-auto">
             You can also{' '}
-            <span onClick={() => this.handleGoToWelcome()} class="cursor-pointer text-blue-400">
+            <span onClick={() => this.handleGoToWelcome()} class="cursor-pointer pb-3 text-blue-500">
               add another account
             </span>
-            .
           </p>
         </div>
       </Fragment>

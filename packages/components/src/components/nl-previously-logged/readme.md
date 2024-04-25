@@ -5,10 +5,10 @@
 
 ## Properties
 
-| Property      | Attribute     | Description | Type     | Default                                                                  |
-| ------------- | ------------- | ----------- | -------- | ------------------------------------------------------------------------ |
-| `description` | `description` |             | `string` | `'Switch between active accounts or choose recent ones for fast login.'` |
-| `titlePage`   | `title-page`  |             | `string` | `'Your accounts'`                                                        |
+| Property      | Attribute     | Description | Type     | Default                                                                   |
+| ------------- | ------------- | ----------- | -------- | ------------------------------------------------------------------------- |
+| `description` | `description` |             | `string` | `'Switch between active accounts or choose a recent one for fast login.'` |
+| `titlePage`   | `title-page`  |             | `string` | `'Your accounts'`                                                         |
 
 
 ## Events
@@ -25,9 +25,14 @@
 
  - [nl-auth](../nl-auth)
 
+### Depends on
+
+- [nl-login-status](../nl-login-status)
+
 ### Graph
 ```mermaid
 graph TD;
+  nl-previously-logged --> nl-login-status
   nl-auth --> nl-previously-logged
   style nl-previously-logged fill:#f9f,stroke:#333,stroke-width:4px
 ```

@@ -150,7 +150,10 @@ class AuthNostrService extends EventEmitter {
           ...this.params.userInfo,
           picture: p?.image || p?.picture,
           name: p?.name || p?.displayName || p?.nip05 || nip19.npubEncode(info.pubkey),
-          nip05: p?.nip05,
+          // NOTE: do not overwrite info.nip05 with the one from profile!
+          // info.nip05 refers to nip46 provider,
+          // profile.nip05 is just a fancy name that user has chosen
+          // nip05: p?.nip05,
           typeAuthMethod: this.params.typeAuthMethod,
         };
 

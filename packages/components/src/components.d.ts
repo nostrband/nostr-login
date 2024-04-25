@@ -51,6 +51,9 @@ export namespace Components {
     }
     interface NlLoading {
     }
+    interface NlLoginStatus {
+        "info": RecentType | Info | undefined;
+    }
     interface NlPreviouslyLogged {
         "description": string;
         "titlePage": string;
@@ -229,6 +232,12 @@ declare global {
         prototype: HTMLNlLoadingElement;
         new (): HTMLNlLoadingElement;
     };
+    interface HTMLNlLoginStatusElement extends Components.NlLoginStatus, HTMLStencilElement {
+    }
+    var HTMLNlLoginStatusElement: {
+        prototype: HTMLNlLoginStatusElement;
+        new (): HTMLNlLoginStatusElement;
+    };
     interface HTMLNlPreviouslyLoggedElementEventMap {
         "nlSwitchAccount": Info;
         "nlLoginRecentAccount": RecentType;
@@ -363,6 +372,7 @@ declare global {
         "nl-info": HTMLNlInfoElement;
         "nl-info-extension": HTMLNlInfoExtensionElement;
         "nl-loading": HTMLNlLoadingElement;
+        "nl-login-status": HTMLNlLoginStatusElement;
         "nl-previously-logged": HTMLNlPreviouslyLoggedElement;
         "nl-select": HTMLNlSelectElement;
         "nl-signin": HTMLNlSigninElement;
@@ -426,6 +436,9 @@ declare namespace LocalJSX {
         "onHandleContinue"?: (event: NlLoadingCustomEvent<boolean>) => void;
         "onStopFetchHandler"?: (event: NlLoadingCustomEvent<boolean>) => void;
     }
+    interface NlLoginStatus {
+        "info"?: RecentType | Info | undefined;
+    }
     interface NlPreviouslyLogged {
         "description"?: string;
         "onNlLoginRecentAccount"?: (event: NlPreviouslyLoggedCustomEvent<RecentType>) => void;
@@ -480,6 +493,7 @@ declare namespace LocalJSX {
         "nl-info": NlInfo;
         "nl-info-extension": NlInfoExtension;
         "nl-loading": NlLoading;
+        "nl-login-status": NlLoginStatus;
         "nl-previously-logged": NlPreviouslyLogged;
         "nl-select": NlSelect;
         "nl-signin": NlSignin;
@@ -501,6 +515,7 @@ declare module "@stencil/core" {
             "nl-info": LocalJSX.NlInfo & JSXBase.HTMLAttributes<HTMLNlInfoElement>;
             "nl-info-extension": LocalJSX.NlInfoExtension & JSXBase.HTMLAttributes<HTMLNlInfoExtensionElement>;
             "nl-loading": LocalJSX.NlLoading & JSXBase.HTMLAttributes<HTMLNlLoadingElement>;
+            "nl-login-status": LocalJSX.NlLoginStatus & JSXBase.HTMLAttributes<HTMLNlLoginStatusElement>;
             "nl-previously-logged": LocalJSX.NlPreviouslyLogged & JSXBase.HTMLAttributes<HTMLNlPreviouslyLoggedElement>;
             "nl-select": LocalJSX.NlSelect & JSXBase.HTMLAttributes<HTMLNlSelectElement>;
             "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;

@@ -33,12 +33,15 @@
 
 ### Depends on
 
+- [nl-login-status](../nl-login-status)
 - [nl-change-account](../nl-change-account)
 
 ### Graph
 ```mermaid
 graph TD;
+  nl-banner --> nl-login-status
   nl-banner --> nl-change-account
+  nl-change-account --> nl-login-status
   style nl-banner fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -1,5 +1,5 @@
 import { Component, h, Listen, Prop, State, Watch, Element, Event, EventEmitter } from '@stencil/core';
-import { Info, RecentType } from '@/types';
+import { Info } from '@/types';
 
 @Component({
   tag: 'nl-change-account',
@@ -81,38 +81,6 @@ export class NLChangeAccount {
     const filteredOptions =
       this.options && this.currentAccount ? this.options.filter(el => el.pubkey !== this.currentAccount.pubkey || el.typeAuthMethod !== this.currentAccount.typeAuthMethod) : [];
 
-    const getStatusLogin = (el: RecentType | Info) => {
-      const isBunkerUrl = Boolean(el.bunkerUrl);
-
-      if (!(isBunkerUrl || el.extension || el.readonly)) {
-        return null;
-      }
-
-      let text = '';
-
-      if (isBunkerUrl) {
-        text = 'Bunker URL';
-      }
-
-      if (el.extension) {
-        text = 'Extension';
-      }
-
-      if (el.readonly) {
-        text = 'Read only';
-      }
-
-      return (
-        <div>
-          <span
-            class={`${isBunkerUrl && 'border-purple-300 text-purple-400 bg-purple-100'} ${el.readonly && 'border-gray-300 text-gray-400 bg-gray-100'} ${el.extension && 'border-yellow-300 text-yellow-500 bg-yellow-100'} rounded-xl border  w-auto text-[10px] px-1 `}
-          >
-            {text}
-          </span>
-        </div>
-      );
-    };
-
     return (
       <div class={`theme-${this.themeState}`}>
         <div class="relative" ref={el => (this.wrapperRef = el)}>
@@ -166,8 +134,8 @@ export class NLChangeAccount {
                     {/*<div class="truncate overflow-hidden w-full">{userName}</div>*/}
 
                     <div class="overflow-hidden flex flex-col w-full">
-                      {getStatusLogin(el)}
                       <div class="truncate overflow-hidden">{userName}</div>
+                      <nl-login-status info={el} />
                     </div>
                   </li>
                 );

@@ -56,6 +56,7 @@ graph TD;
   nl-signup --> button-base
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
+  nl-previously-logged --> nl-login-status
   nl-loading --> button-base
   style nl-auth fill:#f9f,stroke:#333,stroke-width:4px
 ```
