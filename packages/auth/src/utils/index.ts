@@ -42,6 +42,7 @@ export const bunkerUrlToInfo = (bunkerUrl: string, sk = ''): Info => {
     pubkey: url.hostname || url.pathname.split('//')[1],
     sk: sk || generatePrivateKey(),
     relays: url.searchParams.getAll('relay'),
+    token: url.searchParams.get('secret') || '',
     authMethod: 'connect',
   };
 };
