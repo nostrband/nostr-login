@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Fragment, h, Prop, State, Watch } from '@stencil/core';
-import { CURRENT_MODULE } from '@/types';
+import { CURRENT_MODULE, Info, RecentType } from '@/types';
 import { state } from '@/store';
 
 @Component({
@@ -15,6 +15,8 @@ export class NlAuth {
   @Prop() isLoadingExtension: boolean = false;
   @Prop() authUrl: string = '';
   @Prop() error: string = '';
+  @Prop({ mutable: true }) accounts: Info[] = [];
+  @Prop({ mutable: true }) recents: RecentType[] = [];
 
   @State() darkMode: boolean = false;
   @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
@@ -94,6 +96,8 @@ export class NlAuth {
           return <nl-signin-read-only />;
         case CURRENT_MODULE.SIGNIN_BUNKER_URL:
           return <nl-signin-bunker-url />;
+        case CURRENT_MODULE.PREVIOUSLY_LOGGED:
+          return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
         default:
           return <nl-welcome isSignInWithExtension={this.isSignInWithExtension} />;
       }
@@ -184,7 +188,7 @@ export class NlAuth {
                 </button>
               </div>
             </div>
-            {state.screen !== CURRENT_MODULE.WELCOME && !state.isLoading && (
+            {state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED && state.screen !== CURRENT_MODULE.WELCOME && !state.isLoading && (
               <div class="p-4">
                 <button
                   onClick={() => this.handleClickToBack()}
@@ -204,31 +208,34 @@ export class NlAuth {
             ) : (
               <Fragment>
                 {renderModule()}
-                {state.screen !== CURRENT_MODULE.INFO && state.screen !== CURRENT_MODULE.WELCOME && state.screen !== CURRENT_MODULE.EXTENSION && (
-                  <Fragment>
-                    {state.screen === CURRENT_MODULE.SIGNUP ? (
-                      <div class="p-4 overflow-y-auto">
-                        <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-                          If you already have an account please{' '}
-                          <span onClick={() => (state.screen = CURRENT_MODULE.SIGNIN)} class="cursor-pointer text-blue-400">
-                            log in
-                          </span>
-                          .
-                        </p>
-                      </div>
-                    ) : (
-                      <div class="p-4 overflow-y-auto">
-                        <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-                          If you don't have an account please{' '}
-                          <span onClick={() => (state.screen = CURRENT_MODULE.SIGNUP)} class="cursor-pointer text-blue-400">
-                            sign up
-                          </span>
-                          .
-                        </p>
-                      </div>
-                    )}
-                  </Fragment>
-                )}
+                {state.screen !== CURRENT_MODULE.INFO &&
+                  state.screen !== CURRENT_MODULE.WELCOME &&
+                  state.screen !== CURRENT_MODULE.EXTENSION &&
+                  state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED && (
+                    <Fragment>
+                      {state.screen === CURRENT_MODULE.SIGNUP ? (
+                        <div class="p-4 overflow-y-auto">
+                          <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+                            If you already have an account please{' '}
+                            <span onClick={() => (state.screen = CURRENT_MODULE.SIGNIN)} class="cursor-pointer text-blue-400">
+                              log in
+                            </span>
+                            .
+                          </p>
+                        </div>
+                      ) : (
+                        <div class="p-4 overflow-y-auto">
+                          <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+                            If you don't have an account please{' '}
+                            <span onClick={() => (state.screen = CURRENT_MODULE.SIGNUP)} class="cursor-pointer text-blue-400">
+                              sign up
+                            </span>
+                            .
+                          </p>
+                        </div>
+                      )}
+                    </Fragment>
+                  )}
               </Fragment>
             )}
           </div>

@@ -25,12 +25,12 @@ export class NlLoading {
     return (
       <div class="p-4 overflow-y-auto">
         <h1 class="nl-title font-bold text-center text-4xl">
-          {state.authUrl && !state.isLoading && 'Connected!'}
+          {state.authUrl && !state.isLoading && 'Almost ready!'}
           {!state.authUrl && state.isLoading && 'Connecting...'}
           {state.authUrl && state.isLoading && 'Confirming...'}
         </h1>
         <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">
-          {state.authUrl && !state.isLoading && 'Connection established, continue to confirm the connection.'}
+          {state.authUrl && !state.isLoading && 'Continue to confirm the connection to your key storage.'}
           {!state.authUrl && state.isLoading && 'Establishing connection to your key storage.'}
           {state.authUrl && state.isLoading && 'Please confirm the connection in your key storage app.'}
         </p>

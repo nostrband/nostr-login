@@ -1,7 +1,5 @@
 # nl-auth
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -9,11 +7,13 @@
 
 | Property                | Attribute                   | Description | Type                                             | Default                  |
 | ----------------------- | --------------------------- | ----------- | ------------------------------------------------ | ------------------------ |
+| `accounts`              | --                          |             | `Info[]`                                         | `[]`                     |
 | `authUrl`               | `auth-url`                  |             | `string`                                         | `''`                     |
 | `error`                 | `error`                     |             | `string`                                         | `''`                     |
 | `isLoading`             | `is-loading`                |             | `boolean`                                        | `false`                  |
 | `isLoadingExtension`    | `is-loading-extension`      |             | `boolean`                                        | `false`                  |
 | `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean`                                        | `true`                   |
+| `recents`               | --                          |             | `RecentType[]`                                   | `[]`                     |
 | `startScreen`           | `start-screen`              |             | `string`                                         | `CURRENT_MODULE.WELCOME` |
 | `theme`                 | `theme`                     |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
 
@@ -37,6 +37,7 @@
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
 - [nl-signin-bunker-url](../nl-signin-bunker-url)
+- [nl-previously-logged](../nl-previously-logged)
 - [nl-loading](../nl-loading)
 
 ### Graph
@@ -49,6 +50,7 @@ graph TD;
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
   nl-auth --> nl-signin-bunker-url
+  nl-auth --> nl-previously-logged
   nl-auth --> nl-loading
   nl-welcome --> button-base
   nl-signin --> button-base
@@ -56,6 +58,7 @@ graph TD;
   nl-signup --> button-base
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
+  nl-previously-logged --> nl-login-status
   nl-loading --> button-base
   style nl-auth fill:#f9f,stroke:#333,stroke-width:4px
 ```

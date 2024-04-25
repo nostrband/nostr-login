@@ -47,7 +47,7 @@ export default [
             terser({
                 compress: {
                     toplevel: true,
-                }
+                },
             })
         ],
     }

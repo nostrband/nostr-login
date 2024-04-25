@@ -1,5 +1,4 @@
-import { bunkerUrlToInfo, fetchProfile, getBunkerUrl, localStorageRemoveItem, localStorageSetItem } from '../utils';
-import { LOCAL_STORE_KEY } from '../const';
+import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount } from '../utils';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
@@ -12,8 +11,8 @@ class AuthNostrService extends EventEmitter {
   public profileNdk: NDK;
   private signer: NDKNip46Signer | null = null;
   private params: NostrParams;
-  public signerPromise?: Promise<void>
-  public launcherPromise?: Promise<void>
+  public signerPromise?: Promise<void>;
+  public launcherPromise?: Promise<void>;
 
   constructor(params: NostrParams) {
     super();
@@ -48,8 +47,17 @@ class AuthNostrService extends EventEmitter {
   }
 
   public setReadOnly(pubkey: string) {
-    const info = { pubkey };
-    localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+    const info: Info = { pubkey, authMethod: 'readOnly' };
+    this.onAuth('login', info);
+  }
+
+  public setExtension(pubkey: string) {
+    const info: Info = { pubkey, authMethod: 'extension' };
+    this.onAuth('login', info);
+  }
+
+  public async setConnect(info: Info) {
+    await this.initSigner(info);
     this.onAuth('login', info);
   }
 
@@ -64,9 +72,10 @@ class AuthNostrService extends EventEmitter {
 
     // parse bunker url and generate local nsec
     const info = bunkerUrlToInfo(bunkerUrl);
+    const eventToAddAccount = Boolean(this.params.userInfo);
 
     // init signer to talk to the bunker (not the user!)
-    await this.initSigner(info);
+    await this.initSigner(info, { eventToAddAccount });
 
     const params = [
       name,
@@ -97,32 +106,56 @@ class AuthNostrService extends EventEmitter {
   public async logout() {
     this.signer = null;
 
+    // disconnect from signer relays
     for (const r of this.ndk.pool.relays.keys()) {
       this.ndk.pool.removeRelay(r);
     }
 
-    localStorageRemoveItem(LOCAL_STORE_KEY);
+    // move current to recent
+    localStorageRemoveCurrentAccount();
 
-    // clear localstore from user data
+    // notify everyone
     this.onAuth('logout');
+
+    this.emit('updateAccounts');  
   }
 
-  public onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
-    this.params.userInfo = info;
+  private setUserInfo(userInfo: Info | null) {
+    this.params.userInfo = userInfo;
+    this.emit('onUserInfo', userInfo);
 
-    this.emit('onUserInfo', info);
+    if (userInfo) {
+      localStorageAddAccount(userInfo);
+      this.emit('updateAccounts');  
+    }
+  }
+
+  private onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
+    if (type !== 'logout' && !info) throw new Error("No user info in onAuth");
+
+    if (info?.pubkey !== this.params.userInfo?.pubkey) {
+      const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
+      document.dispatchEvent(event);
+    }
+
+    this.setUserInfo(info);
 
     if (info) {
       // async profile fetch
       fetchProfile(info, this.profileNdk).then(p => {
         if (this.params.userInfo !== info) return;
 
-        this.params.userInfo = {
+        const userInfo = {
           ...this.params.userInfo,
           picture: p?.image || p?.picture,
+          name: p?.name || p?.displayName || p?.nip05 || nip19.npubEncode(info.pubkey),
+          // NOTE: do not overwrite info.nip05 with the one from profile!
+          // info.nip05 refers to nip46 provider,
+          // profile.nip05 is just a fancy name that user has chosen
+          // nip05: p?.nip05
         };
 
-        this.emit('onUserInfo', info);
+        this.setUserInfo(userInfo);
       });
     }
 
@@ -141,6 +174,8 @@ class AuthNostrService extends EventEmitter {
         if (info && info.relays) {
           options.relays = info.relays;
         }
+
+        options.method = info!.authMethod || 'connect';
       }
 
       const event = new CustomEvent('nlAuth', { detail: options });
@@ -154,7 +189,7 @@ class AuthNostrService extends EventEmitter {
     }
   }
 
-  public async initSigner(info: Info, { connect = false } = {}) {
+  public async initSigner(info: Info, { connect = false, eventToAddAccount = false } = {}) {
     // mutex
     if (this.signerPromise) {
       try {
@@ -181,7 +216,7 @@ class AuthNostrService extends EventEmitter {
         // OAuth flow
         this.signer.on('authUrl', url => {
           console.log('nostr login auth url', url);
-          this.emit('onAuthUrl', url);
+          this.emit('onAuthUrl', { url, eventToAddAccount });
         });
 
         // if we're doing it for the first time then
@@ -220,17 +255,19 @@ class AuthNostrService extends EventEmitter {
   public async authNip46(type: 'login' | 'signup', name: string, bunkerUrl: string, sk = '') {
     try {
       const info = bunkerUrlToInfo(bunkerUrl, sk);
-      info.nip05 = name;
+      if (isBunkerUrl(name))
+        info.bunkerUrl = name;
+      else
+        info.nip05 = name;
 
       // console.log('nostr login auth info', info);
       if (!info.pubkey || !info.sk || !info.relays?.[0]) {
         throw new Error(`Bad bunker url ${bunkerUrl}`);
       }
 
-      const r = await this.initSigner(info, { connect: true });
+      const eventToAddAccount = Boolean(this.params.userInfo);
 
-      // only save after successfull login
-      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
+      const r = await this.initSigner(info, { connect: true, eventToAddAccount });
 
       // callback
       this.onAuth(type, info);
@@ -254,13 +291,12 @@ class AuthNostrService extends EventEmitter {
   }
 
   public async encrypt(pubkey: string, plaintext: string) {
-    return this.signer?.encrypt(new NDKUser({ pubkey }), plaintext)
+    return this.signer?.encrypt(new NDKUser({ pubkey }), plaintext);
   }
 
   public async decrypt(pubkey: string, ciphertext: string) {
-    return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext)
+    return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext);
   }
-
 }
 
 export default AuthNostrService;

@@ -1,17 +1,15 @@
 # nl-welcome
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property                | Attribute                   | Description | Type      | Default                                                                                        |
-| ----------------------- | --------------------------- | ----------- | --------- | ---------------------------------------------------------------------------------------------- |
-| `description`           | `description`               |             | `string`  | `'This app is part of the Nostr network. Log in with your Nostr account or join the network.'` |
-| `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean` | `true`                                                                                         |
-| `titleWelcome`          | `title-welcome`             |             | `string`  | `'Welcome!'`                                                                                   |
+| Property                | Attribute                   | Description | Type      | Default                                                                                           |
+| ----------------------- | --------------------------- | ----------- | --------- | ------------------------------------------------------------------------------------------------- |
+| `description`           | `description`               |             | `string`  | `'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.'` |
+| `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean` | `true`                                                                                            |
+| `titleWelcome`          | `title-welcome`             |             | `string`  | `'Join Nostr!'`                                                                                   |
 
 
 ## Events

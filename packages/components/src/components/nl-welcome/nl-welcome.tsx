@@ -8,8 +8,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlWelcome {
-  @Prop() titleWelcome = 'Welcome!';
-  @Prop() description = 'This app is part of the Nostr network. Log in with your Nostr account or join the network.';
+  @Prop() titleWelcome = 'Join Nostr!';
+  @Prop() description = 'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.';
   @Prop() isSignInWithExtension = true;
 
   @State() isOpenAdvancedLogin: boolean = false;
@@ -22,6 +22,22 @@ export class NlWelcome {
 
   handleOpenAdvanced() {
     this.isOpenAdvancedLogin = !this.isOpenAdvancedLogin;
+  }
+
+  renderSignInWithExtension() {
+    return (
+      <div class="mt-2">
+        <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.EXTENSION)} titleBtn="Sign in with extension">
+          <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z"
+            />
+          </svg>
+        </button-base>
+      </div>
+    );
   }
 
   render() {
@@ -44,17 +60,7 @@ export class NlWelcome {
               />
             </svg>
           </button-base>
-          {this.isSignInWithExtension && (
-            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.EXTENSION)} titleBtn="Sign in with extension">
-              <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z"
-                />
-              </svg>
-            </button-base>
-          )}
+          {this.isSignInWithExtension && this.renderSignInWithExtension()}
 
           <div class="flex justify-center">
             <div
@@ -82,6 +88,7 @@ export class NlWelcome {
           <div
             class={`${this.isOpenAdvancedLogin ? 'max-h-[500px] mt-3 duration-300' : 'max-h-0 mt-0 duration-[0.25s]'} transition-max-height ease-in flex gap-3 flex-col overflow-hidden`}
           >
+            {!this.isSignInWithExtension && this.renderSignInWithExtension()}
             <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_BUNKER_URL)} titleBtn="Sign in with bunker URL">
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path

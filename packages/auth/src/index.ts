@@ -1,8 +1,8 @@
 import 'nostr-login-components';
 import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, ProcessManager, BannerManager, ModalManager } from './modules';
 import { NostrLoginOptions } from './types';
-import { localStorageGetItem, localStorageSetItem } from './utils';
-import { LOCAL_STORE_KEY } from './const';
+import { isBunkerUrl, localStorageGetAccounts, localStorageGetCurrent, localStorageGetRecents, localStorageSetItem } from './utils';
+import { Info } from 'nostr-login-components/dist/types/types';
 
 export class NostrLoginInitializer {
   public extensionService: NostrExtensionService;
@@ -20,7 +20,7 @@ export class NostrLoginInitializer {
     this.popupManager = new Popup();
     this.bannerManager = new BannerManager(this.params);
     this.authNostrService = new AuthNostrService(this.params);
-    this.extensionService = new NostrExtensionService(this.params, this.authNostrService);
+    this.extensionService = new NostrExtensionService(this.params);
     this.modalManager = new ModalManager(this.params, this.authNostrService, this.extensionService);
     this.nostr = new Nostr(this.params, this.processManager, this.extensionService, this.authNostrService, this.modalManager);
 
@@ -36,8 +36,14 @@ export class NostrLoginInitializer {
       this.bannerManager.onCallStart();
     });
 
-    this.authNostrService.on('onAuthUrl', url => {
+    this.authNostrService.on('onAuthUrl', ({ url, eventToAddAccount }) => {
       this.processManager.onAuthUrl();
+
+      if (eventToAddAccount) {
+        this.modalManager.onAuthUrl(url);
+
+        return;
+      }
 
       if (this.params.userInfo) {
         // show the 'Please confirm' banner
@@ -50,12 +56,24 @@ export class NostrLoginInitializer {
       }
     });
 
+    this.authNostrService.on('updateAccounts', () => {
+      this.updateAccounts();
+    });
+
     this.authNostrService.on('onUserInfo', info => {
       this.bannerManager.onUserInfo(info);
     });
 
     this.modalManager.on('onAuthUrlClick', url => {
       this.popupManager.ensurePopup(url);
+    });
+
+    this.modalManager.on('onSwitchAccount', async (info: Info) => {
+      this.switchAccount(info);
+    });
+
+    this.modalManager.on('updateAccounts', () => {
+      this.updateAccounts();
     });
 
     this.bannerManager.on('logout', () => {
@@ -66,15 +84,61 @@ export class NostrLoginInitializer {
       this.popupManager.ensurePopup(url);
     });
 
+    this.bannerManager.on('onSwitchAccount', async (info: Info) => {
+      this.switchAccount(info);
+    });
+
+    this.extensionService.on('extensionLogin', (pubkey: string) => {
+      this.authNostrService.setExtension(pubkey);
+    })
+
+    this.extensionService.on('extensionLogout', () => {
+      this.authNostrService.logout();
+    })
+
     this.bannerManager.on('launch', startScreen => {
-      const options = startScreen
+      const recent = localStorageGetRecents();
+      const accounts = localStorageGetAccounts();
+
+      let options = startScreen
         ? {
             startScreen,
           }
         : this.params.optionsModal;
 
+      if (Boolean(recent?.length) || Boolean(accounts?.length)) {
+        options = { ...options, startScreen: 'previously-logged' };
+      }
+
       this.modalManager.launch(options).catch(() => {}); // don't throw if cancelled
     });
+  }
+
+  private async switchAccount(info: Info) {
+
+    console.log("nostr login switch to info", info);
+
+    // make sure extension is unlinked
+    this.extensionService.unsetExtension(this.nostr);
+
+    if (info.authMethod === 'readOnly') {
+      this.authNostrService.setReadOnly(info.pubkey);
+    } else if (info.authMethod === 'extension') {
+      // trySetExtensionForPubkey will check if
+      // we still have the extension and it's the same pubkey 
+      await this.extensionService.setExtension();
+    } else if (info.authMethod === 'connect' && info.sk && info.relays && info.relays[0]) {
+      this.authNostrService.setConnect(info);
+    } else {
+      throw new Error("Bad auth info")
+    }
+  }
+
+  private updateAccounts() {
+    const accounts = localStorageGetAccounts();
+    const recents = localStorageGetRecents();
+    this.bannerManager.onUpdateAccounts(accounts);
+    this.modalManager.onUpdateAccounts(accounts, recents);
   }
 
   public init = async (opt: NostrLoginOptions) => {
@@ -104,28 +168,12 @@ export class NostrLoginInitializer {
 
     try {
       // read conf from localstore
-      const info = localStorageGetItem(LOCAL_STORE_KEY);
+      const info = localStorageGetCurrent();
+      if (!info || !info.pubkey) throw new Error("Bad stored info");
 
-      if (!info) {
-        return;
-      }
+      // switch to it
+      await this.switchAccount(info);
 
-      if (info.extension && info.pubkey) {
-        // assume we're signed in, setExtension will check if
-        // we still have the extension and will logout if smth is wrong
-        this.authNostrService.onAuth('login', info);
-
-        await this.extensionService.trySetExtensionForPubkey(info.pubkey);
-      } else if (info.pubkey && info.sk && info.relays && info.relays[0]) {
-        await this.authNostrService.initSigner(info);
-
-        this.authNostrService.onAuth('login', info);
-      } else if (info.pubkey) {
-        // read only
-        this.authNostrService.onAuth('login', info);
-      } else {
-        console.log('nostr login bad stored info', info);
-      }
     } catch (e) {
       console.log('nostr login init error', e);
 
@@ -135,7 +183,7 @@ export class NostrLoginInitializer {
 
   public logout = async () => {
     // replace back
-    this.extensionService.unsetExtension();
+    this.extensionService.unsetExtension(this.nostr);
 
     await this.authNostrService.logout();
   };

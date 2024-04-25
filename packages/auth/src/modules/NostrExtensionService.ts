@@ -1,15 +1,14 @@
-import { localStorageSetItem } from '../utils';
-import { LOCAL_STORE_KEY } from '../const';
+import { Info } from 'nostr-login-components/dist/types/types';
 import { AuthNostrService, Nostr, NostrParams } from './';
+import { EventEmitter } from 'tseep';
 
-class NostrExtensionService {
+class NostrExtensionService extends EventEmitter {
   private params: NostrParams;
-  private authNostrService: AuthNostrService;
   private nostrExtension: any | undefined;
 
-  constructor(params: NostrParams, authNostrService: AuthNostrService) {
+  constructor(params: NostrParams) {
+    super();
     this.params = params;
-    this.authNostrService = authNostrService;
   }
 
   public startCheckingExtension(nostr: Nostr) {
@@ -27,11 +26,11 @@ class NostrExtensionService {
   }
 
   public getExtension() {
-    return this.nostrExtension
+    return this.nostrExtension;
   }
 
   public hasExtension() {
-    return !!this.nostrExtension
+    return !!this.nostrExtension;
   }
 
   private initExtension(nostr: Nostr) {
@@ -40,7 +39,7 @@ class NostrExtensionService {
     // @ts-ignore
     window.nostr = nostr;
     // we're signed in with extesions? well execute that
-    if (this.params.userInfo?.extension) {
+    if (this.params.userInfo?.authMethod === 'extension') {
       this.trySetExtensionForPubkey(this.params.userInfo.pubkey);
     }
     // in the worst case of app saving the nostrExtension reference
@@ -49,18 +48,18 @@ class NostrExtensionService {
 
   public async trySetExtensionForPubkey(expectedPubkey: string) {
     if (this.nostrExtension) {
-      this.setExtensionReadPubkey(expectedPubkey)
+      this.setExtensionReadPubkey(expectedPubkey);
     }
   }
 
   public async setExtension() {
-    this.setExtensionReadPubkey()
+    this.setExtensionReadPubkey();
   }
 
-  public unsetExtension() {
+  public unsetExtension(nostr: Nostr) {
     if (window.nostr === this.nostrExtension) {
       // @ts-ignore
-      window.nostr = this.nostr;
+      window.nostr = nostr;
     }
   }
 
@@ -69,12 +68,9 @@ class NostrExtensionService {
     // @ts-ignore
     const pubkey = await window.nostr.getPublicKey();
     if (expectedPubkey && expectedPubkey !== pubkey) {
-      await this.authNostrService.logout();
+      this.emit("extensionLogout");
     } else {
-      const info = { pubkey, extension: true };
-      localStorageSetItem(LOCAL_STORE_KEY, JSON.stringify(info));
-
-      this.authNostrService.onAuth('login', info);
+      this.emit("extensionLogin", pubkey);
     }
   }
 }

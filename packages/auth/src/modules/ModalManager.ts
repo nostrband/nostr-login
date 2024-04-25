@@ -1,7 +1,8 @@
-import { NostrLoginOptions, TypeModal } from '../types';
-import { getBunkerUrl } from '../utils';
-import { AuthNostrService, NostrExtensionService, Popup, NostrParams } from '.';
+import { NostrLoginOptions, RecentType, TypeModal } from '../types';
+import { getBunkerUrl, localStorageRemoveRecent } from '../utils';
+import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
+import { Info } from 'nostr-login-components/dist/types/types';
 import { nip19 } from 'nostr-tools';
 
 class ModalManager extends EventEmitter {
@@ -10,6 +11,8 @@ class ModalManager extends EventEmitter {
   private extensionService: NostrExtensionService;
   private authNostrService: AuthNostrService;
   private launcherPromise?: Promise<void>;
+  private accounts: Info[] = [];
+  private recents: RecentType[] = [];
 
   constructor(params: NostrParams, authNostrService: AuthNostrService, extensionManager: NostrExtensionService) {
     super();
@@ -36,6 +39,8 @@ class ModalManager extends EventEmitter {
 
     const dialog = document.createElement('dialog');
     this.modal = document.createElement('nl-auth');
+    this.modal.accounts = this.accounts;
+    this.modal.recents = this.recents;
 
     if (opt.theme) {
       this.modal.setAttribute('theme', opt.theme);
@@ -194,8 +199,36 @@ class ModalManager extends EventEmitter {
           signup(event.detail);
         });
 
+        this.modal.addEventListener('nlSwitchAccount', (event: any) => {
+          const eventInfo: Info = event.detail as Info;
+
+          this.emit('onSwitchAccount', eventInfo);
+
+          dialog.close();
+        });
+
+        this.modal.addEventListener('nlLoginRecentAccount', (event: any) => {
+          const userInfo: Info = event.detail as Info;
+
+          if (userInfo.authMethod === 'readOnly') {
+            this.authNostrService.setReadOnly(userInfo.pubkey);
+            dialog.close();
+          } else if (userInfo.authMethod === 'extension') {
+            this.extensionService.setExtension();
+            dialog.close();
+          } else {
+            const input = userInfo.bunkerUrl || userInfo.nip05;
+            if (!input) throw new Error("Bad connect info")
+            login(input);
+          }
+        });
+
+        this.modal.addEventListener('nlRemoveRecent', (event: any) => {
+          localStorageRemoveRecent(event.detail as RecentType);
+          this.emit('updateAccounts');
+        })
+
         this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
-          console.log('nlLoginReadOnly', event.detail);
           if (!this.modal) return;
 
           this.modal.isLoading = true;
@@ -318,6 +351,14 @@ class ModalManager extends EventEmitter {
       this.modal.authUrl = url;
       this.modal.isLoading = false;
     }
+  }
+
+  public onUpdateAccounts(accounts: Info[], recents: RecentType[]) {
+    this.accounts = accounts;
+    this.recents = recents;
+    if (!this.modal) return;
+    this.modal.accounts = accounts;
+    this.modal.recents = recents;
   }
 }
 

@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, h, Prop, State, Watch } from '@stencil/core';
-import { Info, METHOD_MODULE } from '../../types';
+import { Info, METHOD_MODULE } from '@/types';
 
 @Component({
   tag: 'nl-banner',
@@ -17,7 +17,7 @@ export class NlBanner {
   @Prop() listNotifies: string[] = [];
   @State() isOpenNotifyTimeOut: boolean = false;
   // @State() imgUrl: string = '';
-  @State() isOpen: boolean = false;
+  @Prop({ mutable: true }) isOpen: boolean = false;
   @State() isConfirm: boolean = true;
   @State() isOpenConfirm: boolean = false;
 
@@ -25,6 +25,7 @@ export class NlBanner {
   @Prop() notify: { confirm: number; url?: string; timeOut?: { link: string } } | null = null;
   @State() isNotConfirmToSend: boolean = false;
   @Prop() userInfo: Info | null = null;
+  @Prop({ mutable: true }) accounts: Info[] = [];
 
   @Event() handleRetryConfirmBanner: EventEmitter<string>;
   @Event() handleNotifyConfirmBanner: EventEmitter<string>;
@@ -50,10 +51,11 @@ export class NlBanner {
     }
   }
 
-  @Watch('theme')
+  @Watch('nlTheme')
   watchPropHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
     this.themeState = newValue;
   }
+
   connectedCallback() {
     this.themeState = this.nlTheme;
     const getDarkMode = localStorage.getItem('nl-dark-mode');
@@ -119,14 +121,14 @@ export class NlBanner {
 
   render() {
     const isShowImg = Boolean(this.userInfo?.picture);
-    const userName = this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
+    const userName = this.userInfo?.name || this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
     const isShowUserName = Boolean(userName);
 
     return (
       <div class={`theme-${this.themeState}`}>
         <div class={this.darkMode && 'dark'}>
           <div
-            class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block overflow-hidden gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}
+            class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}
           >
             <div class="block w-[48px] h-[46px] relative z-10">
               <div onClick={() => this.handleOpen()} class="flex w-52 h-[46px] items-center pl-[11px]">
@@ -170,6 +172,7 @@ export class NlBanner {
                 )}
 
                 {isShowUserName && <div class="show-slow truncate w-16 text-xs">{userName}</div>}
+                {isShowUserName && <nl-login-status info={this.userInfo} /> }
               </div>
             </div>
 
@@ -235,6 +238,9 @@ export class NlBanner {
                 <div>
                   <div>
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
+                    <div class="mb-2">
+                      <nl-change-account currentAccount={this.userInfo} accounts={this.accounts} />
+                    </div>
                     {Boolean(this.listNotifies.length) && (
                       <div
                         onClick={() => this.handleRetryConfirm()}

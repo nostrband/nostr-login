@@ -1,5 +1,5 @@
 import { NostrLoginOptions, TypeBanner } from '../types';
-import { ModalManager, NostrParams, Popup, AuthNostrService } from '.';
+import { NostrParams } from '.';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { EventEmitter } from 'tseep';
 
@@ -27,11 +27,11 @@ class BannerManager extends EventEmitter {
   public onUserInfo(info: Info | null) {
     if (this.banner) {
       this.banner.userInfo = info;
-      if (info) {
-        this.banner.titleBanner = info.extension ? 'You are using extension' : info.sk ? 'You are logged in' : 'You are read only';
-      } else {
-        this.banner.titleBanner = '';
-      } // 'Use with Nostr';
+      // if (info) {
+      //   this.banner.titleBanner = info.extension ? 'You are using extension' : info.sk ? 'You are logged in' : 'You are read only';
+      // } else {
+      //   this.banner.titleBanner = '';
+      // } // 'Use with Nostr';
     }
   }
 
@@ -53,6 +53,12 @@ class BannerManager extends EventEmitter {
   public onCallEnd() {
     if (this.banner) {
       this.banner.isLoading = false;
+    }
+  }
+
+  public onUpdateAccounts(accounts: Info[]) {
+    if (this.banner) {
+      this.banner.accounts = accounts;
     }
   }
 
@@ -79,8 +85,16 @@ class BannerManager extends EventEmitter {
       }
     });
 
+    this.banner.addEventListener('handleSwitchAccount', (event: any) => {
+      this.emit('onSwitchAccount', event.detail);
+    });
+
     this.banner.addEventListener('handleOpenWelcomeModal', () => {
       this.emit('launch');
+
+      if (this.banner) {
+        this.banner.isOpen = false;
+      }
     });
 
     this.banner.addEventListener('handleRetryConfirmBanner', () => {

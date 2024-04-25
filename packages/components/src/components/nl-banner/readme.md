@@ -1,7 +1,5 @@
 # nl-banner
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -9,7 +7,9 @@
 
 | Property       | Attribute      | Description | Type                                                              | Default     |
 | -------------- | -------------- | ----------- | ----------------------------------------------------------------- | ----------- |
+| `accounts`     | --             |             | `Info[]`                                                          | `[]`        |
 | `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`     |
+| `isOpen`       | `is-open`      |             | `boolean`                                                         | `false`     |
 | `listNotifies` | --             |             | `string[]`                                                        | `[]`        |
 | `nlTheme`      | `nl-theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"`                  | `'default'` |
 | `notify`       | --             |             | `{ confirm: number; url?: string; timeOut?: { link: string; }; }` | `null`      |
@@ -28,6 +28,22 @@
 | `handleRetryConfirmBanner`  |             | `CustomEvent<string>` |
 | `handleSetConfirmBanner`    |             | `CustomEvent<string>` |
 
+
+## Dependencies
+
+### Depends on
+
+- [nl-login-status](../nl-login-status)
+- [nl-change-account](../nl-change-account)
+
+### Graph
+```mermaid
+graph TD;
+  nl-banner --> nl-login-status
+  nl-banner --> nl-change-account
+  nl-change-account --> nl-login-status
+  style nl-banner fill:#f9f,stroke:#333,stroke-width:4px
+```
 
 ----------------------------------------------
 
