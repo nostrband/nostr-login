@@ -228,7 +228,7 @@ class AuthNostrService extends EventEmitter {
 
           await new Promise<void>((ok, err) => {
             if (this.signer && info.sk) {
-              const connectParams = [getPublicKey(info.sk), '', this.params.optionsModal.perms || ''];
+              const connectParams = [getPublicKey(info.sk), info.token || '', this.params.optionsModal.perms || ''];
 
               this.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
                 if (response.result === 'ack') {

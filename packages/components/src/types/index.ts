@@ -35,6 +35,9 @@ export interface Info {
     picture?: string;
     name?: string;
 
+    // nip46 bunker URL secret 
+    token?: string;
+
     // session type
     authMethod: 'connect' | 'readOnly' | 'extension';
 }
