@@ -275,7 +275,7 @@ class ModalManager extends EventEmitter {
 
               ok();
             } catch (e) {
-              console.log('test error', e);
+              console.log('extension error', e);
               // @ts-ignore
               this.modal.error = e.toString();
             }
