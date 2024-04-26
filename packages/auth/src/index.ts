@@ -173,19 +173,22 @@ export class NostrLoginInitializer {
       // read conf from localstore
       const info = localStorageGetCurrent();
 
-      // no current session
-      if (!info) return;
+      // have current session?
+      if (info) {
+        // wtf?
+        if (!info.pubkey) throw new Error('Bad stored info');
 
-      // wtf?
-      if (!info.pubkey) throw new Error('Bad stored info');
-
-      // switch to it
-      await this.switchAccount(info);
+        // switch to it
+        await this.switchAccount(info);
+      }
     } catch (e) {
       console.log('nostr login init error', e);
 
       await this.authNostrService.logout();
     }
+
+    // ensure current state
+    this.updateAccounts();
   };
 
   public logout = async () => {
