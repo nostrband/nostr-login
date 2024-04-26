@@ -51,7 +51,7 @@ export class NlWelcome {
         </div>
 
         <div class="max-w-52 mx-auto pb-5">
-          <button-base titleBtn="Log in" onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN)}>
+          <button-base titleBtn="Log in" onClick={() => this.handleChangeScreen(CURRENT_MODULE.LOGIN)}>
             <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -89,7 +89,7 @@ export class NlWelcome {
             class={`${this.isOpenAdvancedLogin ? 'max-h-[500px] mt-3 duration-300' : 'max-h-0 mt-0 duration-[0.25s]'} transition-max-height ease-in flex gap-3 flex-col overflow-hidden`}
           >
             {!this.isSignInWithExtension && this.renderSignInWithExtension()}
-            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_BUNKER_URL)} titleBtn="Sign in with bunker URL">
+            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.LOGIN_BUNKER_URL)} titleBtn="Sign in with bunker URL">
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -98,7 +98,7 @@ export class NlWelcome {
                 />
               </svg>
             </button-base>
-            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNIN_READ_ONLY)} titleBtn="Sign in to read only">
+            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.LOGIN_READ_ONLY)} titleBtn="Sign in to read only">
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
                   stroke-linecap="round"

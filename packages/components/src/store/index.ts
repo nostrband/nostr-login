@@ -43,7 +43,7 @@ onChange('screen', (value: CURRENT_MODULE) => {
   state.nlSignup.signupName = '';
   state.nlSignup.domain = '';
 
-  if (value === CURRENT_MODULE.SIGNIN || value === CURRENT_MODULE.SIGNUP || value === CURRENT_MODULE.SIGNIN_BUNKER_URL || value === CURRENT_MODULE.SIGNIN_READ_ONLY) {
+  if (value === CURRENT_MODULE.LOGIN || value === CURRENT_MODULE.SIGNUP || value === CURRENT_MODULE.LOGIN_BUNKER_URL || value === CURRENT_MODULE.LOGIN_READ_ONLY) {
     state.prevScreen = CURRENT_MODULE.WELCOME;
   }
 });

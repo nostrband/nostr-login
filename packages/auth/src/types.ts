@@ -7,16 +7,21 @@ export interface NostrLoginAuthOptions {
   method?: 'connect' | 'readOnly' | 'extension';
 }
 
+// NOTE: must be a subset of CURRENT_MODULE enum
+export type StartScreens = 'welcome' | 'signup' | 'login' | 'login-bunker-url' | 'login-read-only' | 'switch-account';
+
+
 export interface NostrLoginOptions {
   // optional
   theme?: string;
-  startScreen?: string;
+  startScreen?: StartScreens;
   bunkers?: string;
   onAuth?: (npub: string, options: NostrLoginAuthOptions) => void;
   perms?: string;
   darkMode?: boolean;
 
-  iife?: boolean; // for unpkg module
+  // do not show the banner, modals must be `launch`-ed 
+  noBanner?: boolean;
 
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
