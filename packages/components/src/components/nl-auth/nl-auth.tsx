@@ -57,7 +57,7 @@ export class NlAuth {
   componentWillLoad() {
     this.themeState = this.theme;
     state.screen = this.startScreen as CURRENT_MODULE;
-    state.prevScreen = this.startScreen as CURRENT_MODULE;
+    state.prevScreen = CURRENT_MODULE.WELCOME; //this.startScreen as CURRENT_MODULE;
 
     const getDarkMode = localStorage.getItem('nl-dark-mode');
 
@@ -84,7 +84,7 @@ export class NlAuth {
       switch (state.screen) {
         case CURRENT_MODULE.WELCOME:
           return <nl-welcome isSignInWithExtension={this.isSignInWithExtension} />;
-        case CURRENT_MODULE.SIGNIN:
+        case CURRENT_MODULE.LOGIN:
           return <nl-signin />;
         case CURRENT_MODULE.SIGNUP:
           return <nl-signup />;
@@ -92,9 +92,9 @@ export class NlAuth {
           return <nl-info />;
         case CURRENT_MODULE.EXTENSION:
           return <nl-info-extension />;
-        case CURRENT_MODULE.SIGNIN_READ_ONLY:
+        case CURRENT_MODULE.LOGIN_READ_ONLY:
           return <nl-signin-read-only />;
-        case CURRENT_MODULE.SIGNIN_BUNKER_URL:
+        case CURRENT_MODULE.LOGIN_BUNKER_URL:
           return <nl-signin-bunker-url />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
           return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
@@ -217,7 +217,7 @@ export class NlAuth {
                         <div class="p-4 overflow-y-auto">
                           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
                             If you already have an account please{' '}
-                            <span onClick={() => (state.screen = CURRENT_MODULE.SIGNIN)} class="cursor-pointer text-blue-400">
+                            <span onClick={() => (state.screen = CURRENT_MODULE.LOGIN)} class="cursor-pointer text-blue-400">
                               log in
                             </span>
                             .

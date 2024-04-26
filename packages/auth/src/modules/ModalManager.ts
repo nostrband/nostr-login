@@ -1,4 +1,4 @@
-import { NostrLoginOptions, RecentType, TypeModal } from '../types';
+import { NostrLoginOptions, RecentType, StartScreens, TypeModal } from '../types';
 import { getBunkerUrl, localStorageRemoveRecent } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
@@ -218,7 +218,7 @@ class ModalManager extends EventEmitter {
             dialog.close();
           } else {
             const input = userInfo.bunkerUrl || userInfo.nip05;
-            if (!input) throw new Error("Bad connect info")
+            if (!input) throw new Error('Bad connect info');
             login(input);
           }
         });
@@ -226,7 +226,7 @@ class ModalManager extends EventEmitter {
         this.modal.addEventListener('nlRemoveRecent', (event: any) => {
           localStorageRemoveRecent(event.detail as RecentType);
           this.emit('updateAccounts');
-        })
+        });
 
         this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
           if (!this.modal) return;
@@ -338,7 +338,16 @@ class ModalManager extends EventEmitter {
         ...defaultOpt,
       };
       if (theme) elementOpt.theme = theme;
-      if (startScreen) elementOpt.startScreen = startScreen;
+
+      switch (startScreen as StartScreens) {
+        case 'login':
+        case 'login-bunker-url':
+        case 'login-read-only':
+        case 'signup':
+        case 'switch-account':
+        case 'welcome':
+          elementOpt.startScreen = startScreen as StartScreens;
+      }
 
       nlElements[i].addEventListener('click', function () {
         initialModals(elementOpt);

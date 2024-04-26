@@ -7,7 +7,6 @@ import { NostrLoginOptions } from './types';
   const cs = document.currentScript;
   document.addEventListener('DOMContentLoaded', async () => {
     const options: NostrLoginOptions = {
-      iife: true,
     };
 
     if (cs) {
@@ -19,6 +18,8 @@ import { NostrLoginOptions } from './types';
       if (perms) options.perms = perms;
       const theme = cs.getAttribute('data-theme');
       if (theme) options.theme = theme;
+      const noBanner = cs.getAttribute('data-no-banner');
+      if (noBanner === 'true') options.noBanner = true;
     }
 
     init(options);

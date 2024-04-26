@@ -1,7 +1,7 @@
 import 'nostr-login-components';
 import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, ProcessManager, BannerManager, ModalManager } from './modules';
-import { NostrLoginOptions } from './types';
-import { isBunkerUrl, localStorageGetAccounts, localStorageGetCurrent, localStorageGetRecents, localStorageSetItem } from './utils';
+import { NostrLoginOptions, StartScreens } from './types';
+import { localStorageGetAccounts, localStorageGetCurrent, localStorageGetRecents, localStorageSetItem } from './utils';
 import { Info } from 'nostr-login-components/dist/types/types';
 
 export class NostrLoginInitializer {
@@ -90,33 +90,19 @@ export class NostrLoginInitializer {
 
     this.extensionService.on('extensionLogin', (pubkey: string) => {
       this.authNostrService.setExtension(pubkey);
-    })
+    });
 
     this.extensionService.on('extensionLogout', () => {
       this.authNostrService.logout();
-    })
+    });
 
     this.bannerManager.on('launch', startScreen => {
-      const recent = localStorageGetRecents();
-      const accounts = localStorageGetAccounts();
-
-      let options = startScreen
-        ? {
-            startScreen,
-          }
-        : this.params.optionsModal;
-
-      if (Boolean(recent?.length) || Boolean(accounts?.length)) {
-        options = { ...options, startScreen: 'previously-logged' };
-      }
-
-      this.modalManager.launch(options).catch(() => {}); // don't throw if cancelled
+      this.launch(startScreen);
     });
   }
 
   private async switchAccount(info: Info) {
-
-    console.log("nostr login switch to info", info);
+    console.log('nostr login switch to info', info);
 
     // make sure extension is unlinked
     this.extensionService.unsetExtension(this.nostr);
@@ -125,12 +111,12 @@ export class NostrLoginInitializer {
       this.authNostrService.setReadOnly(info.pubkey);
     } else if (info.authMethod === 'extension') {
       // trySetExtensionForPubkey will check if
-      // we still have the extension and it's the same pubkey 
+      // we still have the extension and it's the same pubkey
       await this.extensionService.setExtension();
     } else if (info.authMethod === 'connect' && info.sk && info.relays && info.relays[0]) {
       this.authNostrService.setConnect(info);
     } else {
-      throw new Error("Bad auth info")
+      throw new Error('Bad auth info');
     }
   }
 
@@ -140,6 +126,23 @@ export class NostrLoginInitializer {
     this.bannerManager.onUpdateAccounts(accounts);
     this.modalManager.onUpdateAccounts(accounts, recents);
   }
+
+  public launch = (startScreen: StartScreens) => {
+    const recent = localStorageGetRecents();
+    const accounts = localStorageGetAccounts();
+
+    const options = startScreen
+      ? {
+          startScreen,
+        }
+      : this.params.optionsModal;
+
+    if (!startScreen && (Boolean(recent?.length) || Boolean(accounts?.length))) {
+      options.startScreen = 'switch-account';
+    }
+
+    this.modalManager.launch(options).catch(() => {}); // don't throw if cancelled
+  };
 
   public init = async (opt: NostrLoginOptions) => {
     // watch for extension trying to overwrite our window.nostr
@@ -156,10 +159,10 @@ export class NostrLoginInitializer {
     }
 
     // launch
-    if (opt.iife) {
-      this.bannerManager.launchAuthBanner(opt);
-    } else {
+    if (opt.noBanner) {
       this.modalManager.connectModals(opt);
+    } else {
+      this.bannerManager.launchAuthBanner(opt);
     }
 
     if (opt) {
@@ -169,11 +172,15 @@ export class NostrLoginInitializer {
     try {
       // read conf from localstore
       const info = localStorageGetCurrent();
-      if (!info || !info.pubkey) throw new Error("Bad stored info");
+
+      // no current session
+      if (!info) return;
+
+      // wtf?
+      if (!info.pubkey) throw new Error('Bad stored info');
 
       // switch to it
       await this.switchAccount(info);
-
     } catch (e) {
       console.log('nostr login init error', e);
 
@@ -191,6 +198,9 @@ export class NostrLoginInitializer {
 
 const initializer = new NostrLoginInitializer();
 
-export const { init, logout } = initializer;
+export const { init, launch, logout } = initializer;
 
 document.addEventListener('nlLogout', logout);
+document.addEventListener('nlLaunch', (event: any) => {
+  launch(event.detail || '');
+});

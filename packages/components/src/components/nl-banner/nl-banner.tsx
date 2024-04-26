@@ -93,7 +93,7 @@ export class NlBanner {
   }
 
   handleLogin() {
-    this.handleLoginBanner.emit(METHOD_MODULE.SIGNIN);
+    this.handleLoginBanner.emit(METHOD_MODULE.LOGIN);
     this.handleClose();
   }
 

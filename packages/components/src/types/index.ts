@@ -1,17 +1,17 @@
 export enum CURRENT_MODULE {
   WELCOME = 'welcome',
   INFO = 'info',
-  SIGNIN_BUNKER_URL = 'signin-bunker-url',
-  SIGNIN_READ_ONLY = 'signin-read-only',
-  SIGNIN = 'signin',
+  LOGIN_BUNKER_URL = 'login-bunker-url',
+  LOGIN_READ_ONLY = 'login-read-only',
+  LOGIN = 'login',
   SIGNUP = 'signup',
   EXTENSION = 'extension',
   LOADING = 'loading',
-  PREVIOUSLY_LOGGED = 'previously-logged',
+  PREVIOUSLY_LOGGED = 'switch-account',
 }
 
 export enum METHOD_MODULE {
-  SIGNIN = 'signin',
+  LOGIN = 'login',
   SIGNUP = 'signup',
   LOGOUT = 'logout',
   CONFIRM = 'confirm',
