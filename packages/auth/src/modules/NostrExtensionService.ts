@@ -48,12 +48,12 @@ class NostrExtensionService extends EventEmitter {
 
   public async trySetExtensionForPubkey(expectedPubkey: string) {
     if (this.nostrExtension) {
-      this.setExtensionReadPubkey(expectedPubkey);
+      return this.setExtensionReadPubkey(expectedPubkey);
     }
   }
 
   public async setExtension() {
-    this.setExtensionReadPubkey();
+    return this.setExtensionReadPubkey();
   }
 
   public unsetExtension(nostr: Nostr) {
@@ -68,9 +68,9 @@ class NostrExtensionService extends EventEmitter {
     // @ts-ignore
     const pubkey = await window.nostr.getPublicKey();
     if (expectedPubkey && expectedPubkey !== pubkey) {
-      this.emit("extensionLogout");
+      this.emit('extensionLogout');
     } else {
-      this.emit("extensionLogin", pubkey);
+      this.emit('extensionLogin', pubkey);
     }
   }
 }
