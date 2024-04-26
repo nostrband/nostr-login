@@ -30,7 +30,7 @@ export class NlInfoExtension {
             <h1 class="nl-title font-bold text-center text-4xl">Install browser extension!</h1>
             <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">
               Try{' '}
-              <a href="" target="_blank">
+              <a href="https://getalby.com" target="_blank">
                 Alby
               </a>
               ,{' '}
