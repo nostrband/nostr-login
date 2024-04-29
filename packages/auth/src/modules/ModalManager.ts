@@ -214,7 +214,7 @@ class ModalManager extends EventEmitter {
             this.authNostrService.setReadOnly(userInfo.pubkey);
             dialog.close();
           } else if (userInfo.authMethod === 'extension') {
-            this.extensionService.setExtension();
+            this.extensionService.trySetExtensionForPubkey(userInfo.pubkey);
             dialog.close();
           } else {
             const input = userInfo.bunkerUrl || userInfo.nip05;
