@@ -12,38 +12,63 @@ class NostrExtensionService extends EventEmitter {
   }
 
   public startCheckingExtension(nostr: Nostr) {
-    this.checkExtension(nostr);
+    if (this.checkExtension(nostr)) return;
 
     // watch out for extension trying to overwrite us
-    setInterval(() => this.checkExtension(nostr), 100);
+    const to = setInterval(() => {
+      if (this.checkExtension(nostr)) clearTimeout(to);
+    }, 100);
   }
 
   private checkExtension(nostr: Nostr) {
     // @ts-ignore
     if (!this.nostrExtension && window.nostr && window.nostr !== nostr) {
       this.initExtension(nostr);
+      return true;
     }
+    return false;
   }
 
-  public getExtension() {
-    return this.nostrExtension;
-  }
-
-  public hasExtension() {
-    return !!this.nostrExtension;
-  }
-
-  private initExtension(nostr: Nostr) {
+  private async initExtension(nostr: Nostr, lastTry?: boolean) {
     // @ts-ignore
     this.nostrExtension = window.nostr;
     // @ts-ignore
     window.nostr = nostr;
     // we're signed in with extesions? well execute that
     if (this.params.userInfo?.authMethod === 'extension') {
-      this.trySetExtensionForPubkey(this.params.userInfo.pubkey);
+      await this.trySetExtensionForPubkey(this.params.userInfo.pubkey);
     }
+
+    // schedule another check
+    if (!lastTry) {
+      setTimeout(() => {
+        // NOTE: we can't know if user has >1 extension and thus
+        // if the current one we detected is the actual 'last one'
+        // that will set the window.nostr. So the simplest
+        // solution is to wait a bit more, hoping that if one
+        // extension started then the rest are likely to start soon,
+        // and then just capture the most recent one
+
+        // @ts-ignore
+        if (window.nostr !== nostr && this.nostrExtension !== window.nostr) {
+          this.initExtension(nostr, true);
+        }
+      }, 300);
+    }
+
     // in the worst case of app saving the nostrExtension reference
     // it will be calling it directly, not a big deal
+  }
+
+  private async setExtensionReadPubkey(expectedPubkey?: string) {
+    window.nostr = this.nostrExtension;
+    // @ts-ignore
+    const pubkey = await window.nostr.getPublicKey();
+    if (expectedPubkey && expectedPubkey !== pubkey) {
+      this.emit('extensionLogout');
+    } else {
+      this.emit('extensionLogin', pubkey);
+    }
   }
 
   public async trySetExtensionForPubkey(expectedPubkey: string) {
@@ -63,15 +88,12 @@ class NostrExtensionService extends EventEmitter {
     }
   }
 
-  private async setExtensionReadPubkey(expectedPubkey?: string) {
-    window.nostr = this.nostrExtension;
-    // @ts-ignore
-    const pubkey = await window.nostr.getPublicKey();
-    if (expectedPubkey && expectedPubkey !== pubkey) {
-      this.emit('extensionLogout');
-    } else {
-      this.emit('extensionLogin', pubkey);
-    }
+  public getExtension() {
+    return this.nostrExtension;
+  }
+
+  public hasExtension() {
+    return !!this.nostrExtension;
   }
 }
 

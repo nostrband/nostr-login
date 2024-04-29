@@ -112,7 +112,7 @@ export class NostrLoginInitializer {
     } else if (info.authMethod === 'extension') {
       // trySetExtensionForPubkey will check if
       // we still have the extension and it's the same pubkey
-      await this.extensionService.setExtension();
+      await this.extensionService.trySetExtensionForPubkey(info.pubkey);
     } else if (info.authMethod === 'connect' && info.sk && info.relays && info.relays[0]) {
       this.authNostrService.setConnect(info);
     } else {
