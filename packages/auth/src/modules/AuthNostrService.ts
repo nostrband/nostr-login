@@ -117,7 +117,7 @@ class AuthNostrService extends EventEmitter {
     // notify everyone
     this.onAuth('logout');
 
-    this.emit('updateAccounts');  
+    this.emit('updateAccounts');
   }
 
   private setUserInfo(userInfo: Info | null) {
@@ -126,12 +126,12 @@ class AuthNostrService extends EventEmitter {
 
     if (userInfo) {
       localStorageAddAccount(userInfo);
-      this.emit('updateAccounts');  
+      this.emit('updateAccounts');
     }
   }
 
   private onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
-    if (type !== 'logout' && !info) throw new Error("No user info in onAuth");
+    if (type !== 'logout' && !info) throw new Error('No user info in onAuth');
 
     if (info?.pubkey !== this.params.userInfo?.pubkey) {
       const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
@@ -255,10 +255,8 @@ class AuthNostrService extends EventEmitter {
   public async authNip46(type: 'login' | 'signup', name: string, bunkerUrl: string, sk = '') {
     try {
       const info = bunkerUrlToInfo(bunkerUrl, sk);
-      if (isBunkerUrl(name))
-        info.bunkerUrl = name;
-      else
-        info.nip05 = name;
+      if (isBunkerUrl(name)) info.bunkerUrl = name;
+      else info.nip05 = name;
 
       // console.log('nostr login auth info', info);
       if (!info.pubkey || !info.sk || !info.relays?.[0]) {
@@ -295,7 +293,21 @@ class AuthNostrService extends EventEmitter {
   }
 
   public async decrypt(pubkey: string, ciphertext: string) {
-    return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext);
+    // decrypt is broken in ndk v2.3.1, and latest
+    // ndk v2.8.1 doesn't allow to override connect easily,
+    // so we reimplement and fix decrypt here as a temporary fix
+
+    return new Promise<string>((resolve, reject) => {
+      this.signer?.rpc.sendRequest(this.signer.remotePubkey!, 'nip04_decrypt', [pubkey, ciphertext], 24133, (response: NDKRpcResponse) => {
+        if (!response.error) {
+          resolve(response.result);
+        } else {
+          reject(response.error);
+        }
+      });
+    });
+
+    // return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext);
   }
 }
 
