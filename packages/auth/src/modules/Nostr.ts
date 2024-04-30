@@ -1,22 +1,29 @@
-import { AuthNostrService, ModalManager, NostrExtensionService, NostrParams, ProcessManager } from './';
+import { Info } from 'nostr-login-components/dist/types/types';
+
+interface Signer {
+  signEvent: (event: any) => Promise<any>;
+  encrypt: (pubkey: string, plaintext: string) => Promise<string>;
+  decrypt: (pubkey: string, ciphertext: string) => Promise<string>;
+}
+
+export interface NostrObjectParams {
+  waitReady(): Promise<void>;
+  getUserInfo(): Info | null;
+  launch(): Promise<void>;
+  getSigner(): Signer;
+  wait<T>(cb: () => Promise<T>): Promise<T>;
+}
 
 class Nostr {
-  #params: NostrParams;
-  #processManager: ProcessManager;
-  #authNostrService: AuthNostrService;
-  #extensionService: NostrExtensionService;
-  #modalManager: ModalManager;
+
+  #params: NostrObjectParams;
   private nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<any>;
     decrypt: (pubkey: string, ciphertext: string) => Promise<any>;
   };
 
-  constructor(params: NostrParams, processManager: ProcessManager, extensionService: NostrExtensionService, authNostrService: AuthNostrService, modalManager: ModalManager) {
+  constructor(params: NostrObjectParams) {
     this.#params = params;
-    this.#processManager = processManager;
-    this.#extensionService = extensionService;
-    this.#authNostrService = authNostrService;
-    this.#modalManager = modalManager;
 
     this.getPublicKey = this.getPublicKey.bind(this);
     this.signEvent = this.signEvent.bind(this);
@@ -28,30 +35,25 @@ class Nostr {
   }
 
   private async ensureAuth() {
-    // wait until competing requests are finished
-    await this.#authNostrService.waitReady();
-    await this.#modalManager.waitReady();
+    await this.#params.waitReady();
 
-    // got the sign in?
-    if (this.#params.userInfo) return;
+    // authed?
+    if (this.#params.getUserInfo()) return;
 
-    // still no signer? request auth from user
-    if (!this.#authNostrService.hasSigner()) {
-      await this.#modalManager.launch({
-        ...this.#params.optionsModal,
-      });
-    }
+    // launch auth flow
+    await this.#params.launch();
 
     // give up
-    if (!this.#authNostrService.hasSigner()) {
+    if (!this.#params.getUserInfo()) {
       throw new Error('Rejected by user');
     }
   }
 
   async getPublicKey() {
     await this.ensureAuth();
-    if (this.#params.userInfo) {
-      return this.#params.userInfo.pubkey;
+    const userInfo = this.#params.getUserInfo();
+    if (userInfo) {
+      return userInfo.pubkey;
     } else {
       throw new Error('No user');
     }
@@ -60,12 +62,7 @@ class Nostr {
   // @ts-ignore
   async signEvent(event) {
     await this.ensureAuth();
-
-    if (this.#params.userInfo!.authMethod === 'readOnly') throw new Error('Read only');
-
-    const module = this.#params.userInfo!.authMethod === 'extension' ? this.#extensionService.getExtension() : this.#authNostrService;
-
-    return this.#processManager.wait(async () => await module.signEvent(event));
+    return this.#params.wait(async () => await this.#params.getSigner().signEvent(event));
   }
 
   async getRelays() {
@@ -75,22 +72,12 @@ class Nostr {
 
   async encrypt(pubkey: string, plaintext: string) {
     await this.ensureAuth();
-
-    if (this.#params.userInfo!.authMethod === 'readOnly') throw new Error('Read only');
-
-    const module = this.#params.userInfo!.authMethod === 'extension' ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
-
-    return this.#processManager.wait(async () => await module.encrypt(pubkey, plaintext));
+    return this.#params.wait(async () => await this.#params.getSigner().encrypt(pubkey, plaintext));
   }
 
   async decrypt(pubkey: string, ciphertext: string) {
     await this.ensureAuth();
-
-    if (this.#params.userInfo!.authMethod === 'readOnly') throw new Error('Read only');
-
-    const module = this.#params.userInfo!.authMethod === 'extension' ? this.#extensionService.getExtension().nip04 : this.#authNostrService;
-
-    return this.#processManager.wait(async () => await module.decrypt(pubkey, ciphertext));
+    return this.#params.wait(async () => await this.#params.getSigner().decrypt(pubkey, ciphertext));
   }
 }
 
