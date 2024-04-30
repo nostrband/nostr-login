@@ -1,5 +1,5 @@
 import { NostrLoginOptions, RecentType, StartScreens, TypeModal } from '../types';
-import { getBunkerUrl, localStorageRemoveRecent } from '../utils';
+import { checkNip05, getBunkerUrl, localStorageRemoveRecent } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { Info } from 'nostr-login-components/dist/types/types';
@@ -68,7 +68,7 @@ class ModalManager extends EventEmitter {
 
     this.launcherPromise = new Promise<void>((ok, err) => {
       dialog.addEventListener('close', () => {
-        // noop if already resolved?
+        // noop if already resolved
         err(new Error('Closed'));
 
         if (this.modal) {
@@ -133,189 +133,149 @@ class ModalManager extends EventEmitter {
           });
       };
 
-      const checkNip05 = async (nip05: string) => {
-        let available = false;
-        let error = '';
-        let pubkey = '';
-        await (async () => {
-          if (!nip05 || !nip05.includes('@')) return;
+      if (!this.modal) throw new Error('WTH?');
 
-          const [name, domain] = nip05.toLocaleLowerCase().split('@');
-          if (!name) return;
-
-          const REGEXP = new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,8}$/g);
-          if (!REGEXP.test(nip05)) {
-            error = 'Invalid name';
-            return;
-          }
-
-          if (!domain) {
-            error = 'Select service';
-            return;
-          }
-
-          const url = `https://${domain}/.well-known/nostr.json?name=${name.toLowerCase()}`;
-          try {
-            const r = await fetch(url);
-            const d = await r.json();
-            if (d.names[name]) {
-              pubkey = d.names[name];
-              return;
-            }
-          } catch {}
-
-          available = true;
-        })();
-
-        return {
-          available,
-          taken: pubkey != '',
-          error,
-          pubkey,
-        };
-      };
-
-      if (this.modal) {
-        this.modal.addEventListener('handleContinue', () => {
-          if (this.modal) {
-            this.modal.isLoading = true;
-            this.emit('onAuthUrlClick', this.modal.authUrl);
-          }
-        });
-
-        this.modal.addEventListener('stopFetchHandler', () => {
-          if (this.modal) {
-            this.modal.isLoading = false;
-          }
-          dialog.close();
-          err(new Error('Cancelled'));
-        });
-
-        this.modal.addEventListener('nlLogin', (event: any) => {
-          login(event.detail);
-        });
-
-        this.modal.addEventListener('nlSignup', (event: any) => {
-          signup(event.detail);
-        });
-
-        this.modal.addEventListener('nlSwitchAccount', (event: any) => {
-          const eventInfo: Info = event.detail as Info;
-
-          this.emit('onSwitchAccount', eventInfo);
-
-          dialog.close();
-        });
-
-        this.modal.addEventListener('nlLoginRecentAccount', (event: any) => {
-          const userInfo: Info = event.detail as Info;
-
-          if (userInfo.authMethod === 'readOnly') {
-            this.authNostrService.setReadOnly(userInfo.pubkey);
-            dialog.close();
-          } else if (userInfo.authMethod === 'extension') {
-            this.extensionService.trySetExtensionForPubkey(userInfo.pubkey);
-            dialog.close();
-          } else {
-            const input = userInfo.bunkerUrl || userInfo.nip05;
-            if (!input) throw new Error('Bad connect info');
-            login(input);
-          }
-        });
-
-        this.modal.addEventListener('nlRemoveRecent', (event: any) => {
-          localStorageRemoveRecent(event.detail as RecentType);
-          this.emit('updateAccounts');
-        });
-
-        this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
-          if (!this.modal) return;
-
+      this.modal.addEventListener('handleContinue', () => {
+        if (this.modal) {
           this.modal.isLoading = true;
+          this.emit('onAuthUrlClick', this.modal.authUrl);
+        }
+      });
 
-          const nameNpub = event.detail;
-          try {
-            let pubkey = '';
-            if (nameNpub.includes('@')) {
-              const { error, pubkey: nip05pubkey } = await checkNip05(nameNpub);
-              if (nip05pubkey) pubkey = nip05pubkey;
-              else throw new Error(error);
-            } else {
-              const { type, data } = nip19.decode(nameNpub);
-              if (type === 'npub') pubkey = data as string;
-              else throw new Error('Bad npub');
-            }
+      this.modal.addEventListener('stopFetchHandler', () => {
+        if (this.modal) {
+          this.modal.isLoading = false;
+        }
+        dialog.close();
+        err(new Error('Cancelled'));
+      });
 
-            this.authNostrService.setReadOnly(pubkey);
+      this.modal.addEventListener('nlLogin', (event: any) => {
+        login(event.detail);
+      });
 
-            this.modal.isLoading = false;
-            dialog.close();
-            ok();
-          } catch (e: any) {
-            console.log('error', e);
-            this.modal.isLoading = false;
-            this.modal.error = e.toString() || e;
-          }
-        });
+      this.modal.addEventListener('nlSignup', (event: any) => {
+        signup(event.detail);
+      });
 
-        this.modal.addEventListener('nlLoginExtension', async () => {
-          if (!this.extensionService.hasExtension()) {
-            throw new Error('No extension');
-          }
+      this.modal.addEventListener('nlSwitchAccount', (event: any) => {
+        const eventInfo: Info = event.detail as Info;
 
-          if (this.modal) {
-            try {
-              this.modal.isLoadingExtension = true;
+        this.emit('onSwitchAccount', eventInfo);
 
-              await this.extensionService.setExtension();
+        // wait a bit, if dialog closes before
+        // switching finishes then launched promise rejects
+        setTimeout(() => dialog.close(), 300);
+      });
 
-              this.modal.isLoadingExtension = false;
+      this.modal.addEventListener('nlLoginRecentAccount', async (event: any) => {
+        const userInfo: Info = event.detail as Info;
 
-              dialog.close();
-
-              ok();
-            } catch (e) {
-              console.log('extension error', e);
-              // @ts-ignore
-              this.modal.error = e.toString();
-            }
-          }
-        });
-
-        this.modal.addEventListener('nlCheckSignup', async (event: any) => {
-          const { available, taken, error } = await checkNip05(event.detail);
-          if (this.modal) {
-            this.modal.error = String(error);
-
-            if (!error && taken) {
-              this.modal.error = 'Already taken';
-            }
-
-            this.modal.signupNameIsAvailable = available;
-          }
-        });
-
-        this.modal.addEventListener('nlCheckLogin', async (event: any) => {
-          const { available, taken, error } = await checkNip05(event.detail);
-          if (this.modal) {
-            this.modal.error = String(error);
-            if (available) {
-              this.modal.error = 'Name not found';
-            }
-            this.modal.loginIsGood = taken;
-          }
-        });
-
-        this.modal.addEventListener('nlCloseModal', () => {
-          if (this.modal) {
-            this.modal.isLoading = false;
-          }
-
+        if (userInfo.authMethod === 'readOnly') {
+          this.authNostrService.setReadOnly(userInfo.pubkey);
           dialog.close();
+        } else if (userInfo.authMethod === 'extension') {
+          await this.extensionService.trySetExtensionForPubkey(userInfo.pubkey);
+          dialog.close();
+        } else {
+          const input = userInfo.bunkerUrl || userInfo.nip05;
+          if (!input) throw new Error('Bad connect info');
+          login(input);
+        }
+      });
 
-          err(new Error('Cancelled'));
-        });
-      }
+      this.modal.addEventListener('nlRemoveRecent', (event: any) => {
+        localStorageRemoveRecent(event.detail as RecentType);
+        this.emit('updateAccounts');
+      });
+
+      this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
+        if (!this.modal) return;
+
+        this.modal.isLoading = true;
+
+        const nameNpub = event.detail;
+        try {
+          let pubkey = '';
+          if (nameNpub.includes('@')) {
+            const { error, pubkey: nip05pubkey } = await checkNip05(nameNpub);
+            if (nip05pubkey) pubkey = nip05pubkey;
+            else throw new Error(error);
+          } else {
+            const { type, data } = nip19.decode(nameNpub);
+            if (type === 'npub') pubkey = data as string;
+            else throw new Error('Bad npub');
+          }
+
+          this.authNostrService.setReadOnly(pubkey);
+
+          this.modal.isLoading = false;
+          dialog.close();
+          ok();
+        } catch (e: any) {
+          console.log('error', e);
+          this.modal.isLoading = false;
+          this.modal.error = e.toString() || e;
+        }
+      });
+
+      this.modal.addEventListener('nlLoginExtension', async () => {
+        if (!this.extensionService.hasExtension()) {
+          throw new Error('No extension');
+        }
+
+        if (this.modal) {
+          try {
+            this.modal.isLoadingExtension = true;
+
+            await this.extensionService.setExtension();
+
+            this.modal.isLoadingExtension = false;
+
+            dialog.close();
+
+            ok();
+          } catch (e) {
+            console.log('extension error', e);
+            // @ts-ignore
+            this.modal.error = e.toString();
+          }
+        }
+      });
+
+      this.modal.addEventListener('nlCheckSignup', async (event: any) => {
+        const { available, taken, error } = await checkNip05(event.detail);
+        if (this.modal) {
+          this.modal.error = String(error);
+
+          if (!error && taken) {
+            this.modal.error = 'Already taken';
+          }
+
+          this.modal.signupNameIsAvailable = available;
+        }
+      });
+
+      this.modal.addEventListener('nlCheckLogin', async (event: any) => {
+        const { available, taken, error } = await checkNip05(event.detail);
+        if (this.modal) {
+          this.modal.error = String(error);
+          if (available) {
+            this.modal.error = 'Name not found';
+          }
+          this.modal.loginIsGood = taken;
+        }
+      });
+
+      this.modal.addEventListener('nlCloseModal', () => {
+        if (this.modal) {
+          this.modal.isLoading = false;
+        }
+
+        dialog.close();
+
+        err(new Error('Cancelled'));
+      });
 
       dialog.showModal();
     });

@@ -84,6 +84,48 @@ export const getBunkerUrl = async (value: string, optionsModal: NostrLoginOption
   throw new Error('Invalid user name or bunker url');
 };
 
+export const checkNip05 = async (nip05: string) => {
+  let available = false;
+  let error = '';
+  let pubkey = '';
+  await (async () => {
+    if (!nip05 || !nip05.includes('@')) return;
+
+    const [name, domain] = nip05.toLocaleLowerCase().split('@');
+    if (!name) return;
+
+    const REGEXP = new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,8}$/g);
+    if (!REGEXP.test(nip05)) {
+      error = 'Invalid name';
+      return;
+    }
+
+    if (!domain) {
+      error = 'Select service';
+      return;
+    }
+
+    const url = `https://${domain}/.well-known/nostr.json?name=${name.toLowerCase()}`;
+    try {
+      const r = await fetch(url);
+      const d = await r.json();
+      if (d.names[name]) {
+        pubkey = d.names[name];
+        return;
+      }
+    } catch {}
+
+    available = true;
+  })();
+
+  return {
+    available,
+    taken: pubkey != '',
+    error,
+    pubkey,
+  };
+};
+
 const upgradeInfo = (info: Info | RecentType) => {
   if ('typeAuthMethod' in info) delete info['typeAuthMethod'];
 

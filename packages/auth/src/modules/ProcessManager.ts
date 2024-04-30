@@ -15,7 +15,7 @@ class ProcessManager extends EventEmitter {
     }
   }
 
-  public async wait(cb: () => void) {
+  public async wait<T>(cb: () => Promise<T>): Promise<T> {
     if (!this.callTimer) {
       this.callTimer = setTimeout(() => this.emit('onCallTimeout'), CALL_TIMEOUT);
     }
@@ -49,6 +49,9 @@ class ProcessManager extends EventEmitter {
       throw error;
     }
 
+    // we can't return undefined bcs an exception is 
+    // thrown above on error
+    // @ts-ignore
     return result;
   }
 }

@@ -3,6 +3,7 @@ import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, Pro
 import { NostrLoginOptions, StartScreens } from './types';
 import { localStorageGetAccounts, localStorageGetCurrent, localStorageGetRecents, localStorageSetItem } from './utils';
 import { Info } from 'nostr-login-components/dist/types/types';
+import { NostrObjectParams } from './modules/Nostr';
 
 export class NostrLoginInitializer {
   public extensionService: NostrExtensionService;
@@ -22,7 +23,24 @@ export class NostrLoginInitializer {
     this.authNostrService = new AuthNostrService(this.params);
     this.extensionService = new NostrExtensionService(this.params);
     this.modalManager = new ModalManager(this.params, this.authNostrService, this.extensionService);
-    this.nostr = new Nostr(this.params, this.processManager, this.extensionService, this.authNostrService, this.modalManager);
+
+    const nostrApi: NostrObjectParams = {
+      waitReady: async () => {
+        await this.authNostrService.waitReady();
+        await this.modalManager.waitReady();
+      },
+      getUserInfo: () => this.params.userInfo,
+      getSigner: () => {
+        if (this.params.userInfo!.authMethod === 'readOnly') throw new Error('Read only');
+        return this.params.userInfo!.authMethod === 'extension' ? this.extensionService.getExtension() : this.authNostrService;
+      },
+      launch: () => {
+        return this.launch();
+      },
+      wait: (cb) => this.processManager.wait(cb)
+    };
+
+    this.nostr = new Nostr(nostrApi); //this.params, this.processManager, this.extensionService, this.authNostrService, this.modalManager);
 
     this.processManager.on('onCallTimeout', () => {
       this.bannerManager.onCallTimeout();
@@ -77,7 +95,7 @@ export class NostrLoginInitializer {
     });
 
     this.bannerManager.on('logout', () => {
-      this.authNostrService.logout();
+      logout();
     });
 
     this.bannerManager.on('onAuthUrlClick', url => {
@@ -93,7 +111,7 @@ export class NostrLoginInitializer {
     });
 
     this.extensionService.on('extensionLogout', () => {
-      this.authNostrService.logout();
+      logout();
     });
 
     this.bannerManager.on('launch', startScreen => {
@@ -127,7 +145,7 @@ export class NostrLoginInitializer {
     this.modalManager.onUpdateAccounts(accounts, recents);
   }
 
-  public launch = (startScreen: StartScreens) => {
+  public launch = (startScreen?: StartScreens) => {
     const recent = localStorageGetRecents();
     const accounts = localStorageGetAccounts();
 
@@ -141,7 +159,7 @@ export class NostrLoginInitializer {
       options.startScreen = 'switch-account';
     }
 
-    this.modalManager.launch(options).catch(() => {}); // don't throw if cancelled
+    return this.modalManager.launch(options).catch(() => {}); // don't throw if cancelled
   };
 
   public init = async (opt: NostrLoginOptions) => {
@@ -158,13 +176,15 @@ export class NostrLoginInitializer {
       localStorageSetItem('nl-dark-mode', `${opt.darkMode}`);
     }
 
+    // connect launching of our modals to nl-button elements
+    this.modalManager.connectModals(opt);
+
     // launch
-    if (opt.noBanner) {
-      this.modalManager.connectModals(opt);
-    } else {
+    if (!opt.noBanner) {
       this.bannerManager.launchAuthBanner(opt);
     }
 
+    // store options
     if (opt) {
       this.params.optionsModal = { ...opt };
     }
@@ -184,7 +204,7 @@ export class NostrLoginInitializer {
     } catch (e) {
       console.log('nostr login init error', e);
 
-      await this.authNostrService.logout();
+      await logout();
     }
 
     // ensure current state

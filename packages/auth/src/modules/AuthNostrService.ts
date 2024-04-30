@@ -63,8 +63,6 @@ class AuthNostrService extends EventEmitter {
 
   public async createAccount(nip05: string) {
     const [name, domain] = nip05.split('@');
-    // we're gonna need it
-    // ensurePopup();
 
     // bunker's own url
     const bunkerUrl = await getBunkerUrl(`_@${domain}`, this.params.optionsModal);
