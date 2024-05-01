@@ -217,13 +217,22 @@ export class NostrLoginInitializer {
 
     await this.authNostrService.logout();
   };
+
+  public setDarkMode = (dark: boolean) => {
+    localStorageSetItem('nl-dark-mode', `${dark}`);
+    this.bannerManager.onDarkMode(dark);
+    this.modalManager.onDarkMode(dark);
+  };
 }
 
 const initializer = new NostrLoginInitializer();
 
-export const { init, launch, logout } = initializer;
+export const { init, launch, logout, setDarkMode } = initializer;
 
 document.addEventListener('nlLogout', logout);
 document.addEventListener('nlLaunch', (event: any) => {
   launch(event.detail || '');
+});
+document.addEventListener('nlDarkMode', (event: any) => {
+  setDarkMode(!!event.detail);
 });

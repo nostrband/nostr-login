@@ -2,6 +2,7 @@ import { NostrLoginOptions, TypeBanner } from '../types';
 import { NostrParams } from '.';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { EventEmitter } from 'tseep';
+import { getDarkMode, localStorageGetItem } from '../utils';
 
 class BannerManager extends EventEmitter {
   private banner: TypeBanner | null = null;
@@ -62,8 +63,15 @@ class BannerManager extends EventEmitter {
     }
   }
 
+  public onDarkMode(dark: boolean) {
+    if (this.banner) this.banner.darkMode = dark;
+  }
+
   public launchAuthBanner(opt: NostrLoginOptions) {
     this.banner = document.createElement('nl-banner');
+
+    this.banner.setAttribute('dark-mode', String(getDarkMode(opt)));
+    if (opt.theme) this.banner.setAttribute('theme', opt.theme);
 
     this.banner.addEventListener('handleLoginBanner', (event: any) => {
       this.emit('launch', event.detail);

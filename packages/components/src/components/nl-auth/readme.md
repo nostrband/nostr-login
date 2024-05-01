@@ -9,6 +9,7 @@
 | ----------------------- | --------------------------- | ----------- | ------------------------------------------------ | ------------------------ |
 | `accounts`              | --                          |             | `Info[]`                                         | `[]`                     |
 | `authUrl`               | `auth-url`                  |             | `string`                                         | `''`                     |
+| `darkMode`              | `dark-mode`                 |             | `boolean`                                        | `false`                  |
 | `error`                 | `error`                     |             | `string`                                         | `''`                     |
 | `isLoading`             | `is-loading`                |             | `boolean`                                        | `false`                  |
 | `isLoadingExtension`    | `is-loading-extension`      |             | `boolean`                                        | `false`                  |
@@ -20,10 +21,10 @@
 
 ## Events
 
-| Event                  | Description | Type                  |
-| ---------------------- | ----------- | --------------------- |
-| `handleChangeDarkMode` |             | `CustomEvent<string>` |
-| `nlCloseModal`         |             | `CustomEvent<any>`    |
+| Event              | Description | Type                   |
+| ------------------ | ----------- | ---------------------- |
+| `nlChangeDarkMode` |             | `CustomEvent<boolean>` |
+| `nlCloseModal`     |             | `CustomEvent<any>`     |
 
 
 ## Dependencies

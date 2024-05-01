@@ -1,7 +1,7 @@
 import { NlTheme } from './index';
 
 export interface IButton {
-  nlTheme: NlTheme;
+  theme: NlTheme;
   titleBtn: string;
   disabled: boolean;
 }

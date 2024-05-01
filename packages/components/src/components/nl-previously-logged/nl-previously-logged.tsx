@@ -70,7 +70,7 @@ export class NlPreviouslyLogged {
                 return (
                   <li
                     onClick={() => this.handleSwitch(el)}
-                    class="group hover:bg-blue-50 hover:text-blue-400 flex cursor-pointer gap-x-3.5 py-2 px-3 rounded-lg text-sm items-center justify-between"
+                    class="group hover:bg-gray-400 flex cursor-pointer gap-x-3.5 py-2 px-3 rounded-lg text-sm items-center justify-between"
                   >
                     <div class="flex items-center gap-x-3.5 w-full">
                       <div class="w-full max-w-7 h-7 flex relative">
@@ -95,7 +95,7 @@ export class NlPreviouslyLogged {
                       </div>
 
                       <div class="overflow-hidden flex flex-col w-full">
-                        <div class="truncate overflow-hidden">{userName}</div>
+                        <div class="nl-title truncate overflow-hidden">{userName}</div>
                         <nl-login-status info={el} />
                       </div>
                     </div>
@@ -127,7 +127,7 @@ export class NlPreviouslyLogged {
                 return (
                   <li
                     onClick={() => this.handleLoginRecentAccount(el)}
-                    class="flex items-center gap-x-3.5 w-full hover:bg-gray-100 flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm justify-between"
+                    class="flex items-center gap-x-3.5 w-full hover:bg-gray-400 flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm justify-between"
                   >
                     <div class="w-full max-w-7 h-7 flex relative">
                       <div class="absolute top-[-3px] right-[-3px] bg-white border border-white rounded-xl">
@@ -152,8 +152,8 @@ export class NlPreviouslyLogged {
                       </div>
                     </div>
                     <div class="overflow-hidden flex flex-col w-full">
+                      <div class="nl-title truncate overflow-hidden">{userName}</div>
                       <nl-login-status info={el} />
-                      <div class="truncate overflow-hidden">{userName}</div>
                     </div>
                     <svg
                       onClick={e => {

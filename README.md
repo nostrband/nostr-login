@@ -43,7 +43,7 @@ document.addEventListener('nlAuth', (e) => {
 })
 ```
 
-## Launching, logout
+## Launching, logout, etc
 
 The `nostr-login` auth modals will be automatically launched whenever you
 make a call to `window.nostr` if user isn't authed yet. However, you can also launch the auth flow by dispatching a custom `nlLaunch` event:
@@ -58,6 +58,12 @@ To trigger logout in the `nostr-login`, you can dispatch a `nlLogout` event:
 
 ```
 document.dispatchEvent(new Event("nlLogout"));
+```
+
+To change dark mode in the `nostr-login`, you can dispatch a `nlDarkMode` event, with detail as `darkMode` boolean:
+
+```
+document.dispatchEvent(new CustomEvent("nlDarkMode", { detail: true }));
 ```
 
 ## Use as a package

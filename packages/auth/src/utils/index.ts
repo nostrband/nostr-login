@@ -236,3 +236,21 @@ export const localStorageGetCurrent = (): Info | null => {
   if (info) upgradeInfo(info);
   return info;
 };
+
+export const getDarkMode = (opt: NostrLoginOptions) => {
+  const getDarkMode = localStorageGetItem('nl-dark-mode');
+  if (getDarkMode) {
+    // user already changed it
+    return !!JSON.parse(getDarkMode);
+  } else if (opt.darkMode !== undefined) {
+    // app provided an option
+    return opt.darkMode;
+  } else {
+    // auto-detect
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
