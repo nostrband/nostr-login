@@ -1,9 +1,15 @@
 import { Info } from 'nostr-login-components/dist/types/types';
 
-interface Signer {
+export interface Signer {
   signEvent: (event: any) => Promise<any>;
-  encrypt: (pubkey: string, plaintext: string) => Promise<string>;
-  decrypt: (pubkey: string, ciphertext: string) => Promise<string>;
+  nip04: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>;
+  };
+  nip44: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>;
+  };
 }
 
 export interface NostrObjectParams {
@@ -15,9 +21,12 @@ export interface NostrObjectParams {
 }
 
 class Nostr {
-
   #params: NostrObjectParams;
   private nip04: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<any>;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<any>;
+  };
+  private nip44: {
     encrypt: (pubkey: string, plaintext: string) => Promise<any>;
     decrypt: (pubkey: string, ciphertext: string) => Promise<any>;
   };
@@ -29,8 +38,12 @@ class Nostr {
     this.signEvent = this.signEvent.bind(this);
     this.getRelays = this.getRelays.bind(this);
     this.nip04 = {
-      encrypt: this.encrypt.bind(this),
-      decrypt: this.decrypt.bind(this),
+      encrypt: this.encrypt04.bind(this),
+      decrypt: this.decrypt04.bind(this),
+    };
+    this.nip44 = {
+      encrypt: this.encrypt44.bind(this),
+      decrypt: this.decrypt44.bind(this),
     };
   }
 
@@ -70,14 +83,24 @@ class Nostr {
     return {};
   }
 
-  async encrypt(pubkey: string, plaintext: string) {
+  async encrypt04(pubkey: string, plaintext: string) {
     await this.ensureAuth();
-    return this.#params.wait(async () => await this.#params.getSigner().encrypt(pubkey, plaintext));
+    return this.#params.wait(async () => await this.#params.getSigner().nip04.encrypt(pubkey, plaintext));
   }
 
-  async decrypt(pubkey: string, ciphertext: string) {
+  async decrypt04(pubkey: string, ciphertext: string) {
     await this.ensureAuth();
-    return this.#params.wait(async () => await this.#params.getSigner().decrypt(pubkey, ciphertext));
+    return this.#params.wait(async () => await this.#params.getSigner().nip04.decrypt(pubkey, ciphertext));
+  }
+
+  async encrypt44(pubkey: string, plaintext: string) {
+    await this.ensureAuth();
+    return this.#params.wait(async () => await this.#params.getSigner().nip44.encrypt(pubkey, plaintext));
+  }
+
+  async decrypt44(pubkey: string, ciphertext: string) {
+    await this.ensureAuth();
+    return this.#params.wait(async () => await this.#params.getSigner().nip44.decrypt(pubkey, ciphertext));
   }
 }
 

@@ -5,14 +5,24 @@ import { NostrLoginAuthOptions, Response } from '../types';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
+import { Signer } from './Nostr';
 
-class AuthNostrService extends EventEmitter {
+class AuthNostrService extends EventEmitter implements Signer {
   private ndk: NDK;
   public profileNdk: NDK;
   private signer: NDKNip46Signer | null = null;
   private params: NostrParams;
   public signerPromise?: Promise<void>;
   public launcherPromise?: Promise<void>;
+
+  nip04: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>;
+  };
+  nip44: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>;
+  };
 
   constructor(params: NostrParams) {
     super();
@@ -26,6 +36,15 @@ class AuthNostrService extends EventEmitter {
       explicitRelayUrls: ['wss://relay.nostr.band/all', 'wss://purplepag.es'],
     });
     this.profileNdk.connect();
+
+    this.nip04 = {
+      encrypt: this.encrypt04.bind(this),
+      decrypt: this.decrypt04.bind(this),
+    };
+    this.nip44 = {
+      encrypt: this.encrypt44.bind(this),
+      decrypt: this.decrypt44.bind(this),
+    };
   }
 
   public hasSigner() {
@@ -286,17 +305,9 @@ class AuthNostrService extends EventEmitter {
     return event;
   }
 
-  public async encrypt(pubkey: string, plaintext: string) {
-    return this.signer?.encrypt(new NDKUser({ pubkey }), plaintext);
-  }
-
-  public async decrypt(pubkey: string, ciphertext: string) {
-    // decrypt is broken in ndk v2.3.1, and latest
-    // ndk v2.8.1 doesn't allow to override connect easily,
-    // so we reimplement and fix decrypt here as a temporary fix
-
+  private async codec_call(method: string, pubkey: string, param: string) {
     return new Promise<string>((resolve, reject) => {
-      this.signer?.rpc.sendRequest(this.signer.remotePubkey!, 'nip04_decrypt', [pubkey, ciphertext], 24133, (response: NDKRpcResponse) => {
+      this.signer!.rpc.sendRequest(this.signer!.remotePubkey!, method, [pubkey, param], 24133, (response: NDKRpcResponse) => {
         if (!response.error) {
           resolve(response.result);
         } else {
@@ -304,8 +315,28 @@ class AuthNostrService extends EventEmitter {
         }
       });
     });
+  }
 
-    // return this.signer?.decrypt(new NDKUser({ pubkey }), ciphertext);
+  public async encrypt04(pubkey: string, plaintext: string) {
+    return this.signer!.encrypt(new NDKUser({ pubkey }), plaintext);
+  }
+
+  public async decrypt04(pubkey: string, ciphertext: string) {
+    // decrypt is broken in ndk v2.3.1, and latest
+    // ndk v2.8.1 doesn't allow to override connect easily,
+    // so we reimplement and fix decrypt here as a temporary fix
+
+    return this.codec_call('nip04_decrypt', pubkey, ciphertext);
+  }
+
+  public async encrypt44(pubkey: string, plaintext: string) {
+    // no support of nip44 in ndk yet
+    return this.codec_call('nip44_encrypt', pubkey, plaintext);
+  }
+
+  public async decrypt44(pubkey: string, ciphertext: string) {
+    // no support of nip44 in ndk yet
+    return this.codec_call('nip44_decrypt', pubkey, ciphertext);
   }
 }
 
