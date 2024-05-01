@@ -11,34 +11,38 @@ export { Info, NlTheme, RecentType } from "./types/index";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface ButtonBase {
+        "darkMode": boolean;
         "disabled": boolean;
-        "nlTheme": NlTheme;
+        "theme": NlTheme;
         "titleBtn": string;
     }
     interface NlAuth {
         "accounts": Info[];
         "authUrl": string;
+        "darkMode": boolean;
         "error": string;
         "isLoading": boolean;
         "isLoadingExtension": boolean;
         "isSignInWithExtension": boolean;
         "recents": RecentType[];
         "startScreen": string;
-        "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
+        "theme": NlTheme;
     }
     interface NlBanner {
         "accounts": Info[];
+        "darkMode": boolean;
         "isLoading": boolean;
         "isOpen": boolean;
         "listNotifies": string[];
-        "nlTheme": 'default' | 'ocean' | 'lemonade' | 'purple';
         "notify": { confirm: number; url?: string; timeOut?: { link: string } } | null;
+        "theme": NlTheme;
         "titleBanner": string;
         "userInfo": Info | null;
     }
     interface NlButton {
+        "darkMode": boolean;
         "disabled": boolean;
-        "nlTheme": NlTheme;
+        "theme": NlTheme;
         "titleBtn": string;
     }
     interface NlChangeAccount {
@@ -144,7 +148,7 @@ declare global {
     };
     interface HTMLNlAuthElementEventMap {
         "nlCloseModal": any;
-        "handleChangeDarkMode": string;
+        "nlChangeDarkMode": boolean;
     }
     interface HTMLNlAuthElement extends Components.NlAuth, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlAuthElementEventMap>(type: K, listener: (this: HTMLNlAuthElement, ev: NlAuthCustomEvent<HTMLNlAuthElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -389,29 +393,31 @@ declare global {
 }
 declare namespace LocalJSX {
     interface ButtonBase {
+        "darkMode"?: boolean;
         "disabled"?: boolean;
-        "nlTheme"?: NlTheme;
+        "theme"?: NlTheme;
         "titleBtn"?: string;
     }
     interface NlAuth {
         "accounts"?: Info[];
         "authUrl"?: string;
+        "darkMode"?: boolean;
         "error"?: string;
         "isLoading"?: boolean;
         "isLoadingExtension"?: boolean;
         "isSignInWithExtension"?: boolean;
-        "onHandleChangeDarkMode"?: (event: NlAuthCustomEvent<string>) => void;
+        "onNlChangeDarkMode"?: (event: NlAuthCustomEvent<boolean>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
         "recents"?: RecentType[];
         "startScreen"?: string;
-        "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
+        "theme"?: NlTheme;
     }
     interface NlBanner {
         "accounts"?: Info[];
+        "darkMode"?: boolean;
         "isLoading"?: boolean;
         "isOpen"?: boolean;
         "listNotifies"?: string[];
-        "nlTheme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
         "notify"?: { confirm: number; url?: string; timeOut?: { link: string } } | null;
         "onHandleLoginBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleLogoutBanner"?: (event: NlBannerCustomEvent<string>) => void;
@@ -419,12 +425,14 @@ declare namespace LocalJSX {
         "onHandleOpenWelcomeModal"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleRetryConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleSetConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
+        "theme"?: NlTheme;
         "titleBanner"?: string;
         "userInfo"?: Info | null;
     }
     interface NlButton {
+        "darkMode"?: boolean;
         "disabled"?: boolean;
-        "nlTheme"?: NlTheme;
+        "theme"?: NlTheme;
         "titleBtn"?: string;
     }
     interface NlChangeAccount {

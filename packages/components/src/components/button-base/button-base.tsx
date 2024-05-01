@@ -1,4 +1,4 @@
-import { Component, h, Prop, Watch, State, Element } from '@stencil/core';
+import { Component, h, Prop, Element } from '@stencil/core';
 import { NlTheme } from '@/types';
 import { IButton } from '@/types/button';
 
@@ -9,29 +9,10 @@ import { IButton } from '@/types/button';
 })
 export class ButtonBase implements IButton {
   @Element() element: HTMLElement;
-  @State() darkMode: boolean = false;
-  @State() themeState: NlTheme;
-  @Prop() nlTheme: NlTheme = 'default';
+  @Prop({ mutable: true }) theme: NlTheme = 'default';
+  @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop() titleBtn = 'Open modal';
   @Prop() disabled = false;
-  @Watch('theme')
-  watchPropHandler(newValue: NlTheme) {
-    this.themeState = newValue;
-  }
-  connectedCallback() {
-    this.themeState = this.nlTheme;
-    const getDarkMode = JSON.parse(localStorage.getItem('nl-dark-mode'));
-
-    if (getDarkMode) {
-      this.darkMode = getDarkMode;
-    } else {
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        this.darkMode = true;
-      } else {
-        this.darkMode = false;
-      }
-    }
-  }
 
   componentDidRender() {
     const svgElement = this.element.querySelector('svg');
@@ -44,7 +25,7 @@ export class ButtonBase implements IButton {
 
   render() {
     return (
-      <div class={`theme-${this.nlTheme}`}>
+      <div class={`theme-${this.theme}`}>
         <button
           disabled={this.disabled}
           type="button"

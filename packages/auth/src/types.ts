@@ -35,6 +35,7 @@ export interface IBanner {
   listNotifies?: string[];
   accounts?: Info[];
   isOpen?: boolean;
+  darkMode?: boolean;
   notify?: {
     confirm?: number;
     url?: string;
@@ -57,6 +58,7 @@ export interface IModal {
   isFetchCreateAccount?: boolean;
   recents?: RecentType[];
   accounts?: Info[];
+  darkMode?: boolean;
 }
 
 export type TypeModal = IModal & HTMLElement;

@@ -8,11 +8,12 @@
 | Property       | Attribute      | Description | Type                                                              | Default     |
 | -------------- | -------------- | ----------- | ----------------------------------------------------------------- | ----------- |
 | `accounts`     | --             |             | `Info[]`                                                          | `[]`        |
+| `darkMode`     | `dark-mode`    |             | `boolean`                                                         | `false`     |
 | `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`     |
 | `isOpen`       | `is-open`      |             | `boolean`                                                         | `false`     |
 | `listNotifies` | --             |             | `string[]`                                                        | `[]`        |
-| `nlTheme`      | `nl-theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"`                  | `'default'` |
 | `notify`       | --             |             | `{ confirm: number; url?: string; timeOut?: { link: string; }; }` | `null`      |
+| `theme`        | `theme`        |             | `"default" \| "lemonade" \| "ocean" \| "purple"`                  | `'default'` |
 | `titleBanner`  | `title-banner` |             | `string`                                                          | `''`        |
 | `userInfo`     | --             |             | `Info`                                                            | `null`      |
 

@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, h, Prop, State, Watch } from '@stencil/core';
-import { Info, METHOD_MODULE } from '@/types';
+import { Info, METHOD_MODULE, NlTheme } from '@/types';
 
 @Component({
   tag: 'nl-banner',
@@ -7,10 +7,9 @@ import { Info, METHOD_MODULE } from '@/types';
   shadow: true,
 })
 export class NlBanner {
-  @State() darkMode: boolean = false;
   @State() isLogin: boolean = false;
-  @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
-  @Prop() nlTheme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
+  @Prop({ mutable: true }) theme: NlTheme = 'default';
+  @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop() titleBanner: string = '';
   @State() domain: string = '';
   @State() urlNotify: string = '';
@@ -48,26 +47,6 @@ export class NlBanner {
 
     if (!this.urlNotify && notify.timeOut) {
       this.isOpenNotifyTimeOut = true;
-    }
-  }
-
-  @Watch('nlTheme')
-  watchPropHandler(newValue: 'default' | 'ocean' | 'lemonade' | 'purple') {
-    this.themeState = newValue;
-  }
-
-  connectedCallback() {
-    this.themeState = this.nlTheme;
-    const getDarkMode = localStorage.getItem('nl-dark-mode');
-
-    if (getDarkMode) {
-      this.darkMode = JSON.parse(getDarkMode);
-    } else {
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        this.darkMode = true;
-      } else {
-        this.darkMode = false;
-      }
     }
   }
 
@@ -125,7 +104,7 @@ export class NlBanner {
     const isShowUserName = Boolean(userName);
 
     return (
-      <div class={`theme-${this.themeState}`}>
+      <div class={`theme-${this.theme}`}>
         <div class={this.darkMode && 'dark'}>
           <div
             class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}

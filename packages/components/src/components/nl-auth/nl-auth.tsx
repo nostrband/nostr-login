@@ -1,5 +1,5 @@
-import { Component, Event, EventEmitter, Fragment, h, Prop, State, Watch } from '@stencil/core';
-import { CURRENT_MODULE, Info, RecentType } from '@/types';
+import { Component, Event, EventEmitter, Fragment, h, Prop, Watch } from '@stencil/core';
+import { CURRENT_MODULE, Info, NlTheme, RecentType } from '@/types';
 import { state } from '@/store';
 
 @Component({
@@ -8,7 +8,7 @@ import { state } from '@/store';
   shadow: true,
 })
 export class NlAuth {
-  @Prop() theme: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
+  @Prop({ mutable: true }) theme: NlTheme = 'default';
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
   @Prop() isSignInWithExtension: boolean = true;
   @Prop() isLoading: boolean = false;
@@ -18,11 +18,10 @@ export class NlAuth {
   @Prop({ mutable: true }) accounts: Info[] = [];
   @Prop({ mutable: true }) recents: RecentType[] = [];
 
-  @State() darkMode: boolean = false;
-  @State() themeState: 'default' | 'ocean' | 'lemonade' | 'purple' = 'default';
+  @Prop({ mutable: true }) darkMode: boolean = false;
 
   @Event() nlCloseModal: EventEmitter;
-  @Event() handleChangeDarkMode: EventEmitter<string>;
+  @Event() nlChangeDarkMode: EventEmitter<boolean>;
 
   @Watch('isLoading')
   watchLoadingHandler(newValue: boolean) {
@@ -48,24 +47,13 @@ export class NlAuth {
     this.nlCloseModal.emit();
   }
 
-  handleChangeTheme() {
-    this.darkMode = !this.darkMode;
-    this.handleChangeDarkMode.emit(String(!this.darkMode));
-    localStorage.setItem('nl-dark-mode', `${this.darkMode}`);
+  handleChangeDarkMode() {
+    this.nlChangeDarkMode.emit(!this.darkMode);
   }
 
   componentWillLoad() {
-    this.themeState = this.theme;
     state.screen = this.startScreen as CURRENT_MODULE;
     state.prevScreen = CURRENT_MODULE.WELCOME; //this.startScreen as CURRENT_MODULE;
-
-    const getDarkMode = localStorage.getItem('nl-dark-mode');
-
-    if (getDarkMode) {
-      this.darkMode = JSON.parse(getDarkMode);
-    } else {
-      this.darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
   }
 
   handleClickToBack() {
@@ -104,7 +92,7 @@ export class NlAuth {
     };
 
     return (
-      <div class={`theme-${this.themeState}`}>
+      <div class={`theme-${this.theme}`}>
         <div class={classWrapper}>
           <div onClick={() => this.handleClose()} class="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-75 z-[80]" />
 
@@ -124,8 +112,8 @@ export class NlAuth {
               </div>
 
               <div class="flex gap-1">
-                {/* <button
-                  onClick={() => this.handleChangeTheme()}
+                <button
+                  onClick={() => this.handleChangeDarkMode()}
                   type="button"
                   class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
                 >
@@ -147,7 +135,7 @@ export class NlAuth {
                       />
                     </svg>
                   )}
-                </button> */}
+                </button>
                 {!state.isLoading && (
                   <button
                     onClick={() => (state.screen = CURRENT_MODULE.INFO)}

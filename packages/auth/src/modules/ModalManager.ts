@@ -1,5 +1,5 @@
 import { NostrLoginOptions, RecentType, StartScreens, TypeModal } from '../types';
-import { checkNip05, getBunkerUrl, localStorageRemoveRecent } from '../utils';
+import { checkNip05, getBunkerUrl, getDarkMode, localStorageRemoveRecent } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { Info } from 'nostr-login-components/dist/types/types';
@@ -41,6 +41,8 @@ class ModalManager extends EventEmitter {
     this.modal = document.createElement('nl-auth');
     this.modal.accounts = this.accounts;
     this.modal.recents = this.recents;
+
+    this.modal.setAttribute('dark-mode', String(getDarkMode(opt)));
 
     if (opt.theme) {
       this.modal.setAttribute('theme', opt.theme);
@@ -277,6 +279,10 @@ class ModalManager extends EventEmitter {
         err(new Error('Cancelled'));
       });
 
+      this.modal.addEventListener('nlChangeDarkMode', (event: any) => {
+        document.dispatchEvent(new CustomEvent('nlDarkMode', { detail: event.detail }));
+      })
+
       dialog.showModal();
     });
 
@@ -328,6 +334,10 @@ class ModalManager extends EventEmitter {
     if (!this.modal) return;
     this.modal.accounts = accounts;
     this.modal.recents = recents;
+  }
+
+  public onDarkMode(dark: boolean) {
+    if (this.modal) this.modal.darkMode = dark;
   }
 }
 

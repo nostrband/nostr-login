@@ -7,8 +7,9 @@
 
 | Property   | Attribute   | Description | Type                                             | Default        |
 | ---------- | ----------- | ----------- | ------------------------------------------------ | -------------- |
+| `darkMode` | `dark-mode` |             | `boolean`                                        | `false`        |
 | `disabled` | `disabled`  |             | `boolean`                                        | `false`        |
-| `nlTheme`  | `nl-theme`  |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`    |
+| `theme`    | `theme`     |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`    |
 | `titleBtn` | `title-btn` |             | `string`                                         | `'Open modal'` |
 
 

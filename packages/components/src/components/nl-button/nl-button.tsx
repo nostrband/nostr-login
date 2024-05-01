@@ -7,11 +7,12 @@ import { IButton } from '@/types/button';
   shadow: true,
 })
 export class NlButton implements IButton {
-  @Prop() nlTheme: NlTheme = 'default';
+  @Prop() theme: NlTheme = 'default';
+  @Prop() darkMode: boolean = false;
   @Prop() titleBtn = 'Open modal';
   @Prop() disabled = false;
 
   render() {
-    return <button-base nlTheme={this.nlTheme} titleBtn={this.titleBtn} disabled={this.disabled} />;
+    return <button-base theme={this.theme} darkMode={this.darkMode} titleBtn={this.titleBtn} disabled={this.disabled} />;
   }
 }
