@@ -150,7 +150,8 @@ class AuthNostrService extends EventEmitter implements Signer {
   private onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
     if (type !== 'logout' && !info) throw new Error('No user info in onAuth');
 
-    if (info?.pubkey !== this.params.userInfo?.pubkey) {
+    // make sure we emulate logout first
+    if (info && this.params.userInfo && (info.pubkey !== this.params.userInfo.pubkey || info.authMethod !== this.params.userInfo.authMethod)) {
       const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
       document.dispatchEvent(event);
     }
