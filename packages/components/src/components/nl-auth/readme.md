@@ -5,18 +5,19 @@
 
 ## Properties
 
-| Property                | Attribute                   | Description | Type                                             | Default                  |
-| ----------------------- | --------------------------- | ----------- | ------------------------------------------------ | ------------------------ |
-| `accounts`              | --                          |             | `Info[]`                                         | `[]`                     |
-| `authUrl`               | `auth-url`                  |             | `string`                                         | `''`                     |
-| `darkMode`              | `dark-mode`                 |             | `boolean`                                        | `false`                  |
-| `error`                 | `error`                     |             | `string`                                         | `''`                     |
-| `isLoading`             | `is-loading`                |             | `boolean`                                        | `false`                  |
-| `isLoadingExtension`    | `is-loading-extension`      |             | `boolean`                                        | `false`                  |
-| `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean`                                        | `true`                   |
-| `recents`               | --                          |             | `RecentType[]`                                   | `[]`                     |
-| `startScreen`           | `start-screen`              |             | `string`                                         | `CURRENT_MODULE.WELCOME` |
-| `theme`                 | `theme`                     |             | `"default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
+| Property                | Attribute                   | Description | Type                                                       | Default                  |
+| ----------------------- | --------------------------- | ----------- | ---------------------------------------------------------- | ------------------------ |
+| `accounts`              | --                          |             | `Info[]`                                                   | `[]`                     |
+| `authUrl`               | `auth-url`                  |             | `string`                                                   | `''`                     |
+| `darkMode`              | `dark-mode`                 |             | `boolean`                                                  | `false`                  |
+| `error`                 | `error`                     |             | `string`                                                   | `''`                     |
+| `isLoading`             | `is-loading`                |             | `boolean`                                                  | `false`                  |
+| `isLoadingExtension`    | `is-loading-extension`      |             | `boolean`                                                  | `false`                  |
+| `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean`                                                  | `true`                   |
+| `noLocalSignup`         | `no-local-signup`           |             | `boolean`                                                  | `true`                   |
+| `recents`               | --                          |             | `RecentType[]`                                             | `[]`                     |
+| `startScreen`           | `start-screen`              |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
+| `theme`                 | `theme`                     |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
 
 
 ## Events
@@ -34,6 +35,9 @@
 - [nl-welcome](../nl-welcome)
 - [nl-signin](../nl-signin)
 - [nl-signup](../nl-signup)
+- [nl-local-signup](../nl-local-signup)
+- [nl-confirm-logout](../nl-confirm-logout)
+- [nl-backup-flow](../nl-backup-flow)
 - [nl-info](../nl-info)
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
@@ -47,6 +51,9 @@ graph TD;
   nl-auth --> nl-welcome
   nl-auth --> nl-signin
   nl-auth --> nl-signup
+  nl-auth --> nl-local-signup
+  nl-auth --> nl-confirm-logout
+  nl-auth --> nl-backup-flow
   nl-auth --> nl-info
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
@@ -57,6 +64,10 @@ graph TD;
   nl-signin --> button-base
   nl-signup --> nl-select
   nl-signup --> button-base
+  nl-local-signup --> button-base
+  nl-confirm-logout --> button-base
+  nl-backup-flow --> button-base
+  nl-backup-flow --> nl-select
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
   nl-previously-logged --> nl-login-status

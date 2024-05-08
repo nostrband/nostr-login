@@ -65,6 +65,14 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
+  public localSignup(name: string) {
+    console.log(`localSignup name: ${name}`)
+  }
+
+  public importCurrentUser(domain: string) {
+    console.log(`localSignup domain: ${domain}`)
+  }
+
   public setReadOnly(pubkey: string) {
     const info: Info = { pubkey, authMethod: 'readOnly' };
     this.onAuth('login', info);

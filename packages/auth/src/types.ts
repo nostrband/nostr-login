@@ -4,7 +4,7 @@ export interface NostrLoginAuthOptions {
   localNsec?: string;
   relays?: string[];
   type: 'login' | 'signup' | 'logout';
-  method?: 'connect' | 'readOnly' | 'extension';
+  method?: 'connect' | 'readOnly' | 'extension' | 'local';
 }
 
 // NOTE: must be a subset of CURRENT_MODULE enum
@@ -26,6 +26,8 @@ export interface NostrLoginOptions {
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
   isSignInWithExtension?: boolean;
+
+  noLocalSignup?: boolean
 }
 
 export interface IBanner {

@@ -15,13 +15,18 @@ export class NlAuth {
   @Prop() isLoadingExtension: boolean = false;
   @Prop() authUrl: string = '';
   @Prop() error: string = '';
+  @Prop() noLocalSignup: boolean = true;
   @Prop({ mutable: true }) accounts: Info[] = [];
   @Prop({ mutable: true }) recents: RecentType[] = [];
-
   @Prop({ mutable: true }) darkMode: boolean = false;
 
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
+
+  @Watch('noLocalSignup')
+  watchLocalSignupHandler(newValue: boolean) {
+    state.noLocalSignup = newValue;
+  }
 
   @Watch('isLoading')
   watchLoadingHandler(newValue: boolean) {
@@ -76,6 +81,12 @@ export class NlAuth {
           return <nl-signin />;
         case CURRENT_MODULE.SIGNUP:
           return <nl-signup />;
+        case CURRENT_MODULE.LOCAL_SIGNUP:
+          return <nl-local-signup />;
+        case CURRENT_MODULE.CONFIRM_LOGOUT:
+          return <nl-confirm-logout />;
+        case CURRENT_MODULE.BACKUP_FLOW:
+          return <nl-backup-flow />;
         case CURRENT_MODULE.INFO:
           return <nl-info />;
         case CURRENT_MODULE.EXTENSION:
@@ -176,32 +187,38 @@ export class NlAuth {
                 </button>
               </div>
             </div>
-            {state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED && state.screen !== CURRENT_MODULE.WELCOME && !state.isLoading && (
-              <div class="p-4">
-                <button
-                  onClick={() => this.handleClickToBack()}
-                  type="button"
-                  class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                  data-hs-overlay="#hs-vertically-centered-modal"
-                >
-                  <span class="sr-only">Back</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                  </svg>
-                </button>
-              </div>
-            )}
+            {state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED &&
+              state.screen !== CURRENT_MODULE.BACKUP_FLOW &&
+              state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
+              state.screen !== CURRENT_MODULE.WELCOME &&
+              !state.isLoading && (
+                <div class="p-4">
+                  <button
+                    onClick={() => this.handleClickToBack()}
+                    type="button"
+                    class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                    data-hs-overlay="#hs-vertically-centered-modal"
+                  >
+                    <span class="sr-only">Back</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                  </button>
+                </div>
+              )}
             {state.isLoading || state.authUrl ? (
               <nl-loading />
             ) : (
               <Fragment>
                 {renderModule()}
                 {state.screen !== CURRENT_MODULE.INFO &&
+                  state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
+                  state.screen !== CURRENT_MODULE.BACKUP_FLOW &&
                   state.screen !== CURRENT_MODULE.WELCOME &&
                   state.screen !== CURRENT_MODULE.EXTENSION &&
                   state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED && (
                     <Fragment>
-                      {state.screen === CURRENT_MODULE.SIGNUP ? (
+                      {state.screen === CURRENT_MODULE.SIGNUP || CURRENT_MODULE.LOCAL_SIGNUP ? (
                         <div class="p-4 overflow-y-auto">
                           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
                             If you already have an account please{' '}
@@ -215,7 +232,10 @@ export class NlAuth {
                         <div class="p-4 overflow-y-auto">
                           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
                             If you don't have an account please{' '}
-                            <span onClick={() => (state.screen = CURRENT_MODULE.SIGNUP)} class="cursor-pointer text-blue-400">
+                            <span
+                              onClick={() => (this.noLocalSignup ? (state.screen = CURRENT_MODULE.LOCAL_SIGNUP) : (state.screen = CURRENT_MODULE.SIGNUP))}
+                              class="cursor-pointer text-blue-400"
+                            >
                               sign up
                             </span>
                             .

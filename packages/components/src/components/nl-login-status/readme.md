@@ -1,15 +1,13 @@
 # nl-login-status
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property | Attribute | Description | Type                                                                                                                                                   | Default     |
-| -------- | --------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| `info`   | --        |             | `Info \| { name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: "readOnly" \| "extension" \| "connect"; }` | `undefined` |
+| Property | Attribute | Description | Type                                                                                                                                                              | Default     |
+| -------- | --------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `info`   | --        |             | `Info \| { name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: "local" \| "readOnly" \| "extension" \| "connect"; }` | `undefined` |
 
 
 ## Dependencies

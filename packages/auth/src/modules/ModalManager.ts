@@ -160,6 +160,18 @@ class ModalManager extends EventEmitter {
         signup(event.detail);
       });
 
+      this.modal.addEventListener('nlLocalSignup', (event: any) => {
+        this.authNostrService.localSignup(event.detail);
+
+        dialog.close();
+      });
+
+      this.modal.addEventListener('nlBackUpAccount', (event: any) => {
+        this.authNostrService.importCurrentUser(event.detail);
+
+        dialog.close();
+      });
+
       this.modal.addEventListener('nlSwitchAccount', (event: any) => {
         const eventInfo: Info = event.detail as Info;
 

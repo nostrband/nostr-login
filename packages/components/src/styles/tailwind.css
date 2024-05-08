@@ -457,3 +457,12 @@
 .theme-purple .dark .nl-text-success {
   @apply text-teal-400;
 }
+
+/*Theme crab*/
+.theme-crab .nl-button {
+  @apply border border-red-200 bg-red-100 text-red-950 shadow-sm hover:bg-red-50;
+}
+
+.theme-crab .dark .nl-button {
+  @apply bg-red-800 border-red-950 text-red-200 hover:bg-red-900;
+}

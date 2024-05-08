@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, h, Prop, State, Watch } from '@stencil/core';
+import { Component, Event, EventEmitter, Fragment, h, Prop, State, Watch } from '@stencil/core';
 import { Info, METHOD_MODULE, NlTheme } from '@/types';
 
 @Component({
@@ -32,6 +32,8 @@ export class NlBanner {
   @Event() handleLoginBanner: EventEmitter<string>;
   @Event() handleLogoutBanner: EventEmitter<string>;
   @Event() handleOpenWelcomeModal: EventEmitter<string>;
+  @Event() handleConfirmLogout: EventEmitter<string>;
+  @Event() handleBackUpModal: EventEmitter<string>;
 
   @Watch('notify')
   watchNotifyHandler(notify: { confirm: number; url?: string; timeOut?: boolean }) {
@@ -81,8 +83,17 @@ export class NlBanner {
     this.handleClose();
   }
 
+  handleBackUp() {
+    this.handleBackUpModal.emit();
+    this.handleClose();
+  }
+
   handleLogout() {
-    this.handleLogoutBanner.emit(METHOD_MODULE.LOGOUT);
+    if (this.userInfo.authMethod === 'local') {
+      this.handleConfirmLogout.emit();
+    } else {
+      this.handleLogoutBanner.emit(METHOD_MODULE.LOGOUT);
+    }
     this.handleClose();
   }
 
@@ -102,6 +113,7 @@ export class NlBanner {
     const isShowImg = Boolean(this.userInfo?.picture);
     const userName = this.userInfo?.name || this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
     const isShowUserName = Boolean(userName);
+    const isTemporary = this.userInfo && this.userInfo.authMethod === 'local';
 
     return (
       <div class={`theme-${this.theme}`}>
@@ -151,7 +163,7 @@ export class NlBanner {
                 )}
 
                 {isShowUserName && <div class="show-slow truncate w-16 text-xs">{userName}</div>}
-                {isShowUserName && <nl-login-status info={this.userInfo} /> }
+                {isShowUserName && <nl-login-status info={this.userInfo} />}
               </div>
             </div>
 
@@ -204,19 +216,21 @@ export class NlBanner {
                       Go to {this.domain}
                     </a>
                   ) : (
-                    <button
-                      onClick={() => this.handleConfirm()}
-                      type="button"
-                      class="nl-button text-nowrap py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                    >
-                      Confirm
-                    </button>
+                    <button-base onClick={() => this.handleConfirm()} titleBtn="Confirm" />
                   )}
                 </div>
               ) : (
                 <div>
                   <div>
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
+                    {isTemporary && (
+                      <Fragment>
+                        <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your account is temporary and needs a backup</p>
+                        <div class="mb-2">
+                          <button-base onClick={() => this.handleBackUp()} theme="lemonade" titleBtn="Backup account" />
+                        </div>
+                      </Fragment>
+                    )}
                     <div class="mb-2">
                       <nl-change-account currentAccount={this.userInfo} accounts={this.accounts} />
                     </div>
@@ -230,67 +244,45 @@ export class NlBanner {
                     )}
                     {!this.userInfo ? (
                       <div>
-                        <button
-                          // disabled={this.isLoading}
-                          onClick={() => this.handleLogin()}
-                          type="button"
-                          class="nl-button show-slow text-nowrap py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4">
+                        <button-base onClick={() => this.handleLogin()} titleBtn="Log in">
+                          <svg
+                            style={{ display: 'none' }}
+                            slot="icon-start"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="flex-shrink-0 w-4 h-4"
+                          >
                             <path
                               stroke-linecap="round"
                               stroke-linejoin="round"
                               d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"
                             />
                           </svg>
-                          {/*{this.isLoading && (*/}
-                          {/*  <span*/}
-                          {/*    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"*/}
-                          {/*    role="status"*/}
-                          {/*    aria-label="loading"*/}
-                          {/*  ></span>*/}
-                          {/*)}*/}
-                          Log in
-                        </button>
-                        <button
-                          // disabled={this.isLoading}
-                          onClick={() => this.handleSignup()}
-                          type="button"
-                          class="nl-button show-slow text-nowrap mt-3 py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                        >
-                          {/*{this.isLoading && (*/}
-                          {/*  <span*/}
-                          {/*    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"*/}
-                          {/*    role="status"*/}
-                          {/*    aria-label="loading"*/}
-                          {/*  ></span>*/}
-                          {/*)}*/}
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4">
+                        </button-base>
+                        <button-base onClick={() => this.handleSignup()} titleBtn="Sign up">
+                          <svg
+                            style={{ display: 'none' }}
+                            slot="icon-start"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="flex-shrink-0 w-4 h-4"
+                          >
                             <path
                               stroke-linecap="round"
                               stroke-linejoin="round"
                               d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
                             />
                           </svg>
-                          Sign up
-                        </button>
+                        </button-base>
                       </div>
                     ) : (
-                      <button
-                        // disabled={this.isLoading}
-                        onClick={() => this.handleLogout()}
-                        type="button"
-                        class="nl-button text-nowrap show-slow py-2.5 px-3 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg  disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                      >
-                        {/*{this.isLoading && (*/}
-                        {/*  <span*/}
-                        {/*    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"*/}
-                        {/*    role="status"*/}
-                        {/*    aria-label="loading"*/}
-                        {/*  ></span>*/}
-                        {/*)}*/}
-                        Log out
-                      </button>
+                      <button-base onClick={() => this.handleLogout()} titleBtn="Log out" />
                     )}
                   </div>
                 </div>
