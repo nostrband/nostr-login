@@ -1,19 +1,22 @@
-import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount } from '../utils';
+import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount, createProfile } from '../utils';
 import { Info } from 'nostr-login-components/dist/types/types';
-import { getEventHash, getPublicKey, nip19 } from 'nostr-tools';
+import { generatePrivateKey, getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
 import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
 import { Signer } from './Nostr';
+import { Nip44 } from '../utils/nip44';
 
 class AuthNostrService extends EventEmitter implements Signer {
   private ndk: NDK;
-  public profileNdk: NDK;
+  private profileNdk: NDK;
   private signer: NDKNip46Signer | null = null;
+  private localSigner: NDKPrivateKeySigner | null = null;
   private params: NostrParams;
-  public signerPromise?: Promise<void>;
-  public launcherPromise?: Promise<void>;
+  private signerPromise?: Promise<void>;
+  private launcherPromise?: Promise<void>;
+  private nip44Codec = new Nip44();
 
   nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string>;
@@ -47,10 +50,6 @@ class AuthNostrService extends EventEmitter implements Signer {
     };
   }
 
-  public hasSigner() {
-    return !!this.signer;
-  }
-
   public async waitReady() {
     if (this.signerPromise) {
       try {
@@ -65,12 +64,31 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
-  public localSignup(name: string) {
-    console.log(`localSignup name: ${name}`)
+  public async localSignup(name: string) {
+    const sk = generatePrivateKey();
+    const pubkey = getPublicKey(sk);
+    const info: Info = {
+      pubkey,
+      sk,
+      name,
+      authMethod: 'local',
+    };
+    console.log(`localSignup name: ${name}`);
+    await this.setLocal(info, true);
   }
 
-  public importCurrentUser(domain: string) {
-    console.log(`localSignup domain: ${domain}`)
+  public async setLocal(info: Info, create?: boolean) {
+    this.releaseSigner();
+    this.localSigner = new NDKPrivateKeySigner(info.sk);
+
+    if (create) await createProfile(info, this.profileNdk, this.localSigner);
+
+    this.onAuth('login', info);
+  }
+
+  public async importCurrentUser(domain: string) {
+    console.log(`importCurrentUser domain: ${domain}`);
+    await new Promise(ok => setTimeout(ok, 1000));
   }
 
   public setReadOnly(pubkey: string) {
@@ -84,6 +102,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public async setConnect(info: Info) {
+    this.releaseSigner();
     await this.initSigner(info);
     this.onAuth('login', info);
   }
@@ -128,13 +147,18 @@ class AuthNostrService extends EventEmitter implements Signer {
     };
   }
 
-  public async logout() {
+  private releaseSigner() {
     this.signer = null;
+    this.localSigner = null;
 
     // disconnect from signer relays
     for (const r of this.ndk.pool.relays.keys()) {
       this.ndk.pool.removeRelay(r);
     }
+  }
+
+  public async logout() {
+    this.releaseSigner();
 
     // move current to recent
     localStorageRemoveCurrentAccount();
@@ -307,9 +331,15 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public async signEvent(event: any) {
-    event.pubkey = this.signer?.remotePubkey;
-    event.id = getEventHash(event);
-    event.sig = await this.signer?.sign(event);
+    if (this.localSigner) {
+      event.pubkey = getPublicKey(this.localSigner.privateKey!);
+      event.id = getEventHash(event);
+      event.sig = await this.localSigner.sign(event);
+    } else {
+      event.pubkey = this.signer?.remotePubkey;
+      event.id = getEventHash(event);
+      event.sig = await this.signer?.sign(event);
+    }
     console.log('signed', { event });
     return event;
   }
@@ -327,25 +357,41 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public async encrypt04(pubkey: string, plaintext: string) {
-    return this.signer!.encrypt(new NDKUser({ pubkey }), plaintext);
+    if (this.localSigner) {
+      return this.localSigner.encrypt(new NDKUser({ pubkey }), plaintext);
+    } else {
+      return this.signer!.encrypt(new NDKUser({ pubkey }), plaintext);
+    }
   }
 
   public async decrypt04(pubkey: string, ciphertext: string) {
-    // decrypt is broken in ndk v2.3.1, and latest
-    // ndk v2.8.1 doesn't allow to override connect easily,
-    // so we reimplement and fix decrypt here as a temporary fix
+    if (this.localSigner) {
+      return this.localSigner.decrypt(new NDKUser({ pubkey }), ciphertext);
+    } else {
+      // decrypt is broken in ndk v2.3.1, and latest
+      // ndk v2.8.1 doesn't allow to override connect easily,
+      // so we reimplement and fix decrypt here as a temporary fix
 
-    return this.codec_call('nip04_decrypt', pubkey, ciphertext);
+      return this.codec_call('nip04_decrypt', pubkey, ciphertext);
+    }
   }
 
   public async encrypt44(pubkey: string, plaintext: string) {
-    // no support of nip44 in ndk yet
-    return this.codec_call('nip44_encrypt', pubkey, plaintext);
+    if (this.localSigner) {
+      return this.nip44Codec.encrypt(this.localSigner.privateKey!, pubkey, plaintext);
+    } else {
+      // no support of nip44 in ndk yet
+      return this.codec_call('nip44_encrypt', pubkey, plaintext);
+    }
   }
 
   public async decrypt44(pubkey: string, ciphertext: string) {
-    // no support of nip44 in ndk yet
-    return this.codec_call('nip44_decrypt', pubkey, ciphertext);
+    if (this.localSigner) {
+      return this.nip44Codec.decrypt(this.localSigner.privateKey!, pubkey, ciphertext);
+    } else {
+      // no support of nip44 in ndk yet
+      return this.codec_call('nip44_decrypt', pubkey, ciphertext);
+    }
   }
 }
 

@@ -33,7 +33,7 @@ export class NlBanner {
   @Event() handleLogoutBanner: EventEmitter<string>;
   @Event() handleOpenWelcomeModal: EventEmitter<string>;
   @Event() handleConfirmLogout: EventEmitter<string>;
-  @Event() handleBackUpModal: EventEmitter<string>;
+  @Event() handleImportModal: EventEmitter<string>;
 
   @Watch('notify')
   watchNotifyHandler(notify: { confirm: number; url?: string; timeOut?: boolean }) {
@@ -83,8 +83,8 @@ export class NlBanner {
     this.handleClose();
   }
 
-  handleBackUp() {
-    this.handleBackUpModal.emit();
+  handleImport() {
+    this.handleImportModal.emit();
     this.handleClose();
   }
 
@@ -225,9 +225,9 @@ export class NlBanner {
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     {isTemporary && (
                       <Fragment>
-                        <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your account is temporary and needs a backup</p>
+                        <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your account may be lost if you close this tab</p>
                         <div class="mb-2">
-                          <button-base onClick={() => this.handleBackUp()} theme="lemonade" titleBtn="Backup account" />
+                          <button-base onClick={() => this.handleImport()} theme="lemonade" titleBtn="Backup account" />
                         </div>
                       </Fragment>
                     )}

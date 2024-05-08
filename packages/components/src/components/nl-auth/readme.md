@@ -37,7 +37,7 @@
 - [nl-signup](../nl-signup)
 - [nl-local-signup](../nl-local-signup)
 - [nl-confirm-logout](../nl-confirm-logout)
-- [nl-backup-flow](../nl-backup-flow)
+- [nl-import-flow](../nl-import-flow)
 - [nl-info](../nl-info)
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
@@ -53,7 +53,7 @@ graph TD;
   nl-auth --> nl-signup
   nl-auth --> nl-local-signup
   nl-auth --> nl-confirm-logout
-  nl-auth --> nl-backup-flow
+  nl-auth --> nl-import-flow
   nl-auth --> nl-info
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
@@ -66,8 +66,8 @@ graph TD;
   nl-signup --> button-base
   nl-local-signup --> button-base
   nl-confirm-logout --> button-base
-  nl-backup-flow --> button-base
-  nl-backup-flow --> nl-select
+  nl-import-flow --> button-base
+  nl-import-flow --> nl-select
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
   nl-previously-logged --> nl-login-status

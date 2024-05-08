@@ -4,7 +4,7 @@ export enum CURRENT_MODULE {
   LOGIN_BUNKER_URL = 'login-bunker-url',
   LOGIN_READ_ONLY = 'login-read-only',
   CONFIRM_LOGOUT = 'confirm-logout',
-  BACKUP_FLOW = 'backup-flow',
+  IMPORT_FLOW = 'import',
   LOGIN = 'login',
   SIGNUP = 'signup',
   LOCAL_SIGNUP = 'local-signup',
@@ -24,8 +24,10 @@ export interface Info {
   // must be present
   pubkey: string;
 
-  // connect method only
+  // connect or local methods
   sk?: string;
+
+  // connect method only
   relays?: string[];
 
   // connect/readOnly

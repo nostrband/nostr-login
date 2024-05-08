@@ -85,8 +85,8 @@ export class NlAuth {
           return <nl-local-signup />;
         case CURRENT_MODULE.CONFIRM_LOGOUT:
           return <nl-confirm-logout />;
-        case CURRENT_MODULE.BACKUP_FLOW:
-          return <nl-backup-flow />;
+        case CURRENT_MODULE.IMPORT_FLOW:
+          return <nl-import-flow />;
         case CURRENT_MODULE.INFO:
           return <nl-info />;
         case CURRENT_MODULE.EXTENSION:
@@ -188,7 +188,7 @@ export class NlAuth {
               </div>
             </div>
             {state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED &&
-              state.screen !== CURRENT_MODULE.BACKUP_FLOW &&
+              state.screen !== CURRENT_MODULE.IMPORT_FLOW &&
               state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
               state.screen !== CURRENT_MODULE.WELCOME &&
               !state.isLoading && (
@@ -213,7 +213,7 @@ export class NlAuth {
                 {renderModule()}
                 {state.screen !== CURRENT_MODULE.INFO &&
                   state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
-                  state.screen !== CURRENT_MODULE.BACKUP_FLOW &&
+                  state.screen !== CURRENT_MODULE.IMPORT_FLOW &&
                   state.screen !== CURRENT_MODULE.WELCOME &&
                   state.screen !== CURRENT_MODULE.EXTENSION &&
                   state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED && (

@@ -2,21 +2,21 @@ import { Component, h, Fragment, State, Prop, Event, EventEmitter, Watch } from 
 import { state } from '@/store';
 
 @Component({
-  tag: 'nl-backup-flow',
-  styleUrl: 'nl-backup-flow.css',
+  tag: 'nl-import-flow',
+  styleUrl: 'nl-import-flow.css',
   shadow: false,
 })
-export class NlBackupFlow {
-  @Prop() titleSignup = 'Backup an account';
-  @Prop() description = 'some text';
-  @Prop() bunkers: string = 'nsec.app,highlighter.com';
+export class NlImportFlow {
+  @Prop() titleInfo = 'Backup your account';
+  @Prop() textInfo = 'Nostr accounts are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import them into a proper key storage service to avoid losing them, and to use with other Nostr apps.';
+  @Prop() titleImport = 'Choose a service';
+  @Prop() textImport = 'Your Nostr keys will be imported into this provider, and you will manage your keys on their website.';
+  @Prop() bunkers: string = 'nsec.app';
 
   @State() isAvailable = false;
   @State() isContinued = false;
 
-  @Event() nlBackUpAccount: EventEmitter<string>;
-  // @Event() nlCheckSignup: EventEmitter<string>;
-  @Event() fetchHandler: EventEmitter<boolean>;
+  @Event() nlImportAccount: EventEmitter<string>;
 
   formatServers(bunkers: string) {
     return bunkers.split(',').map(d => ({
@@ -32,8 +32,7 @@ export class NlBackupFlow {
 
   handleCreateAccount(e: MouseEvent) {
     e.preventDefault();
-
-    this.nlBackUpAccount.emit(state.nlSignup.domain);
+    this.nlImportAccount.emit(state.nlSignup.domain);
   }
 
   handleContinue() {
@@ -53,8 +52,14 @@ export class NlBackupFlow {
     if (!this.isContinued) {
       return (
         <div class="p-4 overflow-y-auto">
-          <h1 class="nl-title font-bold text-center text-2xl">{this.titleSignup}</h1>
-          <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">{this.description}</p>
+          <h1 class="nl-title font-bold text-center text-2xl">{this.titleInfo}</h1>
+          <p class="nl-description font-light text-sm pt-2 pb-2 max-w-96 mx-auto">
+            Nostr accounts are controlled by cryptographic keys.<br/><br/>
+            
+            Your keys are currently only stored in this browser tab.<br/><br/>
+            
+            You should backup your keys with a key storage service to avoid losing them, and to use them with other Nostr apps.
+          </p>
           <div class="ml-auto mr-auto w-72">
             <button-base onClick={() => this.handleContinue()} titleBtn="Continue" />
           </div>
@@ -65,21 +70,23 @@ export class NlBackupFlow {
     return (
       <Fragment>
         <div class="p-4 overflow-y-auto">
-          <h1 class="nl-title font-bold text-center text-2xl">{this.titleSignup}</h1>
-          <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">{this.description}</p>
+          <h1 class="nl-title font-bold text-center text-2xl">{this.titleImport}</h1>
+          <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">
+            Your Nostr keys will be imported into the service you choose. You will manage your keys on their website.
+          </p>
         </div>
 
         <div class="max-w-72 mx-auto mb-5">
           <div class="mb-0.5">
             <nl-select onSelectDomain={e => this.handleDomainSelect(e)} selected={0} options={state.nlSignup.servers}></nl-select>
           </div>
-          <p class="nl-title font-light text-sm mb-2">Choose a service to manage your Nostr keys.</p>
+          <p class="nl-title font-light text-sm mb-2">Default provider is a fine choice to start with.</p>
 
           <div class="ps-4 pe-4 overflow-y-auto">
             <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
           </div>
 
-          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Backaup an account">
+          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Start importing">
             {state.isLoading ? (
               <span
                 slot="icon-start"

@@ -22,8 +22,8 @@
 
 | Event                       | Description | Type                  |
 | --------------------------- | ----------- | --------------------- |
-| `handleBackUpModal`         |             | `CustomEvent<string>` |
 | `handleConfirmLogout`       |             | `CustomEvent<string>` |
+| `handleImportModal`         |             | `CustomEvent<string>` |
 | `handleLoginBanner`         |             | `CustomEvent<string>` |
 | `handleLogoutBanner`        |             | `CustomEvent<string>` |
 | `handleNotifyConfirmBanner` |             | `CustomEvent<string>` |

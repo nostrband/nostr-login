@@ -17,10 +17,10 @@
 
 ### Used by
 
- - [nl-backup-flow](../nl-backup-flow)
  - [nl-banner](../nl-banner)
  - [nl-button](../nl-button)
  - [nl-confirm-logout](../nl-confirm-logout)
+ - [nl-import-flow](../nl-import-flow)
  - [nl-loading](../nl-loading)
  - [nl-local-signup](../nl-local-signup)
  - [nl-signin](../nl-signin)
@@ -32,10 +32,10 @@
 ### Graph
 ```mermaid
 graph TD;
-  nl-backup-flow --> button-base
   nl-banner --> button-base
   nl-button --> button-base
   nl-confirm-logout --> button-base
+  nl-import-flow --> button-base
   nl-loading --> button-base
   nl-local-signup --> button-base
   nl-signin --> button-base

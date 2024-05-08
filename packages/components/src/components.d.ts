@@ -29,11 +29,6 @@ export namespace Components {
         "startScreen": string;
         "theme": NlTheme;
     }
-    interface NlBackupFlow {
-        "bunkers": string;
-        "description": string;
-        "titleSignup": string;
-    }
     interface NlBanner {
         "accounts": Info[];
         "darkMode": boolean;
@@ -58,6 +53,13 @@ export namespace Components {
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlConfirmLogout {
+    }
+    interface NlImportFlow {
+        "bunkers": string;
+        "textImport": string;
+        "textInfo": string;
+        "titleImport": string;
+        "titleInfo": string;
     }
     interface NlInfo {
     }
@@ -111,10 +113,6 @@ export interface NlAuthCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlAuthElement;
 }
-export interface NlBackupFlowCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLNlBackupFlowElement;
-}
 export interface NlBannerCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlBannerElement;
@@ -126,6 +124,10 @@ export interface NlChangeAccountCustomEvent<T> extends CustomEvent<T> {
 export interface NlConfirmLogoutCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlConfirmLogoutElement;
+}
+export interface NlImportFlowCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlImportFlowElement;
 }
 export interface NlLoadingCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -188,24 +190,6 @@ declare global {
         prototype: HTMLNlAuthElement;
         new (): HTMLNlAuthElement;
     };
-    interface HTMLNlBackupFlowElementEventMap {
-        "nlSignup": string;
-        "fetchHandler": boolean;
-    }
-    interface HTMLNlBackupFlowElement extends Components.NlBackupFlow, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLNlBackupFlowElementEventMap>(type: K, listener: (this: HTMLNlBackupFlowElement, ev: NlBackupFlowCustomEvent<HTMLNlBackupFlowElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLNlBackupFlowElementEventMap>(type: K, listener: (this: HTMLNlBackupFlowElement, ev: NlBackupFlowCustomEvent<HTMLNlBackupFlowElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-    }
-    var HTMLNlBackupFlowElement: {
-        prototype: HTMLNlBackupFlowElement;
-        new (): HTMLNlBackupFlowElement;
-    };
     interface HTMLNlBannerElementEventMap {
         "handleRetryConfirmBanner": string;
         "handleNotifyConfirmBanner": string;
@@ -214,7 +198,7 @@ declare global {
         "handleLogoutBanner": string;
         "handleOpenWelcomeModal": string;
         "handleConfirmLogout": string;
-        "handleBackUpModal": string;
+        "handleImportModal": string;
     }
     interface HTMLNlBannerElement extends Components.NlBanner, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlBannerElementEventMap>(type: K, listener: (this: HTMLNlBannerElement, ev: NlBannerCustomEvent<HTMLNlBannerElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -273,6 +257,23 @@ declare global {
     var HTMLNlConfirmLogoutElement: {
         prototype: HTMLNlConfirmLogoutElement;
         new (): HTMLNlConfirmLogoutElement;
+    };
+    interface HTMLNlImportFlowElementEventMap {
+        "nlImportAccount": string;
+    }
+    interface HTMLNlImportFlowElement extends Components.NlImportFlow, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlImportFlowElementEventMap>(type: K, listener: (this: HTMLNlImportFlowElement, ev: NlImportFlowCustomEvent<HTMLNlImportFlowElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlImportFlowElementEventMap>(type: K, listener: (this: HTMLNlImportFlowElement, ev: NlImportFlowCustomEvent<HTMLNlImportFlowElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlImportFlowElement: {
+        prototype: HTMLNlImportFlowElement;
+        new (): HTMLNlImportFlowElement;
     };
     interface HTMLNlInfoElement extends Components.NlInfo, HTMLStencilElement {
     }
@@ -457,11 +458,11 @@ declare global {
     interface HTMLElementTagNameMap {
         "button-base": HTMLButtonBaseElement;
         "nl-auth": HTMLNlAuthElement;
-        "nl-backup-flow": HTMLNlBackupFlowElement;
         "nl-banner": HTMLNlBannerElement;
         "nl-button": HTMLNlButtonElement;
         "nl-change-account": HTMLNlChangeAccountElement;
         "nl-confirm-logout": HTMLNlConfirmLogoutElement;
+        "nl-import-flow": HTMLNlImportFlowElement;
         "nl-info": HTMLNlInfoElement;
         "nl-info-extension": HTMLNlInfoExtensionElement;
         "nl-loading": HTMLNlLoadingElement;
@@ -498,13 +499,6 @@ declare namespace LocalJSX {
         "startScreen"?: string;
         "theme"?: NlTheme;
     }
-    interface NlBackupFlow {
-        "bunkers"?: string;
-        "description"?: string;
-        "onFetchHandler"?: (event: NlBackupFlowCustomEvent<boolean>) => void;
-        "onNlSignup"?: (event: NlBackupFlowCustomEvent<string>) => void;
-        "titleSignup"?: string;
-    }
     interface NlBanner {
         "accounts"?: Info[];
         "darkMode"?: boolean;
@@ -512,8 +506,8 @@ declare namespace LocalJSX {
         "isOpen"?: boolean;
         "listNotifies"?: string[];
         "notify"?: { confirm: number; url?: string; timeOut?: { link: string } } | null;
-        "onHandleBackUpModal"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleConfirmLogout"?: (event: NlBannerCustomEvent<string>) => void;
+        "onHandleImportModal"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleLoginBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleLogoutBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleNotifyConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
@@ -543,6 +537,14 @@ declare namespace LocalJSX {
         "onHandleLogoutBanner"?: (event: NlConfirmLogoutCustomEvent<string>) => void;
         "onNlCloseModal"?: (event: NlConfirmLogoutCustomEvent<any>) => void;
         "onStopFetchHandler"?: (event: NlConfirmLogoutCustomEvent<boolean>) => void;
+    }
+    interface NlImportFlow {
+        "bunkers"?: string;
+        "onNlImportAccount"?: (event: NlImportFlowCustomEvent<string>) => void;
+        "textImport"?: string;
+        "textInfo"?: string;
+        "titleImport"?: string;
+        "titleInfo"?: string;
     }
     interface NlInfo {
     }
@@ -612,11 +614,11 @@ declare namespace LocalJSX {
     interface IntrinsicElements {
         "button-base": ButtonBase;
         "nl-auth": NlAuth;
-        "nl-backup-flow": NlBackupFlow;
         "nl-banner": NlBanner;
         "nl-button": NlButton;
         "nl-change-account": NlChangeAccount;
         "nl-confirm-logout": NlConfirmLogout;
+        "nl-import-flow": NlImportFlow;
         "nl-info": NlInfo;
         "nl-info-extension": NlInfoExtension;
         "nl-loading": NlLoading;
@@ -637,11 +639,11 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "button-base": LocalJSX.ButtonBase & JSXBase.HTMLAttributes<HTMLButtonBaseElement>;
             "nl-auth": LocalJSX.NlAuth & JSXBase.HTMLAttributes<HTMLNlAuthElement>;
-            "nl-backup-flow": LocalJSX.NlBackupFlow & JSXBase.HTMLAttributes<HTMLNlBackupFlowElement>;
             "nl-banner": LocalJSX.NlBanner & JSXBase.HTMLAttributes<HTMLNlBannerElement>;
             "nl-button": LocalJSX.NlButton & JSXBase.HTMLAttributes<HTMLNlButtonElement>;
             "nl-change-account": LocalJSX.NlChangeAccount & JSXBase.HTMLAttributes<HTMLNlChangeAccountElement>;
             "nl-confirm-logout": LocalJSX.NlConfirmLogout & JSXBase.HTMLAttributes<HTMLNlConfirmLogoutElement>;
+            "nl-import-flow": LocalJSX.NlImportFlow & JSXBase.HTMLAttributes<HTMLNlImportFlowElement>;
             "nl-info": LocalJSX.NlInfo & JSXBase.HTMLAttributes<HTMLNlInfoElement>;
             "nl-info-extension": LocalJSX.NlInfoExtension & JSXBase.HTMLAttributes<HTMLNlInfoExtensionElement>;
             "nl-loading": LocalJSX.NlLoading & JSXBase.HTMLAttributes<HTMLNlLoadingElement>;

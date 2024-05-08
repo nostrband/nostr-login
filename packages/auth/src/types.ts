@@ -8,7 +8,7 @@ export interface NostrLoginAuthOptions {
 }
 
 // NOTE: must be a subset of CURRENT_MODULE enum
-export type StartScreens = 'welcome' | 'signup' | 'login' | 'login-bunker-url' | 'login-read-only' | 'switch-account';
+export type StartScreens = 'welcome' | 'signup' | 'login' | 'login-bunker-url' | 'login-read-only' | 'switch-account' | 'import';
 
 
 export interface NostrLoginOptions {

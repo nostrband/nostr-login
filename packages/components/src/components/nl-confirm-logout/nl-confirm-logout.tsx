@@ -23,7 +23,7 @@ export class NlConfirmLogout {
   }
 
   handleBackUp() {
-    state.screen = CURRENT_MODULE.BACKUP_FLOW;
+    state.screen = CURRENT_MODULE.IMPORT_FLOW;
   }
 
   render() {
