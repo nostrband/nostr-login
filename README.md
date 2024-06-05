@@ -4,7 +4,7 @@ Nostr-Login
 This library is a powerful `window.nostr` provider.
 
 ```
-<script async src='https://www.unpkg.com/nostr-login@latest/dist/unpkg.js'></script>
+<script src='https://www.unpkg.com/nostr-login@latest/dist/unpkg.js'></script>
 ```
 
 Just add the above script to your HTML and 
