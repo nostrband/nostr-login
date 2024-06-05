@@ -4,7 +4,7 @@ Nostr-Login
 This library is a powerful `window.nostr` provider.
 
 ```
-<script src='https://www.unpkg.com/nostr-login@latest/dist/unpkg.js'></script>
+<script async src='https://www.unpkg.com/nostr-login@latest/dist/unpkg.js'></script>
 ```
 
 Just add the above script to your HTML and 
@@ -21,6 +21,7 @@ You can set these attributes to the `script` tag to customize the behavior:
 - `data-perms` - the comma-separated list of [permissions](https://github.com/nostr-protocol/nips/blob/master/46.md#requested-permissions) requested by the app over Nostr Connect, i.e. `sign_event:1,nip04_encrypt`
 - `data-theme` - color themes, one of `default`, `ocean`, `lemonade`, `purple`
 - `data-no-banner` - if `true`, do not show the `nostr-login` banner, will need to launch the modals using event dispatch, see below
+- `data-methods` - comma-separated list of allowed auth methods, method names: `connect`, `extension`, `readOnly`, `local`, all allowed by default.
 
 Example:
 ```
