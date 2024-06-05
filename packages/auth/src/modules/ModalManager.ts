@@ -4,6 +4,7 @@ import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { nip19 } from 'nostr-tools';
+import { setDarkMode } from '..';
 
 class ModalManager extends EventEmitter {
   private modal: TypeModal | null = null;
@@ -56,11 +57,15 @@ class ModalManager extends EventEmitter {
       this.modal.setAttribute('bunkers', opt.bunkers);
     }
 
-    if (opt.isSignInWithExtension !== undefined) {
-      this.modal.isSignInWithExtension = opt.isSignInWithExtension;
-    } else {
-      this.modal.isSignInWithExtension = this.extensionService.hasExtension();
+    if (opt.methods !== undefined) {
+      this.modal.authMethods = opt.methods;
     }
+
+    if (opt.localSignup !== undefined) {
+      this.modal.localSignup = opt.localSignup;
+    }
+
+    this.modal.hasExtension = this.extensionService.hasExtension();
 
     this.modal.isLoadingExtension = false;
     this.modal.isLoading = false;
@@ -88,7 +93,6 @@ class ModalManager extends EventEmitter {
       });
 
       const login = (name: string) => {
-        // modal.error = 'Please confirm in your key storage app.';
         if (this.modal) {
           this.modal.isLoading = true;
         }
@@ -113,7 +117,10 @@ class ModalManager extends EventEmitter {
       };
 
       const signup = (name: string) => {
-        //modal.error = 'Please confirm in your key storage app.';
+        if (this.modal) {
+          this.modal.isLoading = true;
+        }
+
         // create acc on service and get bunker url
         this.authNostrService
           .createAccount(name)
@@ -121,7 +128,7 @@ class ModalManager extends EventEmitter {
           .then(({ bunkerUrl, sk }) => this.authNostrService.authNip46('signup', name, bunkerUrl, sk))
           .then(() => {
             if (this.modal) {
-              this.modal.isFetchCreateAccount = false;
+              this.modal.isLoading = false;
             }
             dialog.close();
             ok();
@@ -129,7 +136,30 @@ class ModalManager extends EventEmitter {
           .catch((e: Error) => {
             console.log('error', e);
             if (this.modal) {
-              this.modal.isFetchCreateAccount = false;
+              this.modal.isLoading = false;
+              this.modal.error = e.toString();
+            }
+          });
+      };
+
+      const importKeys = (bunker: string) => {
+        if (this.modal) {
+          this.modal.isLoading = true;
+        }
+
+        this.authNostrService
+          .importCurrentUser(bunker)
+          .then(() => {
+            if (this.modal) {
+              this.modal.isLoading = false;
+            }
+            dialog.close();
+            ok();
+          })
+          .catch((e: Error) => {
+            console.log('error', e);
+            if (this.modal) {
+              this.modal.isLoading = false;
               this.modal.error = e.toString();
             }
           });
@@ -158,6 +188,15 @@ class ModalManager extends EventEmitter {
 
       this.modal.addEventListener('nlSignup', (event: any) => {
         signup(event.detail);
+      });
+
+      this.modal.addEventListener('nlLocalSignup', (event: any) => {
+        this.authNostrService.localSignup(event.detail);
+        dialog.close();
+      });
+
+      this.modal.addEventListener('nlImportAccount', (event: any) => {
+        importKeys(event.detail);
       });
 
       this.modal.addEventListener('nlSwitchAccount', (event: any) => {
@@ -280,8 +319,9 @@ class ModalManager extends EventEmitter {
       });
 
       this.modal.addEventListener('nlChangeDarkMode', (event: any) => {
+        setDarkMode(event.detail);
         document.dispatchEvent(new CustomEvent('nlDarkMode', { detail: event.detail }));
-      })
+      });
 
       dialog.showModal();
     });

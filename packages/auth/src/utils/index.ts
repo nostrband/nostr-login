@@ -1,5 +1,5 @@
 import { Info } from 'nostr-login-components/dist/types/types';
-import NDK, { NDKUser } from '@nostr-dev-kit/ndk';
+import NDK, { NDKEvent, NDKRelaySet, NDKSigner, NDKUser } from '@nostr-dev-kit/ndk';
 import { generatePrivateKey } from 'nostr-tools';
 import { NostrLoginOptions, RecentType } from '../types';
 
@@ -33,6 +33,32 @@ export const fetchProfile = async (info: Info, profileNdk: NDK) => {
   user.ndk = profileNdk;
 
   return await user.fetchProfile();
+};
+
+export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSigner) => {
+  const origin = window.location.origin;
+  const meta = {
+    name: info.name,
+    about: `I joined Nostr on ${origin}}`,
+  };
+
+  const event = new NDKEvent(profileNdk, {
+    kind: 0,
+    created_at: Math.floor(Date.now() / 1000),
+    pubkey: info.pubkey,
+    content: JSON.stringify(meta),
+    tags: [],
+  });
+
+  await event.sign(signer);
+  console.log("signed profile", event);
+  await event.publish(NDKRelaySet.fromRelayUrls([
+    'wss://nostr.mutinywallet.com',
+    'wss://purplepag.es',
+    'wss://relay.nostr.band',
+    'wss://nos.lol',
+  ], profileNdk));
+  console.log("published profile", event);
 };
 
 export const bunkerUrlToInfo = (bunkerUrl: string, sk = ''): Info => {
@@ -236,6 +262,10 @@ export const localStorageGetCurrent = (): Info | null => {
   if (info) upgradeInfo(info);
   return info;
 };
+
+export const setDarkMode = (dark: boolean) => {
+  localStorageSetItem('nl-dark-mode', dark ? 'true' : 'false');
+}
 
 export const getDarkMode = (opt: NostrLoginOptions) => {
   const getDarkMode = localStorageGetItem('nl-dark-mode');

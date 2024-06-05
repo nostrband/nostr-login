@@ -68,10 +68,7 @@ export class NlPreviouslyLogged {
                 const isShowUserName = Boolean(userName);
 
                 return (
-                  <li
-                    onClick={() => this.handleSwitch(el)}
-                    class="group hover:bg-gray-400 flex cursor-pointer gap-x-3.5 py-2 px-3 rounded-lg text-sm items-center justify-between"
-                  >
+                  <li onClick={() => this.handleSwitch(el)} class="group hover:bg-gray-400 flex cursor-pointer gap-x-3.5 py-2 px-3 rounded-lg text-sm items-center justify-between">
                     <div class="flex items-center gap-x-3.5 w-full">
                       <div class="w-full max-w-7 h-7 flex relative">
                         <div class="absolute top-[-2px] right-[-2px] bg-white border-2 border-white rounded-xl">

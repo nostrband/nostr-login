@@ -3,8 +3,11 @@ export enum CURRENT_MODULE {
   INFO = 'info',
   LOGIN_BUNKER_URL = 'login-bunker-url',
   LOGIN_READ_ONLY = 'login-read-only',
+  CONFIRM_LOGOUT = 'confirm-logout',
+  IMPORT_FLOW = 'import',
   LOGIN = 'login',
   SIGNUP = 'signup',
+  LOCAL_SIGNUP = 'local-signup',
   EXTENSION = 'extension',
   LOADING = 'loading',
   PREVIOUSLY_LOGGED = 'switch-account',
@@ -17,31 +20,35 @@ export enum METHOD_MODULE {
   CONFIRM = 'confirm',
 }
 
+export type AuthMethod = 'connect' | 'readOnly' | 'extension' | 'local';
+
 export interface Info {
-    // must be present
-    pubkey: string;
+  // must be present
+  pubkey: string;
 
-    // connect method only
-    sk?: string;
-    relays?: string[];
+  // connect or local methods
+  sk?: string;
 
-    // connect/readOnly
-    nip05?: string;
+  // connect method only
+  relays?: string[];
 
-    // connect w/ bunkerUrl
-    bunkerUrl?: string;
+  // connect/readOnly
+  nip05?: string;
 
-    // from kind:0 profile
-    picture?: string;
-    name?: string;
+  // connect w/ bunkerUrl
+  bunkerUrl?: string;
 
-    // nip46 bunker URL secret 
-    token?: string;
+  // from kind:0 profile
+  picture?: string;
+  name?: string;
 
-    // session type
-    authMethod: 'connect' | 'readOnly' | 'extension';
+  // nip46 bunker URL secret
+  token?: string;
+
+  // session type
+  authMethod: AuthMethod;
 }
 
 export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;
 
-export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple';
+export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple' | 'crab';

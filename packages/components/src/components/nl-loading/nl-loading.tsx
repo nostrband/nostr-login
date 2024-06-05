@@ -26,8 +26,9 @@ export class NlLoading {
       <div class="p-4 overflow-y-auto">
         <h1 class="nl-title font-bold text-center text-4xl">
           {state.authUrl && !state.isLoading && 'Almost ready!'}
-          {!state.authUrl && state.isLoading && 'Connecting...'}
+          {!state.authUrl && state.isLoading && !state.localSignup && 'Connecting...'}
           {state.authUrl && state.isLoading && 'Confirming...'}
+          {!state.authUrl && state.localSignup && state.isLoading && 'Create a local account...'}
         </h1>
         <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">
           {state.authUrl && !state.isLoading && 'Continue to confirm the connection to your key storage.'}

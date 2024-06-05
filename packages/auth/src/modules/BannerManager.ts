@@ -1,8 +1,8 @@
 import { NostrLoginOptions, TypeBanner } from '../types';
 import { NostrParams } from '.';
-import { Info } from 'nostr-login-components/dist/types/types';
+import { CURRENT_MODULE, Info } from 'nostr-login-components/dist/types/types';
 import { EventEmitter } from 'tseep';
-import { getDarkMode, localStorageGetItem } from '../utils';
+import { getDarkMode } from '../utils';
 
 class BannerManager extends EventEmitter {
   private banner: TypeBanner | null = null;
@@ -79,6 +79,10 @@ class BannerManager extends EventEmitter {
 
     this.banner.addEventListener('handleLogoutBanner', async () => {
       this.emit('logout');
+    });
+
+    this.banner.addEventListener('handleImportModal', (event: any) => {
+      this.emit('import');
     });
 
     this.banner.addEventListener('handleNotifyConfirmBanner', (event: any) => {
