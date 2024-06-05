@@ -4,6 +4,7 @@ import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { nip19 } from 'nostr-tools';
+import { setDarkMode } from '..';
 
 class ModalManager extends EventEmitter {
   private modal: TypeModal | null = null;
@@ -56,11 +57,15 @@ class ModalManager extends EventEmitter {
       this.modal.setAttribute('bunkers', opt.bunkers);
     }
 
-    if (opt.isSignInWithExtension !== undefined) {
-      this.modal.isSignInWithExtension = opt.isSignInWithExtension;
-    } else {
-      this.modal.isSignInWithExtension = this.extensionService.hasExtension();
+    if (opt.methods !== undefined) {
+      this.modal.authMethods = opt.methods;
     }
+
+    if (opt.localSignup !== undefined) {
+      this.modal.localSignup = opt.localSignup;
+    }
+
+    this.modal.hasExtension = this.extensionService.hasExtension();
 
     this.modal.isLoadingExtension = false;
     this.modal.isLoading = false;
@@ -314,6 +319,7 @@ class ModalManager extends EventEmitter {
       });
 
       this.modal.addEventListener('nlChangeDarkMode', (event: any) => {
+        setDarkMode(event.detail);
         document.dispatchEvent(new CustomEvent('nlDarkMode', { detail: event.detail }));
       });
 

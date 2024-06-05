@@ -5,19 +5,21 @@
 
 ## Properties
 
-| Property                | Attribute                   | Description | Type                                                       | Default                  |
-| ----------------------- | --------------------------- | ----------- | ---------------------------------------------------------- | ------------------------ |
-| `accounts`              | --                          |             | `Info[]`                                                   | `[]`                     |
-| `authUrl`               | `auth-url`                  |             | `string`                                                   | `''`                     |
-| `darkMode`              | `dark-mode`                 |             | `boolean`                                                  | `false`                  |
-| `error`                 | `error`                     |             | `string`                                                   | `''`                     |
-| `isLoading`             | `is-loading`                |             | `boolean`                                                  | `false`                  |
-| `isLoadingExtension`    | `is-loading-extension`      |             | `boolean`                                                  | `false`                  |
-| `isSignInWithExtension` | `is-sign-in-with-extension` |             | `boolean`                                                  | `true`                   |
-| `noLocalSignup`         | `no-local-signup`           |             | `boolean`                                                  | `true`                   |
-| `recents`               | --                          |             | `RecentType[]`                                             | `[]`                     |
-| `startScreen`           | `start-screen`              |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
-| `theme`                 | `theme`                     |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
+| Property             | Attribute              | Description | Type                                                       | Default                  |
+| -------------------- | ---------------------- | ----------- | ---------------------------------------------------------- | ------------------------ |
+| `accounts`           | --                     |             | `Info[]`                                                   | `[]`                     |
+| `authMethods`        | --                     |             | `AuthMethod[]`                                             | `[]`                     |
+| `authUrl`            | `auth-url`             |             | `string`                                                   | `''`                     |
+| `bunkers`            | `bunkers`              |             | `string`                                                   | `''`                     |
+| `darkMode`           | `dark-mode`            |             | `boolean`                                                  | `false`                  |
+| `error`              | `error`                |             | `string`                                                   | `''`                     |
+| `hasExtension`       | `has-extension`        |             | `boolean`                                                  | `false`                  |
+| `isLoading`          | `is-loading`           |             | `boolean`                                                  | `false`                  |
+| `isLoadingExtension` | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
+| `localSignup`        | `local-signup`         |             | `boolean`                                                  | `false`                  |
+| `recents`            | --                     |             | `RecentType[]`                                             | `[]`                     |
+| `startScreen`        | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
+| `theme`              | `theme`                |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
 
 
 ## Events

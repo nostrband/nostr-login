@@ -263,6 +263,10 @@ export const localStorageGetCurrent = (): Info | null => {
   return info;
 };
 
+export const setDarkMode = (dark: boolean) => {
+  localStorageSetItem('nl-dark-mode', dark ? 'true' : 'false');
+}
+
 export const getDarkMode = (opt: NostrLoginOptions) => {
   const getDarkMode = localStorageGetItem('nl-dark-mode');
   if (getDarkMode) {

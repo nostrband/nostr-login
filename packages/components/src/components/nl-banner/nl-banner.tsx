@@ -162,8 +162,8 @@ export class NlBanner {
                   </div>
                 )}
 
-                {isShowUserName && <div class="show-slow truncate w-16 text-xs">{userName}</div>}
-                {isShowUserName && <nl-login-status info={this.userInfo} />}
+                {this.isOpen && isShowUserName && <div class="show-slow truncate w-16 text-xs">{userName}</div>}
+                {this.isOpen && isShowUserName && <nl-login-status info={this.userInfo} />}
               </div>
             </div>
 

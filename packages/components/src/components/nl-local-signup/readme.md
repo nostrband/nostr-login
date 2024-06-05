@@ -5,10 +5,10 @@
 
 ## Properties
 
-| Property      | Attribute      | Description | Type     | Default                     |
-| ------------- | -------------- | ----------- | -------- | --------------------------- |
-| `description` | `description`  |             | `string` | `'Join the Nostr network.'` |
-| `titleSignup` | `title-signup` |             | `string` | `'Local Sign up'`           |
+| Property      | Attribute      | Description | Type     | Default                                               |
+| ------------- | -------------- | ----------- | -------- | ----------------------------------------------------- |
+| `description` | `description`  |             | `string` | `'You can use any nickname and can change it later.'` |
+| `titleSignup` | `title-signup` |             | `string` | `'We only need your name'`                            |
 
 
 ## Events

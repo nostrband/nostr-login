@@ -217,12 +217,14 @@ class AuthNostrService extends EventEmitter implements Signer {
       };
 
       if (type !== 'logout') {
-        if (info && info.sk) {
-          options.localNsec = nip19.nsecEncode(info.sk);
+        options.pubkey = info!.pubkey;
+
+        if (info!.sk) {
+          options.localNsec = nip19.nsecEncode(info!.sk);
         }
 
-        if (info && info.relays) {
-          options.relays = info.relays;
+        if (info!.relays) {
+          options.relays = info!.relays;
         }
 
         options.method = info!.authMethod || 'connect';

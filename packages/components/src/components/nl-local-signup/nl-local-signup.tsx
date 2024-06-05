@@ -7,8 +7,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlLocalSignup {
-  @Prop() titleSignup = 'Local Sign up';
-  @Prop() description = 'Join the Nostr network.';
+  @Prop() titleSignup = 'We only need your name';
+  @Prop() description = 'You can use any nickname and can change it later.';
 
   @State() isAvailable = false;
 
@@ -66,7 +66,7 @@ export class NlLocalSignup {
             <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
           </div>
 
-          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create a local account">
+          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create account">
             {state.isLoading ? (
               <span
                 slot="icon-start"

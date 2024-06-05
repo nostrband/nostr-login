@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Fragment, h, Prop, Watch } from '@stencil/core';
-import { CURRENT_MODULE, Info, NlTheme, RecentType } from '@/types';
+import { AuthMethod, CURRENT_MODULE, Info, NlTheme, RecentType } from '@/types';
 import { state } from '@/store';
 
 @Component({
@@ -9,13 +9,15 @@ import { state } from '@/store';
 })
 export class NlAuth {
   @Prop({ mutable: true }) theme: NlTheme = 'default';
+  @Prop() bunkers: string = '';
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
-  @Prop() isSignInWithExtension: boolean = true;
+  @Prop() authMethods: AuthMethod[] = [];
+  @Prop() hasExtension: boolean = false;
   @Prop() isLoading: boolean = false;
   @Prop() isLoadingExtension: boolean = false;
   @Prop() authUrl: string = '';
   @Prop() error: string = '';
-  @Prop() noLocalSignup: boolean = true;
+  @Prop() localSignup: boolean = false;
   @Prop({ mutable: true }) accounts: Info[] = [];
   @Prop({ mutable: true }) recents: RecentType[] = [];
   @Prop({ mutable: true }) darkMode: boolean = false;
@@ -23,9 +25,9 @@ export class NlAuth {
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
 
-  @Watch('noLocalSignup')
+  @Watch('localSignup')
   watchLocalSignupHandler(newValue: boolean) {
-    state.noLocalSignup = newValue;
+    state.localSignup = newValue;
   }
 
   @Watch('isLoading')
@@ -59,6 +61,7 @@ export class NlAuth {
   componentWillLoad() {
     state.screen = this.startScreen as CURRENT_MODULE;
     state.prevScreen = CURRENT_MODULE.WELCOME; //this.startScreen as CURRENT_MODULE;
+    state.localSignup = this.localSignup;
   }
 
   handleClickToBack() {
@@ -76,11 +79,11 @@ export class NlAuth {
     const renderModule = () => {
       switch (state.screen) {
         case CURRENT_MODULE.WELCOME:
-          return <nl-welcome isSignInWithExtension={this.isSignInWithExtension} />;
+          return <nl-welcome hasExtension={this.hasExtension} authMethods={this.authMethods} />;
         case CURRENT_MODULE.LOGIN:
           return <nl-signin />;
         case CURRENT_MODULE.SIGNUP:
-          return <nl-signup />;
+          return <nl-signup bunkers={this.bunkers} />;
         case CURRENT_MODULE.LOCAL_SIGNUP:
           return <nl-local-signup />;
         case CURRENT_MODULE.CONFIRM_LOGOUT:
@@ -98,9 +101,11 @@ export class NlAuth {
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
           return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
         default:
-          return <nl-welcome isSignInWithExtension={this.isSignInWithExtension} />;
+          return <nl-welcome hasExtension={this.hasExtension} authMethods={this.authMethods} />;
       }
     };
+
+    const signup = !this.authMethods.length || (!this.localSignup && this.authMethods.includes('connect')) || (this.localSignup && this.authMethods.includes('local'));
 
     return (
       <div class={`theme-${this.theme}`}>
@@ -229,18 +234,20 @@ export class NlAuth {
                           </p>
                         </div>
                       ) : (
-                        <div class="p-4 overflow-y-auto">
-                          <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-                            If you don't have an account please{' '}
-                            <span
-                              onClick={() => (this.noLocalSignup ? (state.screen = CURRENT_MODULE.LOCAL_SIGNUP) : (state.screen = CURRENT_MODULE.SIGNUP))}
-                              class="cursor-pointer text-blue-400"
-                            >
-                              sign up
-                            </span>
-                            .
-                          </p>
-                        </div>
+                        signup && (
+                          <div class="p-4 overflow-y-auto">
+                            <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+                              If you don't have an account please{' '}
+                              <span
+                                onClick={() => (this.localSignup ? (state.screen = CURRENT_MODULE.LOCAL_SIGNUP) : (state.screen = CURRENT_MODULE.SIGNUP))}
+                                class="cursor-pointer text-blue-400"
+                              >
+                                sign up
+                              </span>
+                              .
+                            </p>
+                          </div>
+                        )
                       )}
                     </Fragment>
                   )}

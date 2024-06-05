@@ -5,9 +5,8 @@ import { NostrLoginOptions } from './types';
 (() => {
   // currentScript only visible in global scope code, not event handlers
   const cs = document.currentScript;
-  document.addEventListener('DOMContentLoaded', async () => {
-    const options: NostrLoginOptions = {
-    };
+  const start = async () => {
+    const options: NostrLoginOptions = {};
 
     if (cs) {
       const dm = cs.getAttribute('data-dark-mode');
@@ -23,12 +22,24 @@ import { NostrLoginOptions } from './types';
       if (theme) options.theme = theme;
 
       const noBanner = cs.getAttribute('data-no-banner');
-      if (noBanner === 'true') options.noBanner = true;
+      if (noBanner) options.noBanner = noBanner === 'true';
 
       const localSignup = cs.getAttribute('data-local-signup');
-      if (localSignup === 'false') options.noLocalSignup = false;
+      if (localSignup) options.localSignup = localSignup === 'true';
+
+      const methods = cs.getAttribute('data-methods');
+      if (methods) {
+        // @ts-ignore
+        options.methods = methods
+          .trim()
+          .split(',')
+          .filter(m => !!m);
+      }
+      console.log("nostr-login options", options);
     }
 
     init(options);
-  });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();

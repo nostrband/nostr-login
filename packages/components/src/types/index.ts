@@ -20,6 +20,8 @@ export enum METHOD_MODULE {
   CONFIRM = 'confirm',
 }
 
+export type AuthMethod = 'connect' | 'readOnly' | 'extension' | 'local';
+
 export interface Info {
   // must be present
   pubkey: string;
@@ -44,7 +46,7 @@ export interface Info {
   token?: string;
 
   // session type
-  authMethod: 'connect' | 'readOnly' | 'extension' | 'local';
+  authMethod: AuthMethod;
 }
 
 export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;

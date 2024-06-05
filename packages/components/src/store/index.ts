@@ -8,7 +8,7 @@ const { state, onChange, on, reset } = createStore({
   isLoading: false,
   isLoadingExtension: false,
   authUrl: '',
-  noLocalSignup: true,
+  localSignup: false,
 
   // State NlSignin
   nlSignin: {

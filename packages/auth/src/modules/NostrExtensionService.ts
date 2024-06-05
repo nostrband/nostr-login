@@ -1,5 +1,4 @@
-import { Info } from 'nostr-login-components/dist/types/types';
-import { AuthNostrService, Nostr, NostrParams } from './';
+import { Nostr, NostrParams } from './';
 import { EventEmitter } from 'tseep';
 
 class NostrExtensionService extends EventEmitter {

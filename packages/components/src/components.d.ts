@@ -5,9 +5,9 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Info, NlTheme, RecentType } from "./types/index";
+import { AuthMethod, Info, NlTheme, RecentType } from "./types/index";
 import { OptionType } from "./components/nl-select/nl-select";
-export { Info, NlTheme, RecentType } from "./types/index";
+export { AuthMethod, Info, NlTheme, RecentType } from "./types/index";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface ButtonBase {
@@ -18,13 +18,15 @@ export namespace Components {
     }
     interface NlAuth {
         "accounts": Info[];
+        "authMethods": AuthMethod[];
         "authUrl": string;
+        "bunkers": string;
         "darkMode": boolean;
         "error": string;
+        "hasExtension": boolean;
         "isLoading": boolean;
         "isLoadingExtension": boolean;
-        "isSignInWithExtension": boolean;
-        "noLocalSignup": boolean;
+        "localSignup": boolean;
         "recents": RecentType[];
         "startScreen": string;
         "theme": NlTheme;
@@ -104,8 +106,9 @@ export namespace Components {
         "titleSignup": string;
     }
     interface NlWelcome {
+        "authMethods": AuthMethod[];
         "description": string;
-        "isSignInWithExtension": boolean;
+        "hasExtension": boolean;
         "titleWelcome": string;
     }
 }
@@ -486,13 +489,15 @@ declare namespace LocalJSX {
     }
     interface NlAuth {
         "accounts"?: Info[];
+        "authMethods"?: AuthMethod[];
         "authUrl"?: string;
+        "bunkers"?: string;
         "darkMode"?: boolean;
         "error"?: string;
+        "hasExtension"?: boolean;
         "isLoading"?: boolean;
         "isLoadingExtension"?: boolean;
-        "isSignInWithExtension"?: boolean;
-        "noLocalSignup"?: boolean;
+        "localSignup"?: boolean;
         "onNlChangeDarkMode"?: (event: NlAuthCustomEvent<boolean>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
         "recents"?: RecentType[];
@@ -606,8 +611,9 @@ declare namespace LocalJSX {
         "titleSignup"?: string;
     }
     interface NlWelcome {
+        "authMethods"?: AuthMethod[];
         "description"?: string;
-        "isSignInWithExtension"?: boolean;
+        "hasExtension"?: boolean;
         "onNlLoginExtension"?: (event: NlWelcomeCustomEvent<void>) => void;
         "titleWelcome"?: string;
     }
