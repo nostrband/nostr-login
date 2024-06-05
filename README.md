@@ -99,6 +99,25 @@ function onSignupClick() {
 }
 ```
 
+### Next.js Fix for Server Side Rendering (SSR)
+
+`nostr-login` calls `document` which is unavailable for server-side rendering. You will have build errors. To fix this, you can import `nostr-login` on the client side in your component with a `useEffect` like this:
+
+```javascript
+  useEffect(() => {
+    import('nostr-login')
+      .then(async ({ init }) => {
+        init({
+          // options
+        })
+      })
+      .catch((error) => console.log('Failed to load nostr-login', error));
+  }, []);
+```
+Note: even if your component has `"use client"` in the first line, this fix still may be necessary.
+
+---
+
 API:
 - `init(opts)` - set mapping of window.nostr to nostr-login
 - `launch(startScreen)` - launch nostr-login UI
