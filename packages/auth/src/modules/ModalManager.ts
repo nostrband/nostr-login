@@ -55,6 +55,8 @@ class ModalManager extends EventEmitter {
 
     if (opt.bunkers) {
       this.modal.setAttribute('bunkers', opt.bunkers);
+    } else {
+      this.modal.setAttribute('bunkers', "nsec.app,highlighter.com");
     }
 
     if (opt.methods !== undefined) {
