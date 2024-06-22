@@ -2,7 +2,7 @@ import 'nostr-login-components';
 import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, ProcessManager, BannerManager, ModalManager } from './modules';
 import { NostrLoginOptions, StartScreens } from './types';
 import { localStorageGetAccounts, localStorageGetCurrent, localStorageGetRecents, localStorageSetItem } from './utils';
-import { CURRENT_MODULE, Info } from 'nostr-login-components/dist/types/types';
+import { Info } from 'nostr-login-components/dist/types/types';
 import { NostrObjectParams } from './modules/Nostr';
 
 export class NostrLoginInitializer {
@@ -235,10 +235,12 @@ const initializer = new NostrLoginInitializer();
 
 export const { init, launch, logout, setDarkMode } = initializer;
 
-document.addEventListener('nlLogout', logout);
-document.addEventListener('nlLaunch', (event: any) => {
-  launch(event.detail || '');
-});
-document.addEventListener('nlDarkMode', (event: any) => {
-  setDarkMode(!!event.detail);
-});
+if (typeof document !== 'undefined') {
+  document.addEventListener('nlLogout', logout);
+  document.addEventListener('nlLaunch', (event: any) => {
+    launch(event.detail || '');
+  });
+  document.addEventListener('nlDarkMode', (event: any) => {
+    setDarkMode(!!event.detail);
+  });
+}
