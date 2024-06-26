@@ -24,8 +24,10 @@ export namespace Components {
         "darkMode": boolean;
         "error": string;
         "hasExtension": boolean;
+        "hasOTP": boolean;
         "isLoading": boolean;
         "isLoadingExtension": boolean;
+        "isOTP": boolean;
         "localSignup": boolean;
         "recents": RecentType[];
         "startScreen": string;
@@ -34,6 +36,7 @@ export namespace Components {
     interface NlBanner {
         "accounts": Info[];
         "darkMode": boolean;
+        "hiddenMode": boolean;
         "isLoading": boolean;
         "isOpen": boolean;
         "listNotifies": string[];
@@ -96,6 +99,12 @@ export namespace Components {
         "description": string;
         "titleLogin": string;
     }
+    interface NlSigninOtp {
+        "description": string;
+        "descriptionOTP": string;
+        "titleLogin": string;
+        "titleLoginOTP": string;
+    }
     interface NlSigninReadOnly {
         "description": string;
         "titleLogin": string;
@@ -109,6 +118,7 @@ export namespace Components {
         "authMethods": AuthMethod[];
         "description": string;
         "hasExtension": boolean;
+        "hasOTP": boolean;
         "titleWelcome": string;
     }
 }
@@ -155,6 +165,10 @@ export interface NlSigninCustomEvent<T> extends CustomEvent<T> {
 export interface NlSigninBunkerUrlCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlSigninBunkerUrlElement;
+}
+export interface NlSigninOtpCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlSigninOtpElement;
 }
 export interface NlSigninReadOnlyCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -404,6 +418,25 @@ declare global {
         prototype: HTMLNlSigninBunkerUrlElement;
         new (): HTMLNlSigninBunkerUrlElement;
     };
+    interface HTMLNlSigninOtpElementEventMap {
+        "nlLoginOTPUser": string;
+        "nlLoginOTPCode": string;
+        "nlCheckLogin": string;
+    }
+    interface HTMLNlSigninOtpElement extends Components.NlSigninOtp, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlSigninOtpElementEventMap>(type: K, listener: (this: HTMLNlSigninOtpElement, ev: NlSigninOtpCustomEvent<HTMLNlSigninOtpElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlSigninOtpElementEventMap>(type: K, listener: (this: HTMLNlSigninOtpElement, ev: NlSigninOtpCustomEvent<HTMLNlSigninOtpElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlSigninOtpElement: {
+        prototype: HTMLNlSigninOtpElement;
+        new (): HTMLNlSigninOtpElement;
+    };
     interface HTMLNlSigninReadOnlyElementEventMap {
         "nlLoginReadOnly": string;
         "nlCheckLogin": string;
@@ -475,6 +508,7 @@ declare global {
         "nl-select": HTMLNlSelectElement;
         "nl-signin": HTMLNlSigninElement;
         "nl-signin-bunker-url": HTMLNlSigninBunkerUrlElement;
+        "nl-signin-otp": HTMLNlSigninOtpElement;
         "nl-signin-read-only": HTMLNlSigninReadOnlyElement;
         "nl-signup": HTMLNlSignupElement;
         "nl-welcome": HTMLNlWelcomeElement;
@@ -495,8 +529,10 @@ declare namespace LocalJSX {
         "darkMode"?: boolean;
         "error"?: string;
         "hasExtension"?: boolean;
+        "hasOTP"?: boolean;
         "isLoading"?: boolean;
         "isLoadingExtension"?: boolean;
+        "isOTP"?: boolean;
         "localSignup"?: boolean;
         "onNlChangeDarkMode"?: (event: NlAuthCustomEvent<boolean>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
@@ -507,6 +543,7 @@ declare namespace LocalJSX {
     interface NlBanner {
         "accounts"?: Info[];
         "darkMode"?: boolean;
+        "hiddenMode"?: boolean;
         "isLoading"?: boolean;
         "isOpen"?: boolean;
         "listNotifies"?: string[];
@@ -596,6 +633,15 @@ declare namespace LocalJSX {
         "onNlLogin"?: (event: NlSigninBunkerUrlCustomEvent<string>) => void;
         "titleLogin"?: string;
     }
+    interface NlSigninOtp {
+        "description"?: string;
+        "descriptionOTP"?: string;
+        "onNlCheckLogin"?: (event: NlSigninOtpCustomEvent<string>) => void;
+        "onNlLoginOTPCode"?: (event: NlSigninOtpCustomEvent<string>) => void;
+        "onNlLoginOTPUser"?: (event: NlSigninOtpCustomEvent<string>) => void;
+        "titleLogin"?: string;
+        "titleLoginOTP"?: string;
+    }
     interface NlSigninReadOnly {
         "description"?: string;
         "onNlCheckLogin"?: (event: NlSigninReadOnlyCustomEvent<string>) => void;
@@ -614,6 +660,7 @@ declare namespace LocalJSX {
         "authMethods"?: AuthMethod[];
         "description"?: string;
         "hasExtension"?: boolean;
+        "hasOTP"?: boolean;
         "onNlLoginExtension"?: (event: NlWelcomeCustomEvent<void>) => void;
         "titleWelcome"?: string;
     }
@@ -634,6 +681,7 @@ declare namespace LocalJSX {
         "nl-select": NlSelect;
         "nl-signin": NlSignin;
         "nl-signin-bunker-url": NlSigninBunkerUrl;
+        "nl-signin-otp": NlSigninOtp;
         "nl-signin-read-only": NlSigninReadOnly;
         "nl-signup": NlSignup;
         "nl-welcome": NlWelcome;
@@ -659,6 +707,7 @@ declare module "@stencil/core" {
             "nl-select": LocalJSX.NlSelect & JSXBase.HTMLAttributes<HTMLNlSelectElement>;
             "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;
             "nl-signin-bunker-url": LocalJSX.NlSigninBunkerUrl & JSXBase.HTMLAttributes<HTMLNlSigninBunkerUrlElement>;
+            "nl-signin-otp": LocalJSX.NlSigninOtp & JSXBase.HTMLAttributes<HTMLNlSigninOtpElement>;
             "nl-signin-read-only": LocalJSX.NlSigninReadOnly & JSXBase.HTMLAttributes<HTMLNlSigninReadOnlyElement>;
             "nl-signup": LocalJSX.NlSignup & JSXBase.HTMLAttributes<HTMLNlSignupElement>;
             "nl-welcome": LocalJSX.NlWelcome & JSXBase.HTMLAttributes<HTMLNlWelcomeElement>;

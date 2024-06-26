@@ -2,7 +2,7 @@ import 'nostr-login-components';
 import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, ProcessManager, BannerManager, ModalManager } from './modules';
 import { NostrLoginOptions, StartScreens } from './types';
 import { localStorageGetAccounts, localStorageGetCurrent, localStorageGetRecents, localStorageSetItem } from './utils';
-import { CURRENT_MODULE, Info } from 'nostr-login-components/dist/types/types';
+import { Info } from 'nostr-login-components/dist/types/types';
 import { NostrObjectParams } from './modules/Nostr';
 
 export class NostrLoginInitializer {
@@ -131,6 +131,8 @@ export class NostrLoginInitializer {
 
     if (info.authMethod === 'readOnly') {
       this.authNostrService.setReadOnly(info.pubkey);
+    } else if (info.authMethod === 'otp') {
+      this.authNostrService.setOTP(info.pubkey, info.otpData || '');
     } else if (info.authMethod === 'local' && info.sk) {
       this.authNostrService.setLocal(info);
     } else if (info.authMethod === 'extension') {
@@ -186,9 +188,7 @@ export class NostrLoginInitializer {
     this.modalManager.connectModals(opt);
 
     // launch
-    if (!opt.noBanner) {
-      this.bannerManager.launchAuthBanner(opt);
-    }
+    this.bannerManager.launchAuthBanner(opt);
 
     // store options
     if (opt) {

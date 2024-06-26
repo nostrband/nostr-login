@@ -31,6 +31,10 @@ export interface NostrLoginOptions {
 
   // allowed auth methods
   methods?: AuthMethod[];
+
+  // otp endpoints
+  otpRequestUrl?: string;
+  otpReplyUrl?: string;
 }
 
 export interface IBanner {
@@ -55,10 +59,12 @@ export type TypeBanner = IBanner & HTMLElement;
 export interface IModal {
   authUrl?: string;
   isLoading?: boolean;
+  isOTP?: boolean;
   isLoadingExtension?: boolean;
   localSignup?: boolean;
   authMethods?: AuthMethod[];
   hasExtension?: boolean;
+  hasOTP?: boolean;
   error?: string;
   signupNameIsAvailable?: string | boolean;
   loginIsGood?: string | boolean;

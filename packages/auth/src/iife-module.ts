@@ -27,6 +27,15 @@ import { NostrLoginOptions } from './types';
       const localSignup = cs.getAttribute('data-local-signup');
       if (localSignup) options.localSignup = localSignup === 'true';
 
+      const otpRequestUrl = cs.getAttribute('data-otp-request-url');
+      if (otpRequestUrl) options.otpRequestUrl = otpRequestUrl;
+
+      const otpReplyUrl = cs.getAttribute('data-otp-reply-url');
+      if (otpReplyUrl) options.otpReplyUrl = otpReplyUrl;
+
+      if (!!otpRequestUrl !== !!otpReplyUrl)
+        console.warn("nostr-login: need request and reply urls for OTP auth");
+
       const methods = cs.getAttribute('data-methods');
       if (methods) {
         // @ts-ignore

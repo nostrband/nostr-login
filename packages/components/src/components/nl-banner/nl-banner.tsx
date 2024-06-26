@@ -10,6 +10,7 @@ export class NlBanner {
   @State() isLogin: boolean = false;
   @Prop({ mutable: true }) theme: NlTheme = 'default';
   @Prop({ mutable: true }) darkMode: boolean = false;
+  @Prop({ mutable: true }) hiddenMode: boolean = false;
   @Prop() titleBanner: string = '';
   @State() domain: string = '';
   @State() urlNotify: string = '';
@@ -116,7 +117,7 @@ export class NlBanner {
     const isTemporary = this.userInfo && this.userInfo.authMethod === 'local';
 
     return (
-      <div class={`theme-${this.theme}`}>
+      <div class={`theme-${this.theme} ${!this.isOpen && this.hiddenMode ? 'hidden' : ''}`}>
         <div class={this.darkMode && 'dark'}>
           <div
             class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}

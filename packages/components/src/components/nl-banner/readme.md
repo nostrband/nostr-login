@@ -9,6 +9,7 @@
 | -------------- | -------------- | ----------- | ----------------------------------------------------------------- | ----------- |
 | `accounts`     | --             |             | `Info[]`                                                          | `[]`        |
 | `darkMode`     | `dark-mode`    |             | `boolean`                                                         | `false`     |
+| `hiddenMode`   | `hidden-mode`  |             | `boolean`                                                         | `false`     |
 | `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`     |
 | `isOpen`       | `is-open`      |             | `boolean`                                                         | `false`     |
 | `listNotifies` | --             |             | `string[]`                                                        | `[]`        |

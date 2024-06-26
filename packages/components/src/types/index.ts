@@ -11,6 +11,7 @@ export enum CURRENT_MODULE {
   EXTENSION = 'extension',
   LOADING = 'loading',
   PREVIOUSLY_LOGGED = 'switch-account',
+  LOGIN_OTP = 'otp',
 }
 
 export enum METHOD_MODULE {
@@ -20,7 +21,7 @@ export enum METHOD_MODULE {
   CONFIRM = 'confirm',
 }
 
-export type AuthMethod = 'connect' | 'readOnly' | 'extension' | 'local';
+export type AuthMethod = 'connect' | 'readOnly' | 'extension' | 'local' | 'otp';
 
 export interface Info {
   // must be present
@@ -47,6 +48,11 @@ export interface Info {
 
   // session type
   authMethod: AuthMethod;
+
+  // what otp auth reply returned,
+  // may be empty if cookies are used, or may contain session
+  // token to be used for future api calls
+  otpData?: string;
 }
 
 export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;

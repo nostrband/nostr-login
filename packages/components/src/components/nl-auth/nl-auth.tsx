@@ -13,8 +13,10 @@ export class NlAuth {
   @Prop() startScreen: string = CURRENT_MODULE.WELCOME;
   @Prop() authMethods: AuthMethod[] = [];
   @Prop() hasExtension: boolean = false;
+  @Prop() hasOTP: boolean = false;
   @Prop() isLoading: boolean = false;
   @Prop() isLoadingExtension: boolean = false;
+  @Prop() isOTP: boolean = false;
   @Prop() authUrl: string = '';
   @Prop() error: string = '';
   @Prop() localSignup: boolean = false;
@@ -40,6 +42,11 @@ export class NlAuth {
     state.isLoadingExtension = newValue;
   }
 
+  @Watch('isOTP')
+  watchOTPHandler(newValue: boolean) {
+    state.isOTP = newValue;
+  }
+
   @Watch('authUrl')
   watchAuthUrlHandler(newValue: string) {
     state.authUrl = newValue;
@@ -62,6 +69,9 @@ export class NlAuth {
     state.screen = this.startScreen as CURRENT_MODULE;
     state.prevScreen = CURRENT_MODULE.WELCOME; //this.startScreen as CURRENT_MODULE;
     state.localSignup = this.localSignup;
+
+    // reset
+    state.isOTP = false;
   }
 
   handleClickToBack() {
@@ -71,15 +81,18 @@ export class NlAuth {
     state.isLoading = false;
     state.isLoadingExtension = false;
     state.authUrl = '';
+    state.isOTP = false;
   }
 
   render() {
     const classWrapper = `w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto flex items-center ${this.darkMode ? 'dark' : ''}`;
 
     const renderModule = () => {
+      if (state.isOTP) return <nl-signin-otp />;
+
       switch (state.screen) {
         case CURRENT_MODULE.WELCOME:
-          return <nl-welcome hasExtension={this.hasExtension} authMethods={this.authMethods} />;
+          return <nl-welcome hasExtension={this.hasExtension} hasOTP={this.hasOTP} authMethods={this.authMethods} />;
         case CURRENT_MODULE.LOGIN:
           return <nl-signin />;
         case CURRENT_MODULE.SIGNUP:
@@ -98,6 +111,8 @@ export class NlAuth {
           return <nl-signin-read-only />;
         case CURRENT_MODULE.LOGIN_BUNKER_URL:
           return <nl-signin-bunker-url />;
+        case CURRENT_MODULE.LOGIN_OTP:
+          return <nl-signin-otp />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
           return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
         default:
@@ -216,41 +231,42 @@ export class NlAuth {
             ) : (
               <Fragment>
                 {renderModule()}
-                {state.screen !== CURRENT_MODULE.INFO &&
-                  state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
-                  state.screen !== CURRENT_MODULE.IMPORT_FLOW &&
-                  state.screen !== CURRENT_MODULE.WELCOME &&
-                  state.screen !== CURRENT_MODULE.EXTENSION &&
-                  state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED && (
-                    <Fragment>
-                      {state.screen === CURRENT_MODULE.SIGNUP || CURRENT_MODULE.LOCAL_SIGNUP ? (
+                {(state.isOTP ||
+                  (state.screen !== CURRENT_MODULE.INFO &&
+                    state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
+                    state.screen !== CURRENT_MODULE.IMPORT_FLOW &&
+                    state.screen !== CURRENT_MODULE.WELCOME &&
+                    state.screen !== CURRENT_MODULE.EXTENSION &&
+                    state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED)) && (
+                  <Fragment>
+                    {state.screen === CURRENT_MODULE.SIGNUP || state.screen === CURRENT_MODULE.LOCAL_SIGNUP ? (
+                      <div class="p-4 overflow-y-auto">
+                        <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
+                          If you already have an account please{' '}
+                          <span onClick={() => (state.screen = CURRENT_MODULE.LOGIN)} class="cursor-pointer text-blue-400">
+                            log in
+                          </span>
+                          .
+                        </p>
+                      </div>
+                    ) : (
+                      signup && (
                         <div class="p-4 overflow-y-auto">
                           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-                            If you already have an account please{' '}
-                            <span onClick={() => (state.screen = CURRENT_MODULE.LOGIN)} class="cursor-pointer text-blue-400">
-                              log in
+                            If you don't have an account please{' '}
+                            <span
+                              onClick={() => (this.localSignup ? (state.screen = CURRENT_MODULE.LOCAL_SIGNUP) : (state.screen = CURRENT_MODULE.SIGNUP))}
+                              class="cursor-pointer text-blue-400"
+                            >
+                              sign up
                             </span>
                             .
                           </p>
                         </div>
-                      ) : (
-                        signup && (
-                          <div class="p-4 overflow-y-auto">
-                            <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-                              If you don't have an account please{' '}
-                              <span
-                                onClick={() => (this.localSignup ? (state.screen = CURRENT_MODULE.LOCAL_SIGNUP) : (state.screen = CURRENT_MODULE.SIGNUP))}
-                                class="cursor-pointer text-blue-400"
-                              >
-                                sign up
-                              </span>
-                              .
-                            </p>
-                          </div>
-                        )
-                      )}
-                    </Fragment>
-                  )}
+                      )
+                    )}
+                  </Fragment>
+                )}
               </Fragment>
             )}
           </div>
