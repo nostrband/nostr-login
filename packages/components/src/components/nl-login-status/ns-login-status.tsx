@@ -24,6 +24,9 @@ export class NlLoginStatus {
     } else if (this.info.authMethod === 'local') {
       text = 'Temporary';
       color = 'border-red-300 text-red-600 bg-red-100';
+    } else if (this.info.authMethod === 'otp') {
+      text = 'Delegated';
+      color = 'border-orange-300 text-orange-600 bg-orange-100';
     } else {
       console.log('unknown auth method', this.info);
       throw new Error('Unknown auth method');

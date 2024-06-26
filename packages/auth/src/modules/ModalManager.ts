@@ -14,6 +14,7 @@ class ModalManager extends EventEmitter {
   private launcherPromise?: Promise<void>;
   private accounts: Info[] = [];
   private recents: RecentType[] = [];
+  private opt?: NostrLoginOptions;
 
   constructor(params: NostrParams, authNostrService: AuthNostrService, extensionManager: NostrExtensionService) {
     super();
@@ -38,6 +39,8 @@ class ModalManager extends EventEmitter {
       } catch {}
     }
 
+    this.opt = opt;
+
     const dialog = document.createElement('dialog');
     this.modal = document.createElement('nl-auth');
     this.modal.accounts = this.accounts;
@@ -56,7 +59,7 @@ class ModalManager extends EventEmitter {
     if (opt.bunkers) {
       this.modal.setAttribute('bunkers', opt.bunkers);
     } else {
-      this.modal.setAttribute('bunkers', "nsec.app,highlighter.com");
+      this.modal.setAttribute('bunkers', 'nsec.app,highlighter.com');
     }
 
     if (opt.methods !== undefined) {
@@ -68,12 +71,15 @@ class ModalManager extends EventEmitter {
     }
 
     this.modal.hasExtension = this.extensionService.hasExtension();
+    this.modal.hasOTP = !!opt.otpRequestUrl && !!opt.otpReplyUrl;
 
     this.modal.isLoadingExtension = false;
     this.modal.isLoading = false;
 
     dialog.appendChild(this.modal);
     document.body.appendChild(dialog);
+
+    let otpPubkey = '';
 
     this.launcherPromise = new Promise<void>((ok, err) => {
       dialog.addEventListener('close', () => {
@@ -217,6 +223,15 @@ class ModalManager extends EventEmitter {
         if (userInfo.authMethod === 'readOnly') {
           this.authNostrService.setReadOnly(userInfo.pubkey);
           dialog.close();
+        } else if (userInfo.authMethod === 'otp') {
+          console.log("recent otp login", userInfo);
+          try {
+            this.modal!.dispatchEvent(new CustomEvent("nlLoginOTPUser", {
+              detail: userInfo.nip05 || userInfo.pubkey
+            }));  
+          } catch (e) {
+            console.error(e);
+          }
         } else if (userInfo.authMethod === 'extension') {
           await this.extensionService.trySetExtensionForPubkey(userInfo.pubkey);
           dialog.close();
@@ -232,6 +247,23 @@ class ModalManager extends EventEmitter {
         this.emit('updateAccounts');
       });
 
+      const nameToPubkey = async (nameNpub: string) => {
+        let pubkey = '';
+        if (nameNpub.includes('@')) {
+          const { error, pubkey: nip05pubkey } = await checkNip05(nameNpub);
+          if (nip05pubkey) pubkey = nip05pubkey;
+          else throw new Error(error);
+        } else if (nameNpub.startsWith("npub")) {
+          const { type, data } = nip19.decode(nameNpub);
+          if (type === 'npub') pubkey = data as string;
+          else throw new Error('Bad npub');
+        } else if (nameNpub.trim().length === 64) {
+          pubkey = nameNpub.trim();
+          nip19.npubEncode(pubkey); // check
+        }
+        return pubkey;
+      };
+
       this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
         if (!this.modal) return;
 
@@ -239,17 +271,7 @@ class ModalManager extends EventEmitter {
 
         const nameNpub = event.detail;
         try {
-          let pubkey = '';
-          if (nameNpub.includes('@')) {
-            const { error, pubkey: nip05pubkey } = await checkNip05(nameNpub);
-            if (nip05pubkey) pubkey = nip05pubkey;
-            else throw new Error(error);
-          } else {
-            const { type, data } = nip19.decode(nameNpub);
-            if (type === 'npub') pubkey = data as string;
-            else throw new Error('Bad npub');
-          }
-
+          const pubkey = await nameToPubkey(nameNpub);
           this.authNostrService.setReadOnly(pubkey);
 
           this.modal.isLoading = false;
@@ -283,6 +305,65 @@ class ModalManager extends EventEmitter {
             // @ts-ignore
             this.modal.error = e.toString();
           }
+        }
+      });
+
+      this.modal.addEventListener('nlLoginOTPUser', async (event: any) => {
+        if (!this.modal) return;
+
+        this.modal.isLoading = true;
+
+        const nameNpub = event.detail;
+        try {
+          const pubkey = await nameToPubkey(nameNpub);
+          const url = this.opt!.otpRequestUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + pubkey;
+          const r = await fetch(url);
+          if (r.status !== 200) {
+            console.warn('nostr-login: bad otp reply', r);
+            throw new Error('Failed to send DM');
+          }
+
+          // switch to 'enter code' mode
+          this.modal.isOTP = true;
+
+          // remember for code handler below
+          otpPubkey = pubkey;
+
+          this.modal.isLoading = false;
+        } catch (e: any) {
+          console.log('error', e);
+          this.modal.isLoading = false;
+          this.modal.error = e.toString() || e;
+        }
+      });
+
+      this.modal.addEventListener('nlLoginOTPCode', async (event: any) => {
+        if (!this.modal) return;
+
+        this.modal.isLoading = true;
+
+        const code = event.detail;
+        try {
+          const url = this.opt!.otpReplyUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + otpPubkey + '&code=' + code;
+          const r = await fetch(url);
+          if (r.status !== 200) {
+            console.warn('nostr-login: bad otp reply', r);
+            throw new Error('Invalid code');
+          }
+
+          const data = await r.text();
+          this.authNostrService.setOTP(otpPubkey, data);
+
+          this.modal.isOTP = false;
+          this.modal.isLoading = false;
+
+          dialog.close();
+
+          ok();
+        } catch (e: any) {
+          console.log('error', e);
+          this.modal.isLoading = false;
+          this.modal.error = e.toString() || e;
         }
       });
 

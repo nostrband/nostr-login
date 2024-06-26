@@ -55,7 +55,8 @@ export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSign
   await event.publish(NDKRelaySet.fromRelayUrls([
     'wss://nostr.mutinywallet.com',
     'wss://purplepag.es',
-    'wss://relay.nostr.band',
+    'wss://user.kindpag.es',
+    'wss://relay.damus.io',
     'wss://nos.lol',
   ], profileNdk));
   console.log("published profile", event);
@@ -207,6 +208,8 @@ export const localStorageRemoveCurrentAccount = () => {
   // make sure session keys are dropped
   // @ts-ignore
   delete recentUser['sk'];
+  // @ts-ignore
+  delete recentUser['otpData'];
 
   // get accounts and recent
   const loggedInAccounts: Info[] = localStorageGetItem(LOGGED_IN_ACCOUNTS) || [];

@@ -10,6 +10,7 @@
 | `authMethods`  | --              |             | `AuthMethod[]` | `[]`                                                                                              |
 | `description`  | `description`   |             | `string`       | `'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.'` |
 | `hasExtension` | `has-extension` |             | `boolean`      | `false`                                                                                           |
+| `hasOTP`       | `has-o-t-p`     |             | `boolean`      | `false`                                                                                           |
 | `titleWelcome` | `title-welcome` |             | `string`       | `'Join Nostr!'`                                                                                   |
 
 

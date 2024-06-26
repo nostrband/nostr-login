@@ -71,7 +71,9 @@ class BannerManager extends EventEmitter {
     this.banner = document.createElement('nl-banner');
 
     this.banner.setAttribute('dark-mode', String(getDarkMode(opt)));
+
     if (opt.theme) this.banner.setAttribute('theme', opt.theme);
+    if (opt.noBanner) this.banner.setAttribute('hidden-mode', 'true');
 
     this.banner.addEventListener('handleLoginBanner', (event: any) => {
       this.emit('launch', event.detail);

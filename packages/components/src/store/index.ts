@@ -7,6 +7,7 @@ const { state, onChange, on, reset } = createStore({
   error: '',
   isLoading: false,
   isLoadingExtension: false,
+  isOTP: false,
   authUrl: '',
   localSignup: false,
 
@@ -33,6 +34,12 @@ const { state, onChange, on, reset } = createStore({
   // State NlSigninReadOnly
   nlSigninReadOnly: {
     loginName: '',
+  },
+
+  // State NlSigninOTP
+  nlSigninOTP: {
+    loginName: '',
+    code: '',
   },
 });
 

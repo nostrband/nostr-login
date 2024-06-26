@@ -25,6 +25,7 @@
  - [nl-local-signup](../nl-local-signup)
  - [nl-signin](../nl-signin)
  - [nl-signin-bunker-url](../nl-signin-bunker-url)
+ - [nl-signin-otp](../nl-signin-otp)
  - [nl-signin-read-only](../nl-signin-read-only)
  - [nl-signup](../nl-signup)
  - [nl-welcome](../nl-welcome)
@@ -40,6 +41,7 @@ graph TD;
   nl-local-signup --> button-base
   nl-signin --> button-base
   nl-signin-bunker-url --> button-base
+  nl-signin-otp --> button-base
   nl-signin-read-only --> button-base
   nl-signup --> button-base
   nl-welcome --> button-base

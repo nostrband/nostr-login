@@ -36,7 +36,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     this.profileNdk = new NDK({
       enableOutboxModel: true,
-      explicitRelayUrls: ['wss://relay.nostr.band/all', 'wss://purplepag.es'],
+      explicitRelayUrls: ['wss://user.kindpag.es', 'wss://purplepag.es'],
     });
     this.profileNdk.connect();
 
@@ -98,6 +98,11 @@ class AuthNostrService extends EventEmitter implements Signer {
 
   public setExtension(pubkey: string) {
     const info: Info = { pubkey, authMethod: 'extension' };
+    this.onAuth('login', info);
+  }
+
+  public setOTP(pubkey: string, data: string) {
+    const info: Info = { pubkey, authMethod: 'otp', otpData: data };
     this.onAuth('login', info);
   }
 

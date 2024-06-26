@@ -14,8 +14,10 @@
 | `darkMode`           | `dark-mode`            |             | `boolean`                                                  | `false`                  |
 | `error`              | `error`                |             | `string`                                                   | `''`                     |
 | `hasExtension`       | `has-extension`        |             | `boolean`                                                  | `false`                  |
+| `hasOTP`             | `has-o-t-p`            |             | `boolean`                                                  | `false`                  |
 | `isLoading`          | `is-loading`           |             | `boolean`                                                  | `false`                  |
 | `isLoadingExtension` | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
+| `isOTP`              | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
 | `localSignup`        | `local-signup`         |             | `boolean`                                                  | `false`                  |
 | `recents`            | --                     |             | `RecentType[]`                                             | `[]`                     |
 | `startScreen`        | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
@@ -34,6 +36,7 @@
 
 ### Depends on
 
+- [nl-signin-otp](../nl-signin-otp)
 - [nl-welcome](../nl-welcome)
 - [nl-signin](../nl-signin)
 - [nl-signup](../nl-signup)
@@ -50,6 +53,7 @@
 ### Graph
 ```mermaid
 graph TD;
+  nl-auth --> nl-signin-otp
   nl-auth --> nl-welcome
   nl-auth --> nl-signin
   nl-auth --> nl-signup
@@ -62,6 +66,7 @@ graph TD;
   nl-auth --> nl-signin-bunker-url
   nl-auth --> nl-previously-logged
   nl-auth --> nl-loading
+  nl-signin-otp --> button-base
   nl-welcome --> button-base
   nl-signin --> button-base
   nl-signup --> nl-select
