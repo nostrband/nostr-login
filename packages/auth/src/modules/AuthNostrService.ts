@@ -232,6 +232,10 @@ class AuthNostrService extends EventEmitter implements Signer {
           options.relays = info!.relays;
         }
 
+        if (info!.otpData) {
+          options.otpData = info!.otpData;
+        }
+
         options.method = info!.authMethod || 'connect';
       }
 
