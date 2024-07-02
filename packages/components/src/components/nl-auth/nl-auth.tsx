@@ -23,6 +23,8 @@ export class NlAuth {
   @Prop({ mutable: true }) accounts: Info[] = [];
   @Prop({ mutable: true }) recents: RecentType[] = [];
   @Prop({ mutable: true }) darkMode: boolean = false;
+  @Prop() welcomeTitle: string = '';
+  @Prop() welcomeDescription: string = '';
 
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
@@ -92,7 +94,15 @@ export class NlAuth {
 
       switch (state.screen) {
         case CURRENT_MODULE.WELCOME:
-          return <nl-welcome hasExtension={this.hasExtension} hasOTP={this.hasOTP} authMethods={this.authMethods} />;
+          return (
+            <nl-welcome
+              titleWelcome={this.welcomeTitle || undefined}
+              description={this.welcomeDescription || undefined}
+              hasExtension={this.hasExtension}
+              hasOTP={this.hasOTP}
+              authMethods={this.authMethods}
+            />
+          );
         case CURRENT_MODULE.LOGIN:
           return <nl-signin />;
         case CURRENT_MODULE.SIGNUP:

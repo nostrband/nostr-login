@@ -36,6 +36,10 @@ export interface NostrLoginOptions {
   // otp endpoints
   otpRequestUrl?: string;
   otpReplyUrl?: string;
+
+  // welcome screen's title/desc
+  title?: string;
+  description?: string;
 }
 
 export interface IBanner {
@@ -72,6 +76,8 @@ export interface IModal {
   recents?: RecentType[];
   accounts?: Info[];
   darkMode?: boolean;
+  welcomeTitle?: string;
+  welcomeDescription?: string;
 }
 
 export type TypeModal = IModal & HTMLElement;

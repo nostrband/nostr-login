@@ -32,6 +32,8 @@ export namespace Components {
         "recents": RecentType[];
         "startScreen": string;
         "theme": NlTheme;
+        "welcomeDescription": string;
+        "welcomeTitle": string;
     }
     interface NlBanner {
         "accounts": Info[];
@@ -539,6 +541,8 @@ declare namespace LocalJSX {
         "recents"?: RecentType[];
         "startScreen"?: string;
         "theme"?: NlTheme;
+        "welcomeDescription"?: string;
+        "welcomeTitle"?: string;
     }
     interface NlBanner {
         "accounts"?: Info[];

@@ -44,6 +44,13 @@ import { NostrLoginOptions } from './types';
           .split(',')
           .filter(m => !!m);
       }
+
+      const title = cs.getAttribute('data-title');
+      if (title) options.title = title;
+
+      const description = cs.getAttribute('data-description');
+      if (description) options.description = description;
+
       console.log("nostr-login options", options);
     }
 

@@ -70,6 +70,14 @@ class ModalManager extends EventEmitter {
       this.modal.localSignup = opt.localSignup;
     }
 
+    if (opt.title) {
+      this.modal.welcomeTitle = opt.title;
+    }
+
+    if (opt.description) {
+      this.modal.welcomeDescription = opt.description;
+    }
+
     this.modal.hasExtension = this.extensionService.hasExtension();
     this.modal.hasOTP = !!opt.otpRequestUrl && !!opt.otpReplyUrl;
 
