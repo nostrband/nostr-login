@@ -22,6 +22,10 @@ You can set these attributes to the `script` tag to customize the behavior:
 - `data-theme` - color themes, one of `default`, `ocean`, `lemonade`, `purple`
 - `data-no-banner` - if `true`, do not show the `nostr-login` banner, will need to launch the modals using event dispatch, see below
 - `data-methods` - comma-separated list of allowed auth methods, method names: `connect`, `extension`, `readOnly`, `local`, all allowed by default.
+- `data-otp-request-url` - URL for requesting OTP code
+- `data-otp-reply-url` - URL for replying with OTP code
+- `data-title` - title for the welcome screen
+- `data-description` - description for the welcome screen
 
 Example:
 ```
@@ -114,6 +118,17 @@ Options:
 - `darkMode` - same as `data-dark-mode` above
 - `noBanner` - same as `data-no-banner` above
 - `isSignInWithExtension` - `true` to bring the *Sign in with exception* button into main list of options, `false` to hide to the *Advanced*, default will behave as `true` if extension is detected.
+
+## OTP login
+
+If you supply both `data-otp-request-url` and `data-otp-reply-url` then "Login with DM" button will appear on the welcome screen. 
+
+When user enters their nip05 or npub, a GET request is made to `<data-otp-request-url>[?&]pubkey=<user-pubkey>`. Server should send
+a DM with one-time code to that pubkey and should return 200.
+
+After user enters the code, a GET request is made to `<data-otp-reply-url>[?&]pubkey=<user-pubkey>&code=<code>`. Server should check that code matches the pubkey and hasn't expired, and should return 200 status and an optional payload. Nostr-login will deliver the payload as `otpData` field in `nlAuth` event, and will save the payload in localstore and will deliver it again as `nlAuth` on page reload.
+
+The reply payload may be used to supply the session token. If token is sent by the server as a cookie then payload might be empty, otherwise the payload should be used by the app to extract the token and use it in future API calls to the server.
 
 
 ## TODO
