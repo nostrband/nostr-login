@@ -235,10 +235,12 @@ const initializer = new NostrLoginInitializer();
 
 export const { init, launch, logout, setDarkMode } = initializer;
 
-document.addEventListener('nlLogout', logout);
-document.addEventListener('nlLaunch', (event: any) => {
-  launch(event.detail || '');
-});
-document.addEventListener('nlDarkMode', (event: any) => {
-  setDarkMode(!!event.detail);
-});
+if (typeof document !== 'undefined') {
+  document.addEventListener('nlLogout', logout);
+  document.addEventListener('nlLaunch', (event: any) => {
+    launch(event.detail || '');
+  });
+  document.addEventListener('nlDarkMode', (event: any) => {
+    setDarkMode(!!event.detail);
+  });
+}
