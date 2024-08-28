@@ -1,7 +1,5 @@
 # nl-confirm-logout
 
-
-
 <!-- Auto Generated Below -->
 
 

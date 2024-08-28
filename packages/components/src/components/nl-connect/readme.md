@@ -1,25 +1,16 @@
 # nl-connect
 
-
-
 <!-- Auto Generated Below -->
 
 
 ## Properties
 
-| Property       | Attribute       | Description | Type           | Default                  |
-| -------------- | --------------- | ----------- | -------------- | ------------------------ |
-| `authMethods`  | --              |             | `AuthMethod[]` | `[]`                     |
-| `hasExtension` | `has-extension` |             | `boolean`      | `false`                  |
-| `hasOTP`       | `has-o-t-p`     |             | `boolean`      | `false`                  |
-| `titleWelcome` | `title-welcome` |             | `string`       | `'Connect to key store'` |
-
-
-## Events
-
-| Event              | Description | Type                |
-| ------------------ | ----------- | ------------------- |
-| `nlLoginExtension` |             | `CustomEvent<void>` |
+| Property                 | Attribute       | Description | Type                                             | Default                  |
+| ------------------------ | --------------- | ----------- | ------------------------------------------------ | ------------------------ |
+| `authMethods`            | --              |             | `AuthMethod[]`                                   | `[]`                     |
+| `createConnectionString` | --              |             | `{ name: string; img: string; link: string; }[]` | `[]`                     |
+| `hasOTP`                 | `has-o-t-p`     |             | `boolean`                                        | `false`                  |
+| `titleWelcome`           | `title-welcome` |             | `string`                                         | `'Connect to key store'` |
 
 
 ## Dependencies

@@ -90,6 +90,16 @@ export class NostrLoginInitializer {
       this.switchAccount(info);
     });
 
+    this.modalManager.on('onLogoutBanner', async (info: Info) => {
+      logout();
+    });
+
+    this.bannerManager.on('onConfirmLogout', async () => {
+      console.log(4)
+      // @ts-ignore
+      this.launch('confirm-logout');
+    });
+
     this.modalManager.on('updateAccounts', () => {
       this.updateAccounts();
     });

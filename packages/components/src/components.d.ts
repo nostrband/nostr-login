@@ -21,6 +21,11 @@ export namespace Components {
         "authMethods": AuthMethod[];
         "authUrl": string;
         "bunkers": string;
+        "createConnectionString": {
+    name: string;
+    img: string;
+    link: string;
+  }[];
         "darkMode": boolean;
         "error": string;
         "hasExtension": boolean;
@@ -63,7 +68,11 @@ export namespace Components {
     }
     interface NlConnect {
         "authMethods": AuthMethod[];
-        "hasExtension": boolean;
+        "createConnectionString": {
+    name: string;
+    img: string;
+    link: string;
+  }[];
         "hasOTP": boolean;
         "titleWelcome": string;
     }
@@ -157,10 +166,6 @@ export interface NlChangeAccountCustomEvent<T> extends CustomEvent<T> {
 export interface NlConfirmLogoutCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlConfirmLogoutElement;
-}
-export interface NlConnectCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLNlConnectElement;
 }
 export interface NlImportFlowCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -299,18 +304,7 @@ declare global {
         prototype: HTMLNlConfirmLogoutElement;
         new (): HTMLNlConfirmLogoutElement;
     };
-    interface HTMLNlConnectElementEventMap {
-        "nlLoginExtension": void;
-    }
     interface HTMLNlConnectElement extends Components.NlConnect, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLNlConnectElementEventMap>(type: K, listener: (this: HTMLNlConnectElement, ev: NlConnectCustomEvent<HTMLNlConnectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLNlConnectElementEventMap>(type: K, listener: (this: HTMLNlConnectElement, ev: NlConnectCustomEvent<HTMLNlConnectElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLNlConnectElement: {
         prototype: HTMLNlConnectElement;
@@ -589,6 +583,11 @@ declare namespace LocalJSX {
         "authMethods"?: AuthMethod[];
         "authUrl"?: string;
         "bunkers"?: string;
+        "createConnectionString"?: {
+    name: string;
+    img: string;
+    link: string;
+  }[];
         "darkMode"?: boolean;
         "error"?: string;
         "hasExtension"?: boolean;
@@ -647,9 +646,12 @@ declare namespace LocalJSX {
     }
     interface NlConnect {
         "authMethods"?: AuthMethod[];
-        "hasExtension"?: boolean;
+        "createConnectionString"?: {
+    name: string;
+    img: string;
+    link: string;
+  }[];
         "hasOTP"?: boolean;
-        "onNlLoginExtension"?: (event: NlConnectCustomEvent<void>) => void;
         "titleWelcome"?: string;
     }
     interface NlImportFlow {

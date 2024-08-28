@@ -218,6 +218,10 @@ class ModalManager extends EventEmitter {
         importKeys(event.detail);
       });
 
+      this.modal.addEventListener('handleLogoutBanner', () => {
+        this.emit('onLogoutBanner');
+      });
+
       this.modal.addEventListener('nlSwitchAccount', (event: any) => {
         const eventInfo: Info = event.detail as Info;
 
