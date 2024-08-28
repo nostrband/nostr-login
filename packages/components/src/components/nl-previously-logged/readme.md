@@ -1,7 +1,5 @@
 # nl-previously-logged
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -19,8 +17,8 @@
 
 | Event                  | Description | Type                                                                                                                            |
 | ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `nlLoginRecentAccount` |             | `CustomEvent<{ picture?: string; name?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }>` |
-| `nlRemoveRecent`       |             | `CustomEvent<{ picture?: string; name?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }>` |
+| `nlLoginRecentAccount` |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }>` |
+| `nlRemoveRecent`       |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }>` |
 | `nlSwitchAccount`      |             | `CustomEvent<Info>`                                                                                                             |
 
 

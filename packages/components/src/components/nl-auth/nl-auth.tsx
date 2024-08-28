@@ -25,6 +25,27 @@ export class NlAuth {
   @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop() welcomeTitle: string = '';
   @Prop() welcomeDescription: string = '';
+  @Prop() createConnectionString: {
+    name: string;
+    img: string;
+    link: string;
+  }[] = [
+    {
+      name: 'Nsec.app',
+      img: 'https://nsec.app/assets/favicon.ico',
+      link: 'https://nsec.app',
+    },
+    {
+      name: 'Amber',
+      img: 'https://raw.githubusercontent.com/greenart7c3/Amber/master/app/src/main/res/mipmap-hdpi/ic_launcher.webp',
+      link: 'https://nsec.app',
+    },
+    {
+      name: 'Other key store',
+      img: '',
+      link: 'https://nsec.app',
+    },
+  ];
 
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
@@ -129,13 +150,13 @@ export class NlAuth {
         case CURRENT_MODULE.LOGIN_OTP:
           return <nl-signin-otp />;
         case CURRENT_MODULE.WELCOME_LOGIN:
-          return <nl-welcome-signin authMethods={this.authMethods} />;
+          return <nl-welcome-signin authMethods={this.authMethods} hasExtension={this.hasExtension} />;
         case CURRENT_MODULE.WELCOME_SIGNUP:
           return <nl-welcome-signup />;
         case CURRENT_MODULE.CONNECTION_STRING:
           return <nl-signin-connection-string />;
         case CURRENT_MODULE.CONNECT:
-          return <nl-connect hasExtension={this.hasExtension} authMethods={this.authMethods} />;
+          return <nl-connect createConnectionString={this.createConnectionString} authMethods={this.authMethods} />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
           return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
         default:

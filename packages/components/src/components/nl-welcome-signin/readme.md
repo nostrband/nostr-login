@@ -1,7 +1,5 @@
 # nl-welcome-signin
 
-
-
 <!-- Auto Generated Below -->
 
 
@@ -10,8 +8,16 @@
 | Property       | Attribute       | Description | Type           | Default    |
 | -------------- | --------------- | ----------- | -------------- | ---------- |
 | `authMethods`  | --              |             | `AuthMethod[]` | `[]`       |
+| `hasExtension` | `has-extension` |             | `boolean`      | `false`    |
 | `hasOTP`       | `has-o-t-p`     |             | `boolean`      | `false`    |
 | `titleWelcome` | `title-welcome` |             | `string`       | `'Log in'` |
+
+
+## Events
+
+| Event              | Description | Type                |
+| ------------------ | ----------- | ------------------- |
+| `nlLoginExtension` |             | `CustomEvent<void>` |
 
 
 ## Dependencies

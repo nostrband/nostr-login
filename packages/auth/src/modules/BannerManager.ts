@@ -76,7 +76,12 @@ class BannerManager extends EventEmitter {
     if (opt.noBanner) this.banner.setAttribute('hidden-mode', 'true');
 
     this.banner.addEventListener('handleLoginBanner', (event: any) => {
+      console.log('test')
       this.emit('launch', event.detail);
+    });
+
+    this.banner.addEventListener('handleConfirmLogout', () => {
+      this.emit('onConfirmLogout');
     });
 
     this.banner.addEventListener('handleLogoutBanner', async () => {

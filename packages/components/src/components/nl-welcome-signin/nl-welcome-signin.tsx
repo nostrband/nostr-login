@@ -1,4 +1,4 @@
-import { Component, Fragment, h, Prop } from '@stencil/core';
+import { Component, Event, EventEmitter, Fragment, h, Prop } from '@stencil/core';
 import { AuthMethod, CURRENT_MODULE } from '@/types';
 import { state } from '@/store';
 
@@ -9,15 +9,35 @@ import { state } from '@/store';
 })
 export class NlWelcomeSignIn {
   @Prop() titleWelcome = 'Log in';
+  @Prop() hasExtension: boolean = false;
   @Prop() authMethods: AuthMethod[] = [];
   @Prop() hasOTP: boolean = false;
 
+  @Event() nlLoginExtension: EventEmitter<void>;
+
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];
+    if (screen === CURRENT_MODULE.EXTENSION) this.nlLoginExtension.emit();
   }
 
   allowAuthMethod(m: AuthMethod) {
     return !this.authMethods.length || this.authMethods.includes(m);
+  }
+
+  renderSignInWithExtension() {
+    return (
+      <div class="mt-2">
+        <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.EXTENSION)} titleBtn="Sign in with extension">
+          <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z"
+            />
+          </svg>
+        </button-base>
+      </div>
+    );
   }
 
   render() {
@@ -61,6 +81,14 @@ export class NlWelcomeSignIn {
                 </svg>
               </button-base>
             )}
+
+            <div class="flex gap-3 flex-col">
+              {this.hasExtension && this.allowAuthMethod('extension') && this.renderSignInWithExtension()}
+              {!this.allowAuthMethod('connect') && !this.hasExtension && <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">No Nostr extension!</p>}
+              {!this.allowAuthMethod('connect') && this.hasExtension && !this.allowAuthMethod('extension') && (
+                <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">Use advanced options.</p>
+              )}
+            </div>
           </div>
         </div>
       </Fragment>

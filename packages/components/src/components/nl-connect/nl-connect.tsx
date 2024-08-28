@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Fragment, h, Prop, State } from '@stencil/core';
+import { Component, Fragment, h, Prop, State } from '@stencil/core';
 import { AuthMethod, CURRENT_MODULE } from '@/types';
 import { state } from '@/store';
 
@@ -10,16 +10,18 @@ import { state } from '@/store';
 export class NlConnect {
   @Prop() titleWelcome = 'Connect to key store';
   @Prop() authMethods: AuthMethod[] = [];
-  @Prop() hasExtension: boolean = false;
   @Prop() hasOTP: boolean = false;
+  @Prop() createConnectionString: {
+    name: string;
+    img: string;
+    link: string;
+  }[] = [];
 
   @State() isOpenAdvancedLogin: boolean = false;
   @State() keysStore: { img: string; name: string; link: string }[] = [];
-  @Event() nlLoginExtension: EventEmitter<void>;
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];
-    if (screen === CURRENT_MODULE.EXTENSION) this.nlLoginExtension.emit();
   }
 
   handleOpenAdvanced() {
@@ -30,35 +32,8 @@ export class NlConnect {
     return !this.authMethods.length || this.authMethods.includes(m);
   }
 
-  renderSignInWithExtension() {
-    return (
-      <div class="mt-2">
-        <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.EXTENSION)} titleBtn="Sign in with extension">
-          <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z"
-            />
-          </svg>
-        </button-base>
-      </div>
-    );
-  }
-
   componentWillLoad() {
-    console.log('load connect page');
-    const createConnectionString = () => {
-      return [
-        {
-          name: 'Nsec.app',
-          img: 'https://nsec.app/assets/favicon.ico',
-          link: 'https://nsec.app',
-        },
-      ];
-    };
-
-    this.keysStore = createConnectionString();
+    this.keysStore = this.createConnectionString;
   }
 
   handleOpenLink() {
@@ -89,7 +64,17 @@ export class NlConnect {
                     >
                       <div class="w-full max-w-7 h-7 flex relative">
                         <div class="uppercase font-bold w-full h-full rounded-full border border-gray-400 flex justify-center items-center">
-                          <img class="w-full rounded-full" src={el.img} alt={el.name} />
+                          {Boolean(el.img) ? (
+                            <img class="w-full rounded-full" src={el.img} alt={el.name} />
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#9ca3af" class="w-4 h-4 block">
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"
+                              />
+                            </svg>
+                          )}
                         </div>
                       </div>
                       <div class="overflow-hidden flex flex-col w-full">
@@ -104,14 +89,6 @@ export class NlConnect {
         )}
 
         <div class="max-w-52 mx-auto pb-5">
-          <div class="flex gap-3 flex-col">
-            {this.hasExtension && this.allowAuthMethod('extension') && this.renderSignInWithExtension()}
-            {!this.allowAuthMethod('connect') && !this.hasExtension && <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">No Nostr extension!</p>}
-            {!this.allowAuthMethod('connect') && this.hasExtension && !this.allowAuthMethod('extension') && (
-              <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">Use advanced options.</p>
-            )}
-          </div>
-
           {(this.allowAuthMethod('connect') || this.allowAuthMethod('readOnly')) && (
             <div class="flex justify-center">
               <div
@@ -143,11 +120,20 @@ export class NlConnect {
             {/* {this.hasExtension && !this.allowAuthMethod('extension') && this.renderSignInWithExtension()} */}
             {this.allowAuthMethod('connect') && (
               <button-base titleBtn="User name" onClick={() => this.handleChangeScreen(CURRENT_MODULE.LOGIN)}>
-                <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg
+                  style={{ display: 'none' }}
+                  slot="icon-start"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  // class="flex-shrink-0 w-4 h-4 text-gray-500"
+                >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"
+                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
                   />
                 </svg>
               </button-base>
