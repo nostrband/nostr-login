@@ -9,7 +9,7 @@ import { state } from '@/store';
 })
 export class NlWelcomeSignUp {
   @Prop() titleWelcome = 'Sign up';
-  @Prop() description = 'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.';
+  @Prop() description = 'Nostr accounts are based on cryptographic keys. You can create keys right here, or with a key storage app.';
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];
@@ -20,6 +20,7 @@ export class NlWelcomeSignUp {
       <Fragment>
         <div class="p-4 overflow-y-auto">
           <h1 class="nl-title font-bold text-center text-3xl">{this.titleWelcome}</h1>
+          <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{this.description}</p>
         </div>
 
         <div class="max-w-52 mx-auto pb-5">
@@ -34,7 +35,7 @@ export class NlWelcomeSignUp {
               </svg>
             </button-base>
 
-            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNUP)} titleBtn="Sign up with key store">
+            <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.SIGNUP)} titleBtn="With key store">
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
                   stroke-linecap="round"

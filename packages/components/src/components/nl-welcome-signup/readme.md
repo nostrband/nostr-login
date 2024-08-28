@@ -7,10 +7,10 @@
 
 ## Properties
 
-| Property       | Attribute       | Description | Type     | Default                                                                                           |
-| -------------- | --------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------- |
-| `description`  | `description`   |             | `string` | `'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.'` |
-| `titleWelcome` | `title-welcome` |             | `string` | `'Sign up'`                                                                                       |
+| Property       | Attribute       | Description | Type     | Default                                                                                                        |
+| -------------- | --------------- | ----------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `description`  | `description`   |             | `string` | `'Nostr accounts are based on cryptographic keys. You can create keys right here, or with a key storage app.'` |
+| `titleWelcome` | `title-welcome` |             | `string` | `'Sign up'`                                                                                                    |
 
 
 ## Dependencies

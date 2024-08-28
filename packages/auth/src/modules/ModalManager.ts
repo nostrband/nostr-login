@@ -39,6 +39,9 @@ class ModalManager extends EventEmitter {
       } catch {}
     }
 
+    // FIXME TESTING
+    this.authNostrService.getNostrConnectServices();
+
     this.opt = opt;
 
     const dialog = document.createElement('dialog');

@@ -1,4 +1,4 @@
-import { Component, Fragment, h, Prop } from '@stencil/core';
+import { Component, Event, EventEmitter, Fragment, h, Prop } from '@stencil/core';
 import { AuthMethod, CURRENT_MODULE } from '@/types';
 import { state } from '@/store';
 
@@ -10,7 +10,9 @@ import { state } from '@/store';
 export class NlWelcomeSignIn {
   @Prop() titleWelcome = 'Log in';
   @Prop() authMethods: AuthMethod[] = [];
+  @Prop() hasExtension: boolean = false;
   @Prop() hasOTP: boolean = false;
+  @Event() nlLoginExtension: EventEmitter<void>;
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];

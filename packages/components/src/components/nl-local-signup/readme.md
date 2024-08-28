@@ -7,10 +7,10 @@
 
 ## Properties
 
-| Property      | Attribute      | Description | Type     | Default                                               |
-| ------------- | -------------- | ----------- | -------- | ----------------------------------------------------- |
-| `description` | `description`  |             | `string` | `'You can use any nickname and can change it later.'` |
-| `titleSignup` | `title-signup` |             | `string` | `'We only need your name'`                            |
+| Property      | Attribute      | Description | Type     | Default                                                  |
+| ------------- | -------------- | ----------- | -------- | -------------------------------------------------------- |
+| `description` | `description`  |             | `string` | `'Choose any username, you can always change it later.'` |
+| `titleSignup` | `title-signup` |             | `string` | `'Create keys for your account'`                         |
 
 
 ## Events

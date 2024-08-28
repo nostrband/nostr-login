@@ -118,7 +118,7 @@ export class NlConnect {
                 onClick={() => this.handleOpenAdvanced()}
                 class="text-blue-500 mt-3 decoration-dashed cursor-pointer inline-flex gap-2 items-center pb-1 border-dashed border-b-[1px] border-blue-500 text-sm font-light"
               >
-                Advanced login
+                Advanced
                 <svg
                   class={arrowClass}
                   xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +171,7 @@ export class NlConnect {
             )}
 
             {this.allowAuthMethod('connect') && (
-              <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.LOGIN_BUNKER_URL)} titleBtn="Sign in with bunker URL">
+              <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.LOGIN_BUNKER_URL)} titleBtn="Bunker URL">
                 <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path
                     stroke-linecap="round"

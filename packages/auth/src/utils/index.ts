@@ -287,3 +287,8 @@ export const getDarkMode = (opt: NostrLoginOptions) => {
     }
   }
 }
+
+export const getIcon = async () => {
+  // FIXME look at meta tags or manifest
+  return document.location.origin + "/favicon.ico";
+}

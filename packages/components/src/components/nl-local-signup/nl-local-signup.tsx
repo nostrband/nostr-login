@@ -7,8 +7,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlLocalSignup {
-  @Prop() titleSignup = 'We only need your name';
-  @Prop() description = 'You can use any nickname and can change it later.';
+  @Prop() titleSignup = 'Create keys for your account';
+  @Prop() description = 'Choose any username, you can always change it later.';
 
   @State() isAvailable = false;
 
@@ -41,7 +41,7 @@ export class NlLocalSignup {
               onInput={e => this.handleInputChange(e)}
               type="text"
               class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
-              placeholder="Enter name"
+              placeholder="Enter username"
               value={state.nlSignup.signupName}
             />
             <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">

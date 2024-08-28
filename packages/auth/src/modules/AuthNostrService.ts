@@ -1,4 +1,4 @@
-import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount, createProfile } from '../utils';
+import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount, createProfile, getIcon } from '../utils';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { generatePrivateKey, getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
@@ -7,6 +7,16 @@ import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
 import { Signer } from './Nostr';
 import { Nip44 } from '../utils/nip44';
+
+const OUTBOX_RELAYS = ['wss://user.kindpag.es', 'wss://purplepag.es', 'wss://relay.nos.social'];
+const DEFAULT_NOSTRCONNECT_RELAY = "wss://relay.nsec.app";
+const NOSTRCONNECT_APPS = [
+  {
+    name: 'Nsec.app',
+    img: 'https://nsec.app/assets/favicon.ico',
+    link: 'https://nsec.app/<nostrconnect>',
+  },
+];
 
 class AuthNostrService extends EventEmitter implements Signer {
   private ndk: NDK;
@@ -17,6 +27,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   private signerPromise?: Promise<void>;
   private launcherPromise?: Promise<void>;
   private nip44Codec = new Nip44();
+  private nostrConnectKey: string = '';
 
   nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string>;
@@ -36,7 +47,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     this.profileNdk = new NDK({
       enableOutboxModel: true,
-      explicitRelayUrls: ['wss://user.kindpag.es', 'wss://purplepag.es'],
+      explicitRelayUrls: OUTBOX_RELAYS,
     });
     this.profileNdk.connect();
 
@@ -62,6 +73,41 @@ class AuthNostrService extends EventEmitter implements Signer {
         await this.launcherPromise;
       } catch {}
     }
+  }
+
+  public async getNostrConnectServices() {
+    this.nostrConnectKey = generatePrivateKey();
+    const pubkey = getPublicKey(this.nostrConnectKey);
+    const meta = {
+      name: document.location.host,
+      url: document.location.href,
+      icon: await getIcon(),
+      perms: this.params.optionsModal.perms,
+    };
+    const nostrconnect = `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}`;
+
+    // copy defaults
+    const apps = NOSTRCONNECT_APPS.map(a => ({...a}));
+    for (const a of apps) {
+      let relay = DEFAULT_NOSTRCONNECT_RELAY;
+      if (a.link.startsWith('https://')) {
+        const url = new URL(a.link);
+        try {
+          const info = await (await fetch(`${url.origin}/.well-known/nostr.json`)).json();
+          const pubkey = info.names['_'];
+          const relays = info.nip46[pubkey] as string[];
+          if (relays && relays.length)
+            relay = relays[0];
+        } catch (e) {
+          console.warn('Bad app info', e, url);
+        }
+      }
+      const nc = nostrconnect + "&relay=" + relay;
+      a.link = a.link.replace("<nostrconnect>", nc);
+    }
+
+    console.log("nc apps", apps);
+    return apps;
   }
 
   public async localSignup(name: string) {

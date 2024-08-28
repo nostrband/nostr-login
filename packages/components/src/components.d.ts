@@ -133,6 +133,7 @@ export namespace Components {
     }
     interface NlWelcomeSignin {
         "authMethods": AuthMethod[];
+        "hasExtension": boolean;
         "hasOTP": boolean;
         "titleWelcome": string;
     }
@@ -200,6 +201,10 @@ export interface NlSigninReadOnlyCustomEvent<T> extends CustomEvent<T> {
 export interface NlSignupCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlSignupElement;
+}
+export interface NlWelcomeSigninCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlWelcomeSigninElement;
 }
 declare global {
     interface HTMLButtonBaseElement extends Components.ButtonBase, HTMLStencilElement {
@@ -522,7 +527,18 @@ declare global {
         prototype: HTMLNlWelcomeElement;
         new (): HTMLNlWelcomeElement;
     };
+    interface HTMLNlWelcomeSigninElementEventMap {
+        "nlLoginExtension": void;
+    }
     interface HTMLNlWelcomeSigninElement extends Components.NlWelcomeSignin, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlWelcomeSigninElementEventMap>(type: K, listener: (this: HTMLNlWelcomeSigninElement, ev: NlWelcomeSigninCustomEvent<HTMLNlWelcomeSigninElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlWelcomeSigninElementEventMap>(type: K, listener: (this: HTMLNlWelcomeSigninElement, ev: NlWelcomeSigninCustomEvent<HTMLNlWelcomeSigninElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLNlWelcomeSigninElement: {
         prototype: HTMLNlWelcomeSigninElement;
@@ -723,7 +739,9 @@ declare namespace LocalJSX {
     }
     interface NlWelcomeSignin {
         "authMethods"?: AuthMethod[];
+        "hasExtension"?: boolean;
         "hasOTP"?: boolean;
+        "onNlLoginExtension"?: (event: NlWelcomeSigninCustomEvent<void>) => void;
         "titleWelcome"?: string;
     }
     interface NlWelcomeSignup {
