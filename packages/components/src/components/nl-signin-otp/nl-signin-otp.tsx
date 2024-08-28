@@ -28,10 +28,8 @@ export class NlSigninOtp {
 
   handleLogin(e: MouseEvent) {
     e.preventDefault();
-    if (state.isOTP)
-      this.nlLoginOTPCode.emit(state.nlSigninOTP.code);
-    else
-      this.nlLoginOTPUser.emit(state.nlSigninOTP.loginName);
+    if (state.isOTP) this.nlLoginOTPCode.emit(state.nlSigninOTP.code);
+    else this.nlLoginOTPUser.emit(state.nlSigninOTP.loginName);
   }
 
   render() {
@@ -48,7 +46,7 @@ export class NlSigninOtp {
               onInput={e => this.handleInputChange(e)}
               type="text"
               class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
-              placeholder={state.isOTP ? "code from direct message" : "npub or name@domain"}
+              placeholder={state.isOTP ? 'code from direct message' : 'npub or name@domain'}
               value={state.isOTP ? state.nlSigninOTP.code : state.nlSigninOTP.loginName}
             />
             <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">

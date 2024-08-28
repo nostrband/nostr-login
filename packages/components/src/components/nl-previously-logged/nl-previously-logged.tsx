@@ -19,12 +19,12 @@ export class NlPreviouslyLogged {
   @Event() nlRemoveRecent: EventEmitter<RecentType>;
 
   handleGoToWelcome() {
-    state.screen = CURRENT_MODULE.WELCOME;
+    state.path = [CURRENT_MODULE.WELCOME];
   }
 
   switchToWelcomeIfEmpty() {
     if (!this.recents.length && !this.accounts.length) {
-      state.screen = CURRENT_MODULE.WELCOME;
+      state.path = [CURRENT_MODULE.WELCOME];
     }
   }
 

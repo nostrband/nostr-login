@@ -25,15 +25,17 @@
     "format": "npx prettier --write src"
   },
   "dependencies": {
-    "@stencil/core": "^4.13.0",
-    "@stencil/store": "^2.0.15",
-    "@stencil/sass": "^3.0.8",
+    "@stencil/core": "^4.20.0",
+    "@stencil/sass": "^3.0.12",
+    "@stencil/store": "^2.0.16",
     "@tailwindcss/forms": "^0.5.7",
+    "qrcode": "^1.5.4",
     "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.6",
     "@types/node": "^16.18.11",
+    "@types/qrcode": "^1.5.5",
     "jest": "^29.7.0",
     "jest-cli": "^29.7.0",
     "prettier": "^3.2.2",

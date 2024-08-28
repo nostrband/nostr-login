@@ -1,4 +1,4 @@
-# nl-welcome
+# nl-welcome-signup
 
 
 
@@ -10,7 +10,7 @@
 | Property       | Attribute       | Description | Type     | Default                                                                                           |
 | -------------- | --------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------- |
 | `description`  | `description`   |             | `string` | `'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.'` |
-| `titleWelcome` | `title-welcome` |             | `string` | `'Join Nostr!'`                                                                                   |
+| `titleWelcome` | `title-welcome` |             | `string` | `'Sign up'`                                                                                       |
 
 
 ## Dependencies
@@ -26,9 +26,9 @@
 ### Graph
 ```mermaid
 graph TD;
-  nl-welcome --> button-base
-  nl-auth --> nl-welcome
-  style nl-welcome fill:#f9f,stroke:#333,stroke-width:4px
+  nl-welcome-signup --> button-base
+  nl-auth --> nl-welcome-signup
+  style nl-welcome-signup fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

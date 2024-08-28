@@ -68,16 +68,18 @@ export class NlAuth {
   }
 
   componentWillLoad() {
-    state.screen = this.startScreen as CURRENT_MODULE;
-    state.prevScreen = CURRENT_MODULE.WELCOME; //this.startScreen as CURRENT_MODULE;
+    state.path = [this.startScreen as CURRENT_MODULE];
     state.localSignup = this.localSignup;
+
+    console.log(state.path);
 
     // reset
     state.isOTP = false;
   }
 
   handleClickToBack() {
-    state.screen = state.prevScreen;
+    state.path.pop();
+    state.path = [...state.path];
 
     // reset
     state.isLoading = false;
@@ -86,23 +88,26 @@ export class NlAuth {
     state.isOTP = false;
   }
 
+  switchSignSignUpStrategy(str: CURRENT_MODULE) {
+    if (CURRENT_MODULE.LOCAL_SIGNUP === str) {
+      state.path = [CURRENT_MODULE.WELCOME, CURRENT_MODULE.WELCOME_SIGNUP, str];
+
+      return;
+    }
+
+    state.path = [CURRENT_MODULE.WELCOME, str];
+  }
+
   render() {
     const classWrapper = `w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto flex items-center ${this.darkMode ? 'dark' : ''}`;
+    const lastValuePath = state.path.at(-1);
 
     const renderModule = () => {
       if (state.isOTP) return <nl-signin-otp />;
 
-      switch (state.screen) {
+      switch (lastValuePath) {
         case CURRENT_MODULE.WELCOME:
-          return (
-            <nl-welcome
-              titleWelcome={this.welcomeTitle || undefined}
-              description={this.welcomeDescription || undefined}
-              hasExtension={this.hasExtension}
-              hasOTP={this.hasOTP}
-              authMethods={this.authMethods}
-            />
-          );
+          return <nl-welcome titleWelcome={this.welcomeTitle || undefined} description={this.welcomeDescription || undefined} />;
         case CURRENT_MODULE.LOGIN:
           return <nl-signin />;
         case CURRENT_MODULE.SIGNUP:
@@ -123,10 +128,18 @@ export class NlAuth {
           return <nl-signin-bunker-url />;
         case CURRENT_MODULE.LOGIN_OTP:
           return <nl-signin-otp />;
+        case CURRENT_MODULE.WELCOME_LOGIN:
+          return <nl-welcome-signin authMethods={this.authMethods} />;
+        case CURRENT_MODULE.WELCOME_SIGNUP:
+          return <nl-welcome-signup />;
+        case CURRENT_MODULE.CONNECTION_STRING:
+          return <nl-signin-connection-string />;
+        case CURRENT_MODULE.CONNECT:
+          return <nl-connect hasExtension={this.hasExtension} authMethods={this.authMethods} />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
           return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
         default:
-          return <nl-welcome hasExtension={this.hasExtension} authMethods={this.authMethods} />;
+          return <nl-welcome />;
       }
     };
 
@@ -179,7 +192,7 @@ export class NlAuth {
                 </button>
                 {!state.isLoading && (
                   <button
-                    onClick={() => (state.screen = CURRENT_MODULE.INFO)}
+                    onClick={() => (state.path = [...state.path, CURRENT_MODULE.INFO])}
                     type="button"
                     class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent"
                   >
@@ -217,43 +230,39 @@ export class NlAuth {
                 </button>
               </div>
             </div>
-            {state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED &&
-              state.screen !== CURRENT_MODULE.IMPORT_FLOW &&
-              state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
-              state.screen !== CURRENT_MODULE.WELCOME &&
-              !state.isLoading && (
-                <div class="p-4">
-                  <button
-                    onClick={() => this.handleClickToBack()}
-                    type="button"
-                    class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                    data-hs-overlay="#hs-vertically-centered-modal"
-                  >
-                    <span class="sr-only">Back</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                    </svg>
-                  </button>
-                </div>
-              )}
+            {state.path.length > 1 && !state.isLoading && (
+              <div class="p-4">
+                <button
+                  onClick={() => this.handleClickToBack()}
+                  type="button"
+                  class="nl-action-button flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent  dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                  data-hs-overlay="#hs-vertically-centered-modal"
+                >
+                  <span class="sr-only">Back</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                  </svg>
+                </button>
+              </div>
+            )}
             {state.isLoading || state.authUrl ? (
               <nl-loading />
             ) : (
               <Fragment>
                 {renderModule()}
                 {(state.isOTP ||
-                  (state.screen !== CURRENT_MODULE.INFO &&
-                    state.screen !== CURRENT_MODULE.CONFIRM_LOGOUT &&
-                    state.screen !== CURRENT_MODULE.IMPORT_FLOW &&
-                    state.screen !== CURRENT_MODULE.WELCOME &&
-                    state.screen !== CURRENT_MODULE.EXTENSION &&
-                    state.screen !== CURRENT_MODULE.PREVIOUSLY_LOGGED)) && (
+                  (lastValuePath !== CURRENT_MODULE.INFO &&
+                    lastValuePath !== CURRENT_MODULE.CONFIRM_LOGOUT &&
+                    lastValuePath !== CURRENT_MODULE.IMPORT_FLOW &&
+                    lastValuePath !== CURRENT_MODULE.WELCOME &&
+                    lastValuePath !== CURRENT_MODULE.EXTENSION &&
+                    lastValuePath !== CURRENT_MODULE.PREVIOUSLY_LOGGED)) && (
                   <Fragment>
-                    {state.screen === CURRENT_MODULE.SIGNUP || state.screen === CURRENT_MODULE.LOCAL_SIGNUP ? (
+                    {lastValuePath === CURRENT_MODULE.WELCOME_SIGNUP || lastValuePath === CURRENT_MODULE.SIGNUP || lastValuePath === CURRENT_MODULE.LOCAL_SIGNUP ? (
                       <div class="p-4 overflow-y-auto">
                         <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
                           If you already have an account please{' '}
-                          <span onClick={() => (state.screen = CURRENT_MODULE.LOGIN)} class="cursor-pointer text-blue-400">
+                          <span onClick={() => this.switchSignSignUpStrategy(CURRENT_MODULE.WELCOME_LOGIN)} class="cursor-pointer text-blue-400">
                             log in
                           </span>
                           .
@@ -265,7 +274,9 @@ export class NlAuth {
                           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
                             If you don't have an account please{' '}
                             <span
-                              onClick={() => (this.localSignup ? (state.screen = CURRENT_MODULE.LOCAL_SIGNUP) : (state.screen = CURRENT_MODULE.SIGNUP))}
+                              onClick={() =>
+                                this.localSignup ? this.switchSignSignUpStrategy(CURRENT_MODULE.LOCAL_SIGNUP) : this.switchSignSignUpStrategy(CURRENT_MODULE.WELCOME_SIGNUP)
+                              }
                               class="cursor-pointer text-blue-400"
                             >
                               sign up

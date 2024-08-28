@@ -1,5 +1,7 @@
 # nl-login-status
 
+
+
 <!-- Auto Generated Below -->
 
 
@@ -7,7 +9,7 @@
 
 | Property | Attribute | Description | Type                                                                                                                       | Default     |
 | -------- | --------- | ----------- | -------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `info`   | --        |             | `Info \| { name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }` | `undefined` |
+| `info`   | --        |             | `Info \| { picture?: string; name?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }` | `undefined` |
 
 
 ## Dependencies
