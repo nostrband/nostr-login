@@ -5,12 +5,19 @@
 
 ## Properties
 
-| Property                 | Attribute       | Description | Type                                             | Default                  |
-| ------------------------ | --------------- | ----------- | ------------------------------------------------ | ------------------------ |
-| `authMethods`            | --              |             | `AuthMethod[]`                                   | `[]`                     |
-| `createConnectionString` | --              |             | `{ name: string; img: string; link: string; }[]` | `[]`                     |
-| `hasOTP`                 | `has-o-t-p`     |             | `boolean`                                        | `false`                  |
-| `titleWelcome`           | `title-welcome` |             | `string`                                         | `'Connect to key store'` |
+| Property                 | Attribute       | Description | Type                 | Default                  |
+| ------------------------ | --------------- | ----------- | -------------------- | ------------------------ |
+| `authMethods`            | --              |             | `AuthMethod[]`       | `[]`                     |
+| `createConnectionString` | --              |             | `ConnectionString[]` | `[]`                     |
+| `hasOTP`                 | `has-o-t-p`     |             | `boolean`            | `false`                  |
+| `titleWelcome`           | `title-welcome` |             | `string`             | `'Connect to key store'` |
+
+
+## Events
+
+| Event            | Description | Type                  |
+| ---------------- | ----------- | --------------------- |
+| `nlNostrConnect` |             | `CustomEvent<string>` |
 
 
 ## Dependencies

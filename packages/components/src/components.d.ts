@@ -5,9 +5,9 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AuthMethod, Info, NlTheme, RecentType } from "./types/index";
+import { AuthMethod, ConnectionString, Info, NlTheme, RecentType } from "./types/index";
 import { OptionType } from "./components/nl-select/nl-select";
-export { AuthMethod, Info, NlTheme, RecentType } from "./types/index";
+export { AuthMethod, ConnectionString, Info, NlTheme, RecentType } from "./types/index";
 export { OptionType } from "./components/nl-select/nl-select";
 export namespace Components {
     interface ButtonBase {
@@ -21,11 +21,8 @@ export namespace Components {
         "authMethods": AuthMethod[];
         "authUrl": string;
         "bunkers": string;
-        "createConnectionString": {
-    name: string;
-    img: string;
-    link: string;
-  }[];
+        "connectionString": string;
+        "createConnectionString": ConnectionString[];
         "darkMode": boolean;
         "error": string;
         "hasExtension": boolean;
@@ -65,14 +62,12 @@ export namespace Components {
         "theme": 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlConfirmLogout {
+        "description": string;
+        "titleModal": string;
     }
     interface NlConnect {
         "authMethods": AuthMethod[];
-        "createConnectionString": {
-    name: string;
-    img: string;
-    link: string;
-  }[];
+        "createConnectionString": ConnectionString[];
         "hasOTP": boolean;
         "titleWelcome": string;
     }
@@ -167,6 +162,10 @@ export interface NlConfirmLogoutCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlConfirmLogoutElement;
 }
+export interface NlConnectCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlConnectElement;
+}
 export interface NlImportFlowCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlImportFlowElement;
@@ -194,6 +193,10 @@ export interface NlSigninCustomEvent<T> extends CustomEvent<T> {
 export interface NlSigninBunkerUrlCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlSigninBunkerUrlElement;
+}
+export interface NlSigninConnectionStringCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlSigninConnectionStringElement;
 }
 export interface NlSigninOtpCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -285,7 +288,6 @@ declare global {
         new (): HTMLNlChangeAccountElement;
     };
     interface HTMLNlConfirmLogoutElementEventMap {
-        "stopFetchHandler": boolean;
         "handleLogoutBanner": string;
         "handleBackUpModal": string;
         "nlCloseModal": any;
@@ -304,7 +306,18 @@ declare global {
         prototype: HTMLNlConfirmLogoutElement;
         new (): HTMLNlConfirmLogoutElement;
     };
+    interface HTMLNlConnectElementEventMap {
+        "nlNostrConnect": string;
+    }
     interface HTMLNlConnectElement extends Components.NlConnect, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlConnectElementEventMap>(type: K, listener: (this: HTMLNlConnectElement, ev: NlConnectCustomEvent<HTMLNlConnectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlConnectElementEventMap>(type: K, listener: (this: HTMLNlConnectElement, ev: NlConnectCustomEvent<HTMLNlConnectElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLNlConnectElement: {
         prototype: HTMLNlConnectElement;
@@ -453,7 +466,18 @@ declare global {
         prototype: HTMLNlSigninBunkerUrlElement;
         new (): HTMLNlSigninBunkerUrlElement;
     };
+    interface HTMLNlSigninConnectionStringElementEventMap {
+        "nlNostrConnectDefault": void;
+    }
     interface HTMLNlSigninConnectionStringElement extends Components.NlSigninConnectionString, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlSigninConnectionStringElementEventMap>(type: K, listener: (this: HTMLNlSigninConnectionStringElement, ev: NlSigninConnectionStringCustomEvent<HTMLNlSigninConnectionStringElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlSigninConnectionStringElementEventMap>(type: K, listener: (this: HTMLNlSigninConnectionStringElement, ev: NlSigninConnectionStringCustomEvent<HTMLNlSigninConnectionStringElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLNlSigninConnectionStringElement: {
         prototype: HTMLNlSigninConnectionStringElement;
@@ -583,11 +607,8 @@ declare namespace LocalJSX {
         "authMethods"?: AuthMethod[];
         "authUrl"?: string;
         "bunkers"?: string;
-        "createConnectionString"?: {
-    name: string;
-    img: string;
-    link: string;
-  }[];
+        "connectionString"?: string;
+        "createConnectionString"?: ConnectionString[];
         "darkMode"?: boolean;
         "error"?: string;
         "hasExtension"?: boolean;
@@ -639,19 +660,17 @@ declare namespace LocalJSX {
         "theme"?: 'default' | 'ocean' | 'lemonade' | 'purple';
     }
     interface NlConfirmLogout {
+        "description"?: string;
         "onHandleBackUpModal"?: (event: NlConfirmLogoutCustomEvent<string>) => void;
         "onHandleLogoutBanner"?: (event: NlConfirmLogoutCustomEvent<string>) => void;
         "onNlCloseModal"?: (event: NlConfirmLogoutCustomEvent<any>) => void;
-        "onStopFetchHandler"?: (event: NlConfirmLogoutCustomEvent<boolean>) => void;
+        "titleModal"?: string;
     }
     interface NlConnect {
         "authMethods"?: AuthMethod[];
-        "createConnectionString"?: {
-    name: string;
-    img: string;
-    link: string;
-  }[];
+        "createConnectionString"?: ConnectionString[];
         "hasOTP"?: boolean;
+        "onNlNostrConnect"?: (event: NlConnectCustomEvent<string>) => void;
         "titleWelcome"?: string;
     }
     interface NlImportFlow {
@@ -710,6 +729,7 @@ declare namespace LocalJSX {
     interface NlSigninConnectionString {
         "connectionString"?: string;
         "description"?: string;
+        "onNlNostrConnectDefault"?: (event: NlSigninConnectionStringCustomEvent<void>) => void;
         "titleLogin"?: string;
     }
     interface NlSigninOtp {

@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { CURRENT_MODULE, METHOD_MODULE } from '@/types';
 import { state } from '@/store';
 
@@ -8,7 +8,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlConfirmLogout {
-  @Event() stopFetchHandler: EventEmitter<boolean>;
+  @Prop() titleModal = "Delete keys?";
+  @Prop() description = "Your account keys are stored in this browser tab and will be deleted if you log out, and your account will be inaccessible.";
   @Event() handleLogoutBanner: EventEmitter<string>;
   @Event() handleBackUpModal: EventEmitter<string>;
   @Event() nlCloseModal: EventEmitter;
@@ -29,13 +30,13 @@ export class NlConfirmLogout {
   render() {
     return (
       <div class="p-4 overflow-y-auto">
-        <h1 class="nl-title font-bold text-center text-4xl">Warning!</h1>
-        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">You will lose your account</p>
+        <h1 class="nl-title font-bold text-center text-4xl">{this.titleModal}</h1>
+        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{this.description}</p>
 
         <div class="mt-3 ml-auto mr-auto w-60 flex flex-col gap-2">
-          <button-base onClick={() => this.handleCancel()} titleBtn="Cancel" />
-          <button-base onClick={() => this.handleBackUp()} titleBtn="Backup account" theme="lemonade" />
-          <button-base onClick={() => this.handleLogout()} theme="crab" titleBtn="Logout" />
+          {/* <button-base onClick={() => this.handleCancel()} titleBtn="Cancel" /> */}
+          <button-base onClick={() => this.handleBackUp()} titleBtn="Backup keys" theme="lemonade" />
+          <button-base onClick={() => this.handleLogout()} theme="crab" titleBtn="Logout and delete keys" />
         </div>
       </div>
     );

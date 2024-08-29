@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Fragment, h, Prop, Watch } from '@stencil/core';
-import { AuthMethod, CURRENT_MODULE, Info, NlTheme, RecentType } from '@/types';
+import { AuthMethod, ConnectionString, CURRENT_MODULE, Info, NlTheme, RecentType } from '@/types';
 import { state } from '@/store';
 
 @Component({
@@ -25,27 +25,8 @@ export class NlAuth {
   @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop() welcomeTitle: string = '';
   @Prop() welcomeDescription: string = '';
-  @Prop() createConnectionString: {
-    name: string;
-    img: string;
-    link: string;
-  }[] = [
-    {
-      name: 'Nsec.app',
-      img: 'https://nsec.app/assets/favicon.ico',
-      link: 'https://nsec.app',
-    },
-    {
-      name: 'Amber',
-      img: 'https://raw.githubusercontent.com/greenart7c3/Amber/master/app/src/main/res/mipmap-hdpi/ic_launcher.webp',
-      link: 'https://nsec.app',
-    },
-    {
-      name: 'Other key store',
-      img: '',
-      link: 'https://nsec.app',
-    },
-  ];
+  @Prop() connectionString: string = "";
+  @Prop() createConnectionString: ConnectionString[] = [];
 
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
@@ -92,7 +73,7 @@ export class NlAuth {
     state.path = [this.startScreen as CURRENT_MODULE];
     state.localSignup = this.localSignup;
 
-    console.log(state.path);
+    console.log("path", state.path);
 
     // reset
     state.isOTP = false;
@@ -154,7 +135,7 @@ export class NlAuth {
         case CURRENT_MODULE.WELCOME_SIGNUP:
           return <nl-welcome-signup />;
         case CURRENT_MODULE.CONNECTION_STRING:
-          return <nl-signin-connection-string />;
+          return <nl-signin-connection-string connectionString={this.connectionString}/>;
         case CURRENT_MODULE.CONNECT:
           return <nl-connect createConnectionString={this.createConnectionString} authMethods={this.authMethods} />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:

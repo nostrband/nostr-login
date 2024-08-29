@@ -11,10 +11,7 @@ export class NlWelcomeSignIn {
   @Prop() titleWelcome = 'Log in';
   @Prop() hasExtension: boolean = false;
   @Prop() authMethods: AuthMethod[] = [];
-  @Prop() hasExtension: boolean = false;
   @Prop() hasOTP: boolean = false;
-  @Event() nlLoginExtension: EventEmitter<void>;
-
   @Event() nlLoginExtension: EventEmitter<void>;
 
   handleChangeScreen(screen) {

@@ -62,3 +62,10 @@ export interface Info {
 export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple' | 'crab';
+
+export interface ConnectionString {
+  name: string;
+  img: string;
+  link: string;
+  relay: string;
+}

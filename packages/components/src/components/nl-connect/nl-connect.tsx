@@ -1,5 +1,5 @@
-import { Component, Fragment, h, Prop, State } from '@stencil/core';
-import { AuthMethod, CURRENT_MODULE } from '@/types';
+import { Component, Event, EventEmitter, Fragment, h, Prop, State } from '@stencil/core';
+import { AuthMethod, ConnectionString, CURRENT_MODULE } from '@/types';
 import { state } from '@/store';
 
 @Component({
@@ -11,14 +11,10 @@ export class NlConnect {
   @Prop() titleWelcome = 'Connect to key store';
   @Prop() authMethods: AuthMethod[] = [];
   @Prop() hasOTP: boolean = false;
-  @Prop() createConnectionString: {
-    name: string;
-    img: string;
-    link: string;
-  }[] = [];
+  @Prop() createConnectionString: ConnectionString[] = [];
 
   @State() isOpenAdvancedLogin: boolean = false;
-  @State() keysStore: { img: string; name: string; link: string }[] = [];
+  @Event() nlNostrConnect: EventEmitter<string>;
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];
@@ -33,11 +29,10 @@ export class NlConnect {
   }
 
   componentWillLoad() {
-    this.keysStore = this.createConnectionString;
   }
 
-  handleOpenLink() {
-    state.isLoading = true;
+  handleOpenLink(relay: string) {
+    this.nlNostrConnect.emit(relay);
   }
 
   render() {
@@ -49,17 +44,17 @@ export class NlConnect {
           <h1 class="nl-title font-bold text-center text-3xl">{this.titleWelcome}</h1>
         </div>
 
-        {Boolean(this.keysStore.length) && (
+        {Boolean(this.createConnectionString.length) && (
           <div class="max-w-96 mx-auto pt-5">
             <p class="nl-description font-medium text-sm pb-1.5">Select key store:</p>
             <ul class="p-2 rounded-lg border border-gray-200 flex flex-col w-full gap-0.5">
-              {this.keysStore.map(el => {
+              {this.createConnectionString.map(el => {
                 return (
                   <li>
                     <a
                       href={el.link}
                       target="_blank"
-                      onClick={() => this.handleOpenLink()}
+                      onClick={() => this.handleOpenLink(el.relay)}
                       class="flex items-center gap-x-3.5 w-full hover:bg-gray-300 flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm justify-between"
                     >
                       <div class="w-full max-w-7 h-7 flex relative">
