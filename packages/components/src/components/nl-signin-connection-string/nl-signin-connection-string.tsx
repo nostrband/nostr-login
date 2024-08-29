@@ -76,13 +76,13 @@ export class NlSigninConnectionString {
             </div>
 
             {this.isCopy ? (
-              <div class="absolute inset-y-0 end-0 flex items-center  p-2">
+              <div class="absolute inset-y-0 end-0 flex items-center p-2 bg-gray-50 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#00cc00" class="flex-shrink-0 w-4 h-4 text-gray-500">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
               </div>
             ) : (
-              <div class="absolute inset-y-0 end-0 flex items-center cursor-pointer p-2" onClick={() => this.copyToClipboard()}>
+              <div class="absolute inset-y-0 end-0 flex items-center cursor-pointer p-2 bg-gray-50 rounded-lg" onClick={() => this.copyToClipboard()}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 w-4 h-4 text-gray-500">
                   <path
                     stroke-linecap="round"
