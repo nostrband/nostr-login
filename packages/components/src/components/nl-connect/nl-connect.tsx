@@ -28,8 +28,7 @@ export class NlConnect {
     return !this.authMethods.length || this.authMethods.includes(m);
   }
 
-  componentWillLoad() {
-  }
+  componentWillLoad() {}
 
   handleOpenLink(relay: string) {
     this.nlNostrConnect.emit(relay);
@@ -44,45 +43,46 @@ export class NlConnect {
           <h1 class="nl-title font-bold text-center text-3xl">{this.titleWelcome}</h1>
         </div>
 
-        {Boolean(this.createConnectionString.length) && (
-          <div class="max-w-96 mx-auto pt-5">
-            <p class="nl-description font-medium text-sm pb-1.5">Select key store:</p>
-            <ul class="p-2 rounded-lg border border-gray-200 flex flex-col w-full gap-0.5">
-              {this.createConnectionString.map(el => {
-                return (
-                  <li>
-                    <a
-                      href={el.link}
-                      target="_blank"
-                      onClick={() => this.handleOpenLink(el.relay)}
-                      class="flex items-center gap-x-3.5 w-full hover:bg-gray-300 flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm justify-between"
-                    >
-                      <div class="w-full max-w-7 h-7 flex relative">
-                        <div class="uppercase font-bold w-full h-full rounded-full border border-gray-400 flex justify-center items-center">
-                          {Boolean(el.img) ? (
-                            <img class="w-full rounded-full" src={el.img} alt={el.name} />
-                          ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#9ca3af" class="w-4 h-4 block">
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"
-                              />
-                            </svg>
-                          )}
+        <div class="p-4">
+          {Boolean(this.createConnectionString.length) && (
+            <div class="max-w-96 mx-auto pt-5">
+              <p class="nl-description font-medium text-sm pb-1.5">Select key store:</p>
+              <ul class="p-2 rounded-lg border border-gray-200 flex flex-col w-full gap-0.5">
+                {this.createConnectionString.map(el => {
+                  return (
+                    <li>
+                      <a
+                        href={el.link}
+                        target="_blank"
+                        onClick={() => this.handleOpenLink(el.relay)}
+                        class="flex items-center gap-x-3.5 w-full hover:bg-gray-300 flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm justify-between"
+                      >
+                        <div class="w-full max-w-7 h-7 flex relative">
+                          <div class="uppercase font-bold w-full h-full rounded-full border border-gray-400 flex justify-center items-center">
+                            {Boolean(el.img) ? (
+                              <img class="w-full rounded-full" src={el.img} alt={el.name} />
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#9ca3af" class="w-4 h-4 block">
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"
+                                />
+                              </svg>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div class="overflow-hidden flex flex-col w-full">
-                        <div class="nl-title truncate overflow-hidden">{el.name}</div>
-                      </div>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-
+                        <div class="overflow-hidden flex flex-col w-full">
+                          <div class="nl-title truncate overflow-hidden">{el.name}</div>
+                        </div>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
         <div class="max-w-52 mx-auto pb-5">
           {(this.allowAuthMethod('connect') || this.allowAuthMethod('readOnly')) && (
             <div class="flex justify-center">

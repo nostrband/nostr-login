@@ -57,7 +57,7 @@ export class NlPreviouslyLogged {
           <h1 class="nl-title font-bold text-center text-4xl">{this.titlePage}</h1>
           <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{this.description}</p>
         </div>
-
+        <div class="p-4">
         {Boolean(this.accounts.length) && (
           <div class="max-w-96 mx-auto">
             <p class="nl-description font-medium text-sm pb-1.5">Active accounts</p>
@@ -176,7 +176,7 @@ export class NlPreviouslyLogged {
             </ul>
           </div>
         )}
-
+</div>
         <div class="p-4 overflow-y-auto">
           <p class="nl-footer font-light text-center text-sm max-w-96 mx-auto">
             You can also{' '}
