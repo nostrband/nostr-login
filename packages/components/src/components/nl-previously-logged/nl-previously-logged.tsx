@@ -176,7 +176,7 @@ export class NlPreviouslyLogged {
             </ul>
           </div>
         )}
-</div>
+        </div>
         <div class="p-4 overflow-y-auto">
           <p class="nl-footer font-light text-center text-sm max-w-96 mx-auto">
             You can also{' '}
