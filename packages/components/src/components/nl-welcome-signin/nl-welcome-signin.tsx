@@ -26,7 +26,6 @@ export class NlWelcomeSignIn {
 
   renderSignInWithExtension() {
     return (
-      <div class="mt-2">
         <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.EXTENSION)} titleBtn="Sign in with extension">
           <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path
@@ -36,7 +35,6 @@ export class NlWelcomeSignIn {
             />
           </svg>
         </button-base>
-      </div>
     );
   }
 
@@ -82,13 +80,11 @@ export class NlWelcomeSignIn {
               </button-base>
             )}
 
-            <div class="flex gap-3 flex-col">
               {this.hasExtension && this.allowAuthMethod('extension') && this.renderSignInWithExtension()}
               {!this.allowAuthMethod('connect') && !this.hasExtension && <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">No Nostr extension!</p>}
               {!this.allowAuthMethod('connect') && this.hasExtension && !this.allowAuthMethod('extension') && (
                 <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">Use advanced options.</p>
               )}
-            </div>
           </div>
         </div>
       </Fragment>

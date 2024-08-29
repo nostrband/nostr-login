@@ -49,6 +49,7 @@ export class NlConnect {
           <h1 class="nl-title font-bold text-center text-3xl">{this.titleWelcome}</h1>
         </div>
 
+<div class="p-4">
         {Boolean(this.keysStore.length) && (
           <div class="max-w-96 mx-auto pt-5">
             <p class="nl-description font-medium text-sm pb-1.5">Select key store:</p>
@@ -87,7 +88,7 @@ export class NlConnect {
             </ul>
           </div>
         )}
-
+</div>
         <div class="max-w-52 mx-auto pb-5">
           {(this.allowAuthMethod('connect') || this.allowAuthMethod('readOnly')) && (
             <div class="flex justify-center">
