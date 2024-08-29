@@ -89,11 +89,13 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public async nostrConnect(relay?: string) {
+    relay = relay || DEFAULT_NOSTRCONNECT_RELAY;
+
     const info: Info = {
       authMethod: 'connect',
       pubkey: '', // unknown yet!
       sk: this.nostrConnectKey,
-      relays: [relay || DEFAULT_NOSTRCONNECT_RELAY],
+      relays: [relay],
     };
 
     const remotePubkey = await this.initSigner(info, { listen: true });
@@ -101,6 +103,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     // signer learns the remote pubkey
     if (!remotePubkey) throw new Error('Bad remote pubkey');
     info.pubkey = remotePubkey;
+    info.bunkerUrl = `bunker://${remotePubkey}?relay=${relay}`;
 
     // callback
     this.onAuth('login', info);
@@ -272,6 +275,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     // make sure we emulate logout first
     if (info && this.params.userInfo && (info.pubkey !== this.params.userInfo.pubkey || info.authMethod !== this.params.userInfo.authMethod)) {
       const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
+      console.log('nostr-login auth', event.detail);
       document.dispatchEvent(event);
     }
 
@@ -322,6 +326,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       }
 
       const event = new CustomEvent('nlAuth', { detail: options });
+      console.log('nostr-login auth', options);
       document.dispatchEvent(event);
 
       if (this.params.optionsModal.onAuth) {
@@ -364,27 +369,8 @@ class AuthNostrService extends EventEmitter implements Signer {
           });
         }
 
-        // if we're doing it for the first time then
-        // we should send 'connect' NIP46 request
-        if (connect) {
-          // since ndk doesn't yet support perms param
-          // we reimplement the 'connect' call here
-          // await signer.blockUntilReady();
-
-          await new Promise<void>((ok, err) => {
-            if (this.signer && info.sk) {
-              const connectParams = [info.pubkey!, info.token || '', this.params.optionsModal.perms || ''];
-
-              this.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
-                if (response.result === 'ack') {
-                  ok();
-                } else {
-                  err(response.error);
-                }
-              });
-            }
-          });
-        } else if (listen) {
+        // nostrconnect: flow
+        if (listen) {
           // ndk doesn't support nostrconnect:
           // we just listed to an unsolicited reply to
           // our pubkey and if it's ack - we're fine
@@ -423,12 +409,34 @@ class AuthNostrService extends EventEmitter implements Signer {
             sub.stop();
           });
         } else {
-          // when connection was already initiated we
-          // just start the signer and are ready to do RPC
+          // bunker-url based flow
+
+          // if we're doing it for the first time then
+          // we should send 'connect' NIP46 request
+          if (connect) {
+            // since ndk doesn't yet support perms param
+            // we reimplement the 'connect' call here
+            // await signer.blockUntilReady();
+
+            await new Promise<void>((ok, err) => {
+              if (this.signer && info.sk) {
+                const connectParams = [info.pubkey!, info.token || '', this.params.optionsModal.perms || ''];
+                this.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
+                  if (response.result === 'ack') {
+                    ok();
+                  } else {
+                    err(response.error);
+                  }
+                });
+              }
+            });
+          }
+
+          // resolve after we've connected, if required
           ok(undefined);
         }
       } catch (e) {
-        console.log("initSigner failure", e);
+        console.log('initSigner failure', e);
         // make sure signer isn't set
         this.signer = null;
         err(e);
