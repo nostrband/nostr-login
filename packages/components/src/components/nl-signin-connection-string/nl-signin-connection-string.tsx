@@ -60,7 +60,7 @@ export class NlSigninConnectionString {
           <div class="relative mb-2">
             <input
               type="text"
-              class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
+              class="nl-input peer py-3 px-4 pe-11 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
               placeholder="npub or name@domain"
               value={this.connectionString}
               disabled
