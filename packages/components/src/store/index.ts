@@ -1,9 +1,10 @@
 import { createStore } from '@stencil/store';
 import { CURRENT_MODULE } from '@/types';
 
-const { state, onChange, on, reset } = createStore({
+const { state, onChange, reset } = createStore({
   screen: CURRENT_MODULE.WELCOME,
   prevScreen: CURRENT_MODULE.WELCOME,
+  path: [CURRENT_MODULE.WELCOME],
   error: '',
   isLoading: false,
   isLoadingExtension: false,
@@ -45,21 +46,21 @@ const { state, onChange, on, reset } = createStore({
 
 // control show screens & manage history (like as router)
 // ??? edit to better solution
-onChange('screen', (value: CURRENT_MODULE) => {
+onChange('screen', () => {
   state.error = '';
   state.nlSignin.loginName = '';
   state.nlSignup.signupName = '';
   state.nlSignup.domain = '';
 
-  if (value === CURRENT_MODULE.LOGIN || value === CURRENT_MODULE.SIGNUP || value === CURRENT_MODULE.LOGIN_BUNKER_URL || value === CURRENT_MODULE.LOGIN_READ_ONLY) {
-    state.prevScreen = CURRENT_MODULE.WELCOME;
-  }
+  // if (value === CURRENT_MODULE.LOGIN || value === CURRENT_MODULE.SIGNUP || value === CURRENT_MODULE.LOGIN_BUNKER_URL || value === CURRENT_MODULE.LOGIN_READ_ONLY) {
+  //   state.prevScreen = CURRENT_MODULE.WELCOME;
+  // }
 });
 
-on('set', (_, value, oldValue) => {
-  if (value === CURRENT_MODULE.INFO) {
-    state.prevScreen = oldValue;
-  }
-});
+// on('set', (_, value, oldValue) => {
+//   if (value === CURRENT_MODULE.INFO) {
+//     state.prevScreen = oldValue;
+//   }
+// });
 
 export { state, reset };

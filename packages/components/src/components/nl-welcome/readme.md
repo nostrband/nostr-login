@@ -5,20 +5,10 @@
 
 ## Properties
 
-| Property       | Attribute       | Description | Type           | Default                                                                                           |
-| -------------- | --------------- | ----------- | -------------- | ------------------------------------------------------------------------------------------------- |
-| `authMethods`  | --              |             | `AuthMethod[]` | `[]`                                                                                              |
-| `description`  | `description`   |             | `string`       | `'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.'` |
-| `hasExtension` | `has-extension` |             | `boolean`      | `false`                                                                                           |
-| `hasOTP`       | `has-o-t-p`     |             | `boolean`      | `false`                                                                                           |
-| `titleWelcome` | `title-welcome` |             | `string`       | `'Join Nostr!'`                                                                                   |
-
-
-## Events
-
-| Event              | Description | Type                |
-| ------------------ | ----------- | ------------------- |
-| `nlLoginExtension` |             | `CustomEvent<void>` |
+| Property       | Attribute       | Description | Type     | Default                                                                                           |
+| -------------- | --------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `description`  | `description`   |             | `string` | `'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.'` |
+| `titleWelcome` | `title-welcome` |             | `string` | `'Join Nostr!'`                                                                                   |
 
 
 ## Dependencies

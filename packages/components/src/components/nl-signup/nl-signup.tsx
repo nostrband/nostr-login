@@ -7,8 +7,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlSignup {
-  @Prop() titleSignup = 'Sign up';
-  @Prop() description = 'Join the Nostr network.';
+  @Prop() titleSignup = 'Create keys with key store';
+  @Prop() description = 'Choose some username and a key store service.';
   @Prop() bunkers: string = 'nsec.app,highlighter.com';
 
   @State() isAvailable = false;
@@ -86,7 +86,7 @@ export class NlSignup {
           {/* {inputStatus && (
           <p class={classError}>{textError}</p>
         )} */}
-          <div class="mb-0.5">
+          <div class="mb-2">
             {/*<select class="nl-select border-transparent py-3 px-4 pe-9 block w-full rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none">*/}
             {/*  <option selected value="@nsec.app">*/}
             {/*    @nsec.app*/}
@@ -94,13 +94,13 @@ export class NlSignup {
             {/*</select>*/}
             <nl-select onSelectDomain={e => this.handleDomainSelect(e)} selected={0} options={state.nlSignup.servers}></nl-select>
           </div>
-          <p class="nl-title font-light text-sm mb-2">Choose a service to manage your Nostr keys.</p>
+          {/* <p class="nl-title font-light text-sm mb-2">Choose a service to manage your Nostr keys.</p> */}
 
           <div class="ps-4 pe-4 overflow-y-auto">
             <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
           </div>
 
-          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create an account">
+          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create account">
             {state.isLoading ? (
               <span
                 slot="icon-start"

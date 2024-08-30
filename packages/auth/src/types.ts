@@ -1,4 +1,4 @@
-import { Info, AuthMethod } from 'nostr-login-components/dist/types/types';
+import { Info, AuthMethod, ConnectionString } from 'nostr-login-components/dist/types/types';
 
 export interface NostrLoginAuthOptions {
   localNsec?: string;
@@ -78,6 +78,8 @@ export interface IModal {
   darkMode?: boolean;
   welcomeTitle?: string;
   welcomeDescription?: string;
+  connectionString?: string;
+  createConnectionString?: ConnectionString[];
 }
 
 export type TypeModal = IModal & HTMLElement;

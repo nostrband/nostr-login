@@ -7,8 +7,9 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlImportFlow {
-  @Prop() titleInfo = 'Backup your account';
-  @Prop() textInfo = 'Nostr accounts are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import them into a proper key storage service to avoid losing them, and to use with other Nostr apps.';
+  @Prop() titleInfo = 'Backup your account (Coming soon!)';
+  @Prop() textInfo =
+    'Nostr accounts are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import them into a proper key storage service to avoid losing them, and to use with other Nostr apps.';
   @Prop() titleImport = 'Choose a service';
   @Prop() textImport = 'Your Nostr keys will be imported into this provider, and you will manage your keys on their website.';
   @Prop() bunkers: string = 'nsec.app';
@@ -32,7 +33,7 @@ export class NlImportFlow {
 
   handleCreateAccount(e: MouseEvent) {
     e.preventDefault();
-    this.nlImportAccount.emit(state.nlSignup.domain);
+//    this.nlImportAccount.emit(state.nlSignup.domain);
   }
 
   handleContinue() {
@@ -54,10 +55,12 @@ export class NlImportFlow {
         <div class="p-4 overflow-y-auto">
           <h1 class="nl-title font-bold text-center text-2xl">{this.titleInfo}</h1>
           <p class="nl-description font-light text-sm pt-2 pb-2 max-w-96 mx-auto">
-            Nostr accounts are controlled by cryptographic keys.<br/><br/>
-            
-            Your keys are currently only stored in this browser tab.<br/><br/>
-            
+            Nostr accounts are controlled by cryptographic keys.
+            <br />
+            <br />
+            Your keys are currently only stored in this browser tab.
+            <br />
+            <br />
             You should backup your keys with a key storage service to avoid losing them, and to use them with other Nostr apps.
           </p>
           <div class="ml-auto mr-auto w-72">

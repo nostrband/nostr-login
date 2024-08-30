@@ -5,11 +5,11 @@
 
 ## Properties
 
-| Property      | Attribute      | Description | Type     | Default                      |
-| ------------- | -------------- | ----------- | -------- | ---------------------------- |
-| `bunkers`     | `bunkers`      |             | `string` | `'nsec.app,highlighter.com'` |
-| `description` | `description`  |             | `string` | `'Join the Nostr network.'`  |
-| `titleSignup` | `title-signup` |             | `string` | `'Sign up'`                  |
+| Property      | Attribute      | Description | Type     | Default                                           |
+| ------------- | -------------- | ----------- | -------- | ------------------------------------------------- |
+| `bunkers`     | `bunkers`      |             | `string` | `'nsec.app,highlighter.com'`                      |
+| `description` | `description`  |             | `string` | `'Choose some username and a key store service.'` |
+| `titleSignup` | `title-signup` |             | `string` | `'Create keys with key store'`                    |
 
 
 ## Events

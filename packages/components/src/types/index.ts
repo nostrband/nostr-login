@@ -1,5 +1,7 @@
 export enum CURRENT_MODULE {
   WELCOME = 'welcome',
+  WELCOME_LOGIN = 'welcome-login',
+  WELCOME_SIGNUP = 'welcome-signup',
   INFO = 'info',
   LOGIN_BUNKER_URL = 'login-bunker-url',
   LOGIN_READ_ONLY = 'login-read-only',
@@ -12,6 +14,8 @@ export enum CURRENT_MODULE {
   LOADING = 'loading',
   PREVIOUSLY_LOGGED = 'switch-account',
   LOGIN_OTP = 'otp',
+  CONNECT = 'connect',
+  CONNECTION_STRING = 'connection-string',
 }
 
 export enum METHOD_MODULE {
@@ -58,3 +62,10 @@ export interface Info {
 export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple' | 'crab';
+
+export interface ConnectionString {
+  name: string;
+  img: string;
+  link: string;
+  relay: string;
+}

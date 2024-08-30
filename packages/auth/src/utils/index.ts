@@ -51,15 +51,11 @@ export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSign
   });
 
   await event.sign(signer);
-  console.log("signed profile", event);
-  await event.publish(NDKRelaySet.fromRelayUrls([
-    'wss://nostr.mutinywallet.com',
-    'wss://purplepag.es',
-    'wss://user.kindpag.es',
-    'wss://relay.damus.io',
-    'wss://nos.lol',
-  ], profileNdk));
-  console.log("published profile", event);
+  console.log('signed profile', event);
+  await event.publish(
+    NDKRelaySet.fromRelayUrls(['wss://nostr.mutinywallet.com', 'wss://purplepag.es', 'wss://user.kindpag.es', 'wss://relay.damus.io', 'wss://nos.lol'], profileNdk),
+  );
+  console.log('published profile', event);
 };
 
 export const bunkerUrlToInfo = (bunkerUrl: string, sk = ''): Info => {
@@ -222,6 +218,8 @@ export const localStorageRemoveCurrentAccount = () => {
   const recents: RecentType[] = recentsAccounts;
   if (recentUser.authMethod === 'connect' && recentUser.bunkerUrl && recentUser.bunkerUrl.includes('secret=')) {
     console.log('nostr login bunker conn with a secret not saved to recent');
+  } else if (recentUser.authMethod === 'local') {
+    console.log('nostr login temporary local keys not save to recent');
   } else {
     // upsert to recent
     const index = recentsAccounts.findIndex((el: RecentType) => el.pubkey === recentUser.pubkey && el.authMethod === recentUser.authMethod);
@@ -268,7 +266,7 @@ export const localStorageGetCurrent = (): Info | null => {
 
 export const setDarkMode = (dark: boolean) => {
   localStorageSetItem('nl-dark-mode', dark ? 'true' : 'false');
-}
+};
 
 export const getDarkMode = (opt: NostrLoginOptions) => {
   const getDarkMode = localStorageGetItem('nl-dark-mode');
@@ -286,4 +284,9 @@ export const getDarkMode = (opt: NostrLoginOptions) => {
       return false;
     }
   }
-}
+};
+
+export const getIcon = async () => {
+  // FIXME look at meta tags or manifest
+  return document.location.origin + '/favicon.ico';
+};

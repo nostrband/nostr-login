@@ -1,12 +1,35 @@
-import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount, createProfile } from '../utils';
-import { Info } from 'nostr-login-components/dist/types/types';
+import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, getBunkerUrl, localStorageRemoveCurrentAccount, createProfile, getIcon } from '../utils';
+import { ConnectionString, Info } from 'nostr-login-components/dist/types/types';
 import { generatePrivateKey, getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
-import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser } from '@nostr-dev-kit/ndk';
+import NDK, { NDKEvent, NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser, NDKRpcRequest } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
 import { Signer } from './Nostr';
 import { Nip44 } from '../utils/nip44';
+
+const OUTBOX_RELAYS = ['wss://user.kindpag.es', 'wss://purplepag.es', 'wss://relay.nos.social'];
+const DEFAULT_NOSTRCONNECT_RELAY = 'wss://relay.nsec.app';
+const NOSTRCONNECT_APPS: ConnectionString[] = [
+  {
+    name: 'Nsec.app',
+    img: 'https://nsec.app/assets/favicon.ico',
+    link: 'https://use.nsec.app/<nostrconnect>',
+    relay: 'wss://relay.nsec.app/',
+  },
+  {
+    name: 'Amber',
+    img: 'https://raw.githubusercontent.com/greenart7c3/Amber/master/app/src/main/res/mipmap-hdpi/ic_launcher.webp',
+    link: '<nostrconnect>',
+    relay: 'wss://relay.nsec.app/',
+  },
+  {
+    name: 'Other key stores',
+    img: '',
+    link: '<nostrconnect>',
+    relay: 'wss://relay.nsec.app/',
+  },
+];
 
 class AuthNostrService extends EventEmitter implements Signer {
   private ndk: NDK;
@@ -14,9 +37,10 @@ class AuthNostrService extends EventEmitter implements Signer {
   private signer: NDKNip46Signer | null = null;
   private localSigner: NDKPrivateKeySigner | null = null;
   private params: NostrParams;
-  private signerPromise?: Promise<void>;
+  private signerPromise?: Promise<string | undefined>;
   private launcherPromise?: Promise<void>;
   private nip44Codec = new Nip44();
+  private nostrConnectKey: string = '';
 
   nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string>;
@@ -36,7 +60,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     this.profileNdk = new NDK({
       enableOutboxModel: true,
-      explicitRelayUrls: ['wss://user.kindpag.es', 'wss://purplepag.es'],
+      explicitRelayUrls: OUTBOX_RELAYS,
     });
     this.profileNdk.connect();
 
@@ -62,6 +86,67 @@ class AuthNostrService extends EventEmitter implements Signer {
         await this.launcherPromise;
       } catch {}
     }
+  }
+
+  public async nostrConnect(relay?: string) {
+    relay = relay || DEFAULT_NOSTRCONNECT_RELAY;
+
+    const info: Info = {
+      authMethod: 'connect',
+      pubkey: '', // unknown yet!
+      sk: this.nostrConnectKey,
+      relays: [relay],
+    };
+
+    const remotePubkey = await this.initSigner(info, { listen: true });
+
+    // signer learns the remote pubkey
+    if (!remotePubkey) throw new Error('Bad remote pubkey');
+    info.pubkey = remotePubkey;
+    info.bunkerUrl = `bunker://${remotePubkey}?relay=${relay}`;
+
+    // callback
+    this.onAuth('login', info);
+  }
+
+  // public async cancelListenNostrConnect() {
+  //   if (this.listenSub) {
+  //     this.listenSub.stop();
+  //     this.listenSub = null;
+  //   }
+  // }
+
+  public async getNostrConnectServices(): Promise<[string, ConnectionString[]]> {
+    this.nostrConnectKey = generatePrivateKey();
+    const pubkey = getPublicKey(this.nostrConnectKey);
+    const meta = {
+      name: document.location.host,
+      url: document.location.href,
+      icon: await getIcon(),
+      perms: this.params.optionsModal.perms,
+    };
+    const nostrconnect = `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}`;
+
+    // copy defaults
+    const apps = NOSTRCONNECT_APPS.map(a => ({ ...a }));
+    for (const a of apps) {
+      let relay = DEFAULT_NOSTRCONNECT_RELAY;
+      if (a.link.startsWith('https://')) {
+        const url = new URL(a.link);
+        try {
+          const info = await (await fetch(`${url.origin}/.well-known/nostr.json`)).json();
+          const pubkey = info.names['_'];
+          const relays = info.nip46[pubkey] as string[];
+          if (relays && relays.length) relay = relays[0];
+        } catch (e) {
+          console.log('Bad app info', e, url);
+        }
+      }
+      const nc = nostrconnect + '&relay=' + relay;
+      a.link = a.link.replace('<nostrconnect>', nc);
+    }
+
+    return [nostrconnect, apps];
   }
 
   public async localSignup(name: string) {
@@ -190,6 +275,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     // make sure we emulate logout first
     if (info && this.params.userInfo && (info.pubkey !== this.params.userInfo.pubkey || info.authMethod !== this.params.userInfo.authMethod)) {
       const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
+      console.log('nostr-login auth', event.detail);
       document.dispatchEvent(event);
     }
 
@@ -240,6 +326,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       }
 
       const event = new CustomEvent('nlAuth', { detail: options });
+      console.log('nostr-login auth', options);
       document.dispatchEvent(event);
 
       if (this.params.optionsModal.onAuth) {
@@ -250,7 +337,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
-  public async initSigner(info: Info, { connect = false, eventToAddAccount = false } = {}) {
+  public async initSigner(info: Info, { listen = false, connect = false, eventToAddAccount = false } = {}) {
     // mutex
     if (this.signerPromise) {
       try {
@@ -258,7 +345,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       } catch {}
     }
 
-    this.signerPromise = new Promise<void>(async (ok, err) => {
+    this.signerPromise = new Promise<string | undefined>(async (ok, err) => {
       try {
         if (info.relays) {
           for (const r of info.relays) {
@@ -275,35 +362,81 @@ class AuthNostrService extends EventEmitter implements Signer {
         this.signer = new NDKNip46Signer(this.ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
 
         // OAuth flow
-        this.signer.on('authUrl', url => {
-          console.log('nostr login auth url', url);
-          this.emit('onAuthUrl', { url, eventToAddAccount });
-        });
-
-        // if we're doing it for the first time then
-        // we should send 'connect' NIP46 request
-        if (connect) {
-          // since ndk doesn't yet support perms param
-          // we reimplement the 'connect' call here
-          // await signer.blockUntilReady();
-
-          await new Promise<void>((ok, err) => {
-            if (this.signer && info.sk) {
-              const connectParams = [getPublicKey(info.sk), info.token || '', this.params.optionsModal.perms || ''];
-
-              this.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
-                if (response.result === 'ack') {
-                  ok();
-                } else {
-                  err(response.error);
-                }
-              });
-            }
+        if (!listen) {
+          this.signer.on('authUrl', url => {
+            console.log('nostr login auth url', url);
+            this.emit('onAuthUrl', { url, eventToAddAccount });
           });
         }
 
-        ok();
+        // nostrconnect: flow
+        if (listen) {
+          // ndk doesn't support nostrconnect:
+          // we just listed to an unsolicited reply to
+          // our pubkey and if it's ack - we're fine
+          const pubkey = getPublicKey(info.sk!);
+          console.log('nostr-login listening for conn to', pubkey);
+          const sub = await this.signer.rpc.subscribe({
+            'kinds': [24133],
+            '#p': [pubkey],
+          });
+          sub.on('event', async (event: NDKEvent) => {
+            // console.log("ack?", event);
+            try {
+              const parsedEvent = await this.signer!.rpc.parseEvent(event);
+              // console.log("parsedEvent", parsedEvent);
+              if (!(parsedEvent as NDKRpcRequest).method) {
+                const response = parsedEvent as NDKRpcResponse;
+
+                // ignore
+                if (response.result === 'auth_url') return;
+
+                if (response.result === 'ack') {
+                  // now ensure the remote pubkey
+                  this.signer!.remotePubkey = event.pubkey;
+                  this.signer!.remoteUser = new NDKUser({ pubkey: event.pubkey });
+                  info.pubkey = event.pubkey;
+
+                  ok(event.pubkey);
+                } else {
+                  err(response.error);
+                }
+              }
+            } catch (e) {
+              console.log('error parsing event', e, event.rawEvent());
+            }
+            // done
+            sub.stop();
+          });
+        } else {
+          // bunker-url based flow
+
+          // if we're doing it for the first time then
+          // we should send 'connect' NIP46 request
+          if (connect) {
+            // since ndk doesn't yet support perms param
+            // we reimplement the 'connect' call here
+            // await signer.blockUntilReady();
+
+            await new Promise<void>((ok, err) => {
+              if (this.signer && info.sk) {
+                const connectParams = [info.pubkey!, info.token || '', this.params.optionsModal.perms || ''];
+                this.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
+                  if (response.result === 'ack') {
+                    ok();
+                  } else {
+                    err(response.error);
+                  }
+                });
+              }
+            });
+          }
+
+          // resolve after we've connected, if required
+          ok(undefined);
+        }
       } catch (e) {
+        console.log('initSigner failure', e);
         // make sure signer isn't set
         this.signer = null;
         err(e);
@@ -326,13 +459,10 @@ class AuthNostrService extends EventEmitter implements Signer {
 
       const eventToAddAccount = Boolean(this.params.userInfo);
 
-      const r = await this.initSigner(info, { connect: true, eventToAddAccount });
+      await this.initSigner(info, { connect: true, eventToAddAccount });
 
       // callback
       this.onAuth(type, info);
-
-      // result
-      return r;
     } catch (e) {
       console.log('nostr login auth failed', e);
       // make ure it's closed

@@ -84,6 +84,8 @@ class ModalManager extends EventEmitter {
     this.modal.isLoadingExtension = false;
     this.modal.isLoading = false;
 
+    [this.modal.connectionString, this.modal.createConnectionString] = await this.authNostrService.getNostrConnectServices();
+
     dialog.appendChild(this.modal);
     document.body.appendChild(dialog);
 
@@ -181,6 +183,28 @@ class ModalManager extends EventEmitter {
           });
       };
 
+      const nostrConnect = async (relay?: string) => {
+        if (relay && this.modal) {
+          this.modal.isLoading = true;
+        }
+
+        try {
+          await this.authNostrService.nostrConnect(relay);
+          if (this.modal) {
+            this.modal.isLoading = false;
+          }
+
+          dialog.close();
+          ok();
+        } catch (e: any) {
+          console.log('error', e);
+          if (this.modal) {
+            this.modal.isLoading = false;
+            this.modal.error = e.toString();
+          }
+        }
+      };
+
       if (!this.modal) throw new Error('WTH?');
 
       this.modal.addEventListener('handleContinue', () => {
@@ -188,14 +212,6 @@ class ModalManager extends EventEmitter {
           this.modal.isLoading = true;
           this.emit('onAuthUrlClick', this.modal.authUrl);
         }
-      });
-
-      this.modal.addEventListener('stopFetchHandler', () => {
-        if (this.modal) {
-          this.modal.isLoading = false;
-        }
-        dialog.close();
-        err(new Error('Cancelled'));
       });
 
       this.modal.addEventListener('nlLogin', (event: any) => {
@@ -215,6 +231,18 @@ class ModalManager extends EventEmitter {
         importKeys(event.detail);
       });
 
+      this.modal.addEventListener('handleLogoutBanner', () => {
+        this.emit('onLogoutBanner');
+      });
+
+      this.modal.addEventListener('nlNostrConnect', (event: any) => {
+        nostrConnect(event.detail as string);
+      });
+
+      this.modal.addEventListener('nlNostrConnectDefault', () => {
+        nostrConnect();
+      });
+
       this.modal.addEventListener('nlSwitchAccount', (event: any) => {
         const eventInfo: Info = event.detail as Info;
 
@@ -232,11 +260,13 @@ class ModalManager extends EventEmitter {
           this.authNostrService.setReadOnly(userInfo.pubkey);
           dialog.close();
         } else if (userInfo.authMethod === 'otp') {
-          console.log("recent otp login", userInfo);
+          console.log('recent otp login', userInfo);
           try {
-            this.modal!.dispatchEvent(new CustomEvent("nlLoginOTPUser", {
-              detail: userInfo.nip05 || userInfo.pubkey
-            }));  
+            this.modal!.dispatchEvent(
+              new CustomEvent('nlLoginOTPUser', {
+                detail: userInfo.nip05 || userInfo.pubkey,
+              }),
+            );
           } catch (e) {
             console.error(e);
           }
@@ -261,7 +291,7 @@ class ModalManager extends EventEmitter {
           const { error, pubkey: nip05pubkey } = await checkNip05(nameNpub);
           if (nip05pubkey) pubkey = nip05pubkey;
           else throw new Error(error);
-        } else if (nameNpub.startsWith("npub")) {
+        } else if (nameNpub.startsWith('npub')) {
           const { type, data } = nip19.decode(nameNpub);
           if (type === 'npub') pubkey = data as string;
           else throw new Error('Bad npub');
@@ -399,15 +429,18 @@ class ModalManager extends EventEmitter {
         }
       });
 
-      this.modal.addEventListener('nlCloseModal', () => {
+      const cancel = () => {
         if (this.modal) {
           this.modal.isLoading = false;
         }
 
-        dialog.close();
+        // this.authNostrService.cancelListenNostrConnect();
 
+        dialog.close();
         err(new Error('Cancelled'));
-      });
+      };
+      this.modal.addEventListener('stopFetchHandler', cancel);
+      this.modal.addEventListener('nlCloseModal', cancel);
 
       this.modal.addEventListener('nlChangeDarkMode', (event: any) => {
         setDarkMode(event.detail);

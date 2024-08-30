@@ -5,25 +5,27 @@
 
 ## Properties
 
-| Property             | Attribute              | Description | Type                                                       | Default                  |
-| -------------------- | ---------------------- | ----------- | ---------------------------------------------------------- | ------------------------ |
-| `accounts`           | --                     |             | `Info[]`                                                   | `[]`                     |
-| `authMethods`        | --                     |             | `AuthMethod[]`                                             | `[]`                     |
-| `authUrl`            | `auth-url`             |             | `string`                                                   | `''`                     |
-| `bunkers`            | `bunkers`              |             | `string`                                                   | `''`                     |
-| `darkMode`           | `dark-mode`            |             | `boolean`                                                  | `false`                  |
-| `error`              | `error`                |             | `string`                                                   | `''`                     |
-| `hasExtension`       | `has-extension`        |             | `boolean`                                                  | `false`                  |
-| `hasOTP`             | `has-o-t-p`            |             | `boolean`                                                  | `false`                  |
-| `isLoading`          | `is-loading`           |             | `boolean`                                                  | `false`                  |
-| `isLoadingExtension` | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
-| `isOTP`              | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
-| `localSignup`        | `local-signup`         |             | `boolean`                                                  | `false`                  |
-| `recents`            | --                     |             | `RecentType[]`                                             | `[]`                     |
-| `startScreen`        | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
-| `theme`              | `theme`                |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
-| `welcomeDescription` | `welcome-description`  |             | `string`                                                   | `''`                     |
-| `welcomeTitle`       | `welcome-title`        |             | `string`                                                   | `''`                     |
+| Property                 | Attribute              | Description | Type                                                       | Default                  |
+| ------------------------ | ---------------------- | ----------- | ---------------------------------------------------------- | ------------------------ |
+| `accounts`               | --                     |             | `Info[]`                                                   | `[]`                     |
+| `authMethods`            | --                     |             | `AuthMethod[]`                                             | `[]`                     |
+| `authUrl`                | `auth-url`             |             | `string`                                                   | `''`                     |
+| `bunkers`                | `bunkers`              |             | `string`                                                   | `''`                     |
+| `connectionString`       | `connection-string`    |             | `string`                                                   | `""`                     |
+| `createConnectionString` | --                     |             | `ConnectionString[]`                                       | `[]`                     |
+| `darkMode`               | `dark-mode`            |             | `boolean`                                                  | `false`                  |
+| `error`                  | `error`                |             | `string`                                                   | `''`                     |
+| `hasExtension`           | `has-extension`        |             | `boolean`                                                  | `false`                  |
+| `hasOTP`                 | `has-o-t-p`            |             | `boolean`                                                  | `false`                  |
+| `isLoading`              | `is-loading`           |             | `boolean`                                                  | `false`                  |
+| `isLoadingExtension`     | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
+| `isOTP`                  | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
+| `localSignup`            | `local-signup`         |             | `boolean`                                                  | `false`                  |
+| `recents`                | --                     |             | `RecentType[]`                                             | `[]`                     |
+| `startScreen`            | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
+| `theme`                  | `theme`                |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
+| `welcomeDescription`     | `welcome-description`  |             | `string`                                                   | `''`                     |
+| `welcomeTitle`           | `welcome-title`        |             | `string`                                                   | `''`                     |
 
 
 ## Events
@@ -49,6 +51,10 @@
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
 - [nl-signin-bunker-url](../nl-signin-bunker-url)
+- [nl-welcome-signin](../nl-welcome-signin)
+- [nl-welcome-signup](../nl-welcome-signup)
+- [nl-signin-connection-string](../nl-signin-connection-string)
+- [nl-connect](../nl-connect)
 - [nl-previously-logged](../nl-previously-logged)
 - [nl-loading](../nl-loading)
 
@@ -66,6 +72,10 @@ graph TD;
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
   nl-auth --> nl-signin-bunker-url
+  nl-auth --> nl-welcome-signin
+  nl-auth --> nl-welcome-signup
+  nl-auth --> nl-signin-connection-string
+  nl-auth --> nl-connect
   nl-auth --> nl-previously-logged
   nl-auth --> nl-loading
   nl-signin-otp --> button-base
@@ -79,6 +89,9 @@ graph TD;
   nl-import-flow --> nl-select
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
+  nl-welcome-signin --> button-base
+  nl-welcome-signup --> button-base
+  nl-connect --> button-base
   nl-previously-logged --> nl-login-status
   nl-loading --> button-base
   style nl-auth fill:#f9f,stroke:#333,stroke-width:4px
