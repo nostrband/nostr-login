@@ -24,7 +24,7 @@ export class NlWelcome {
         </div>
 
         <div class="max-w-52 mx-auto pb-5">
-          <div class="flex gap-3 flex-col">
+          <div class="flex gap-3 flex-col mb-2">
             <button-base titleBtn="Log in" onClick={() => this.handleChangeScreen(CURRENT_MODULE.WELCOME_LOGIN)}>
               <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
@@ -36,7 +36,7 @@ export class NlWelcome {
             </button-base>
           </div>
 
-          <div class="nl-divider py-3 flex items-center text-xs uppercase before:flex-[1_1_0%] before:border-t before:me-6 after:flex-[1_1_0%] after:border-t  after:ms-6">Or</div>
+          {/* <div class="nl-divider py-3 flex items-center text-xs uppercase before:flex-[1_1_0%] before:border-t before:me-6 after:flex-[1_1_0%] after:border-t  after:ms-6">Or</div> */}
 
           <button-base onClick={() => this.handleChangeScreen(CURRENT_MODULE.WELCOME_SIGNUP)} titleBtn="Sign up">
             <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

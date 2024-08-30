@@ -20,13 +20,13 @@ const NOSTRCONNECT_APPS: ConnectionString[] = [
   {
     name: 'Amber',
     img: 'https://raw.githubusercontent.com/greenart7c3/Amber/master/app/src/main/res/mipmap-hdpi/ic_launcher.webp',
-    link: 'nostr:<nostrconnect>',
+    link: '<nostrconnect>',
     relay: 'wss://relay.nsec.app/',
   },
   {
-    name: 'Other key store',
+    name: 'Other key stores',
     img: '',
-    link: 'nostr:<nostrconnect>',
+    link: '<nostrconnect>',
     relay: 'wss://relay.nsec.app/',
   },
 ];

@@ -7,7 +7,7 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlImportFlow {
-  @Prop() titleInfo = 'Backup your account';
+  @Prop() titleInfo = 'Backup your account (Coming soon!)';
   @Prop() textInfo =
     'Nostr accounts are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import them into a proper key storage service to avoid losing them, and to use with other Nostr apps.';
   @Prop() titleImport = 'Choose a service';
@@ -33,7 +33,7 @@ export class NlImportFlow {
 
   handleCreateAccount(e: MouseEvent) {
     e.preventDefault();
-    this.nlImportAccount.emit(state.nlSignup.domain);
+//    this.nlImportAccount.emit(state.nlSignup.domain);
   }
 
   handleContinue() {

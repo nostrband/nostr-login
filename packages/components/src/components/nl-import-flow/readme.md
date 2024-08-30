@@ -11,7 +11,7 @@
 | `textImport`  | `text-import`  |             | `string` | `'Your Nostr keys will be imported into this provider, and you will manage your keys on their website.'`                                                                                                                           |
 | `textInfo`    | `text-info`    |             | `string` | `'Nostr accounts are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import them into a proper key storage service to avoid losing them, and to use with other Nostr apps.'` |
 | `titleImport` | `title-import` |             | `string` | `'Choose a service'`                                                                                                                                                                                                               |
-| `titleInfo`   | `title-info`   |             | `string` | `'Backup your account'`                                                                                                                                                                                                            |
+| `titleInfo`   | `title-info`   |             | `string` | `'Backup your account (Coming soon!)'`                                                                                                                                                                                             |
 
 
 ## Events
