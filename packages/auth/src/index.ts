@@ -189,11 +189,6 @@ export class NostrLoginInitializer {
     // @ts-ignore
     window.nostr = this.nostr;
 
-    // force darkMode from init options
-    if ('darkMode' in opt) {
-      localStorageSetItem('nl-dark-mode', `${opt.darkMode}`);
-    }
-
     // connect launching of our modals to nl-button elements
     this.modalManager.connectModals(opt);
 

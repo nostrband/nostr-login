@@ -270,9 +270,10 @@ export const setDarkMode = (dark: boolean) => {
 
 export const getDarkMode = (opt: NostrLoginOptions) => {
   const getDarkModeLocal = localStorage.getItem('nl-dark-mode');
+
   if (getDarkModeLocal) {
     // user already changed it
-    return !!JSON.parse(getDarkModeLocal);
+    return Boolean(JSON.parse(getDarkModeLocal));
   } else if (opt.darkMode !== undefined) {
     // app provided an option
     return opt.darkMode;
