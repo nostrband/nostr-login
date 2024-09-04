@@ -9,7 +9,7 @@ import { Signer } from './Nostr';
 import { Nip44 } from '../utils/nip44';
 
 const OUTBOX_RELAYS = ['wss://user.kindpag.es', 'wss://purplepag.es', 'wss://relay.nos.social'];
-const DEFAULT_NOSTRCONNECT_RELAY = 'wss://relay.nsec.app';
+const DEFAULT_NOSTRCONNECT_RELAY = 'wss://relay.nsec.app/';
 const NOSTRCONNECT_APPS: ConnectionString[] = [
   {
     name: 'Nsec.app',
@@ -41,6 +41,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   private launcherPromise?: Promise<void>;
   private nip44Codec = new Nip44();
   private nostrConnectKey: string = '';
+  private nostrConnectSecret: string = '';
 
   nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string>;
@@ -118,6 +119,8 @@ class AuthNostrService extends EventEmitter implements Signer {
 
   public async getNostrConnectServices(): Promise<[string, ConnectionString[]]> {
     this.nostrConnectKey = generatePrivateKey();
+    this.nostrConnectSecret = Math.random().toString(36).substring(7);
+
     const pubkey = getPublicKey(this.nostrConnectKey);
     const meta = {
       name: document.location.host,
@@ -125,7 +128,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       icon: await getIcon(),
       perms: this.params.optionsModal.perms,
     };
-    const nostrconnect = `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}`;
+    const nostrconnect = `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}&secret=${this.nostrConnectSecret}`;
 
     // copy defaults
     const apps = NOSTRCONNECT_APPS.map(a => ({ ...a }));
@@ -384,14 +387,16 @@ class AuthNostrService extends EventEmitter implements Signer {
             // console.log("ack?", event);
             try {
               const parsedEvent = await this.signer!.rpc.parseEvent(event);
-              // console.log("parsedEvent", parsedEvent);
+              console.log("parsedEvent", parsedEvent);
               if (!(parsedEvent as NDKRpcRequest).method) {
                 const response = parsedEvent as NDKRpcResponse;
 
                 // ignore
                 if (response.result === 'auth_url') return;
 
-                if (response.result === 'ack') {
+                // FIXME for now accept 'ack' replies, later on only
+                // accept secrets
+                if (response.result === 'ack' || response.result === this.nostrConnectSecret) {
                   // now ensure the remote pubkey
                   this.signer!.remotePubkey = event.pubkey;
                   this.signer!.remoteUser = new NDKUser({ pubkey: event.pubkey });
