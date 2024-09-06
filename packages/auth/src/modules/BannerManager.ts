@@ -76,7 +76,6 @@ class BannerManager extends EventEmitter {
     if (opt.noBanner) this.banner.setAttribute('hidden-mode', 'true');
 
     this.banner.addEventListener('handleLoginBanner', (event: any) => {
-      console.log('test')
       this.emit('launch', event.detail);
     });
 
@@ -109,7 +108,7 @@ class BannerManager extends EventEmitter {
     });
 
     this.banner.addEventListener('handleOpenWelcomeModal', () => {
-      this.emit('launch');
+      this.emit('launch', this.params.optionsModal.startScreen);
 
       if (this.banner) {
         this.banner.isOpen = false;

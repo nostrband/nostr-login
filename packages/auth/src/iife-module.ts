@@ -1,5 +1,5 @@
 import { init } from './index';
-import { NostrLoginOptions } from './types';
+import { NostrLoginOptions, StartScreens } from './types';
 
 // wrap to hide local vars
 (() => {
@@ -14,6 +14,9 @@ import { NostrLoginOptions } from './types';
 
       const bunkers = cs.getAttribute('data-bunkers');
       if (bunkers) options.bunkers = bunkers;
+
+      const startScreen = cs.getAttribute('data-start-screen');
+      if (startScreen) options.startScreen = startScreen as StartScreens;
 
       const perms = cs.getAttribute('data-perms');
       if (perms) options.perms = perms;
