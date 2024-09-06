@@ -10,7 +10,20 @@ export interface NostrLoginAuthOptions {
 }
 
 // NOTE: must be a subset of CURRENT_MODULE enum
-export type StartScreens = 'welcome' | 'signup' | 'login' | 'login-bunker-url' | 'login-read-only' | 'switch-account' | 'import';
+export type StartScreens =
+  | 'welcome'
+  | 'welcome-login'
+  | 'welcome-signup'
+  | 'signup'
+  | 'local-signup'
+  | 'login'
+  | 'otp'
+  | 'connect'
+  | 'login-bunker-url'
+  | 'login-read-only'
+  | 'connection-string'
+  | 'switch-account'
+  | 'import';
 
 export interface NostrLoginOptions {
   // optional
@@ -21,14 +34,14 @@ export interface NostrLoginOptions {
   perms?: string;
   darkMode?: boolean;
 
-  // do not show the banner, modals must be `launch`-ed 
+  // do not show the banner, modals must be `launch`-ed
   noBanner?: boolean;
 
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
 
   // use local signup instead of nostr connect
-  localSignup?: boolean
+  localSignup?: boolean;
 
   // allowed auth methods
   methods?: AuthMethod[];

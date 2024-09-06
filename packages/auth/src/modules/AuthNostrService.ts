@@ -387,7 +387,7 @@ class AuthNostrService extends EventEmitter implements Signer {
             // console.log("ack?", event);
             try {
               const parsedEvent = await this.signer!.rpc.parseEvent(event);
-              console.log("parsedEvent", parsedEvent);
+              // console.log("parsedEvent", parsedEvent);
               if (!(parsedEvent as NDKRpcRequest).method) {
                 const response = parsedEvent as NDKRpcResponse;
 
