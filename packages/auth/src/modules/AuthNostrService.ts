@@ -114,13 +114,6 @@ class AuthNostrService extends EventEmitter implements Signer {
     return info;
   }
 
-  // public async cancelListenNostrConnect() {
-  //   if (this.listenSub) {
-  //     this.listenSub.stop();
-  //     this.listenSub = null;
-  //   }
-  // }
-
   public async getNostrConnectServices(): Promise<[string, ConnectionString[]]> {
     this.nostrConnectKey = generatePrivateKey();
     this.nostrConnectSecret = Math.random().toString(36).substring(7);
@@ -183,12 +176,17 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public async importAndConnect(relay: string) {
-    // it's all the same as nostrconnect,
-    // onAuth called by it will call logout
-    // on our local-key session which
-    // will erase the keys from recents bcs those
-    // aren't saved
-    await this.nostrConnect(relay);
+    const info = await this.nostrConnect(relay, true);
+
+    // logout to remove local keys from storage
+    // but keep the connect signer
+    await this.logout(/*keepSigner*/true);
+
+    // release local one
+    this.localSigner = null;
+
+    // notify app that we've switched to 'connect' keys
+    this.onAuth('login', info);
   }
 
   public setReadOnly(pubkey: string) {
@@ -262,8 +260,8 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
-  public async logout() {
-    this.releaseSigner();
+  public async logout(keepSigner = false) {
+    if (!keepSigner) this.releaseSigner();
 
     // move current to recent
     localStorageRemoveCurrentAccount();
