@@ -183,11 +183,12 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public async importAndConnect(relay: string) {
-    const info = await this.nostrConnect(relay, true);
-
-    await this.logout();
-
-    this.onAuth('login', info);
+    // it's all the same as nostrconnect,
+    // onAuth called by it will call logout
+    // on our local-key session which
+    // will erase the keys from recents bcs those
+    // aren't saved
+    await this.nostrConnect(relay);
   }
 
   public setReadOnly(pubkey: string) {
