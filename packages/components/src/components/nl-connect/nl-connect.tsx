@@ -11,7 +11,7 @@ export class NlConnect {
   @Prop() titleWelcome = 'Connect to key store';
   @Prop() authMethods: AuthMethod[] = [];
   @Prop() hasOTP: boolean = false;
-  @Prop() createConnectionString: ConnectionString[] = [];
+  @Prop() connectionStringServices: ConnectionString[] = [];
 
   @State() isOpenAdvancedLogin: boolean = false;
   @Event() nlNostrConnect: EventEmitter<string>;
@@ -44,11 +44,11 @@ export class NlConnect {
         </div>
 
         <div class="p-4">
-          {Boolean(this.createConnectionString.length) && (
+          {Boolean(this.connectionStringServices.length) && (
             <div class="max-w-96 mx-auto pt-5">
               <p class="nl-description font-medium text-sm pb-1.5">Select key store:</p>
               <ul class="p-2 rounded-lg border border-gray-200 flex flex-col w-full gap-0.5">
-                {this.createConnectionString.map(el => {
+                {this.connectionStringServices.map(el => {
                   return (
                     <li>
                       <a

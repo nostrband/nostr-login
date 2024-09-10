@@ -5,27 +5,27 @@
 
 ## Properties
 
-| Property                 | Attribute              | Description | Type                                                       | Default                  |
-| ------------------------ | ---------------------- | ----------- | ---------------------------------------------------------- | ------------------------ |
-| `accounts`               | --                     |             | `Info[]`                                                   | `[]`                     |
-| `authMethods`            | --                     |             | `AuthMethod[]`                                             | `[]`                     |
-| `authUrl`                | `auth-url`             |             | `string`                                                   | `''`                     |
-| `bunkers`                | `bunkers`              |             | `string`                                                   | `''`                     |
-| `connectionString`       | `connection-string`    |             | `string`                                                   | `""`                     |
-| `createConnectionString` | --                     |             | `ConnectionString[]`                                       | `[]`                     |
-| `darkMode`               | `dark-mode`            |             | `boolean`                                                  | `false`                  |
-| `error`                  | `error`                |             | `string`                                                   | `''`                     |
-| `hasExtension`           | `has-extension`        |             | `boolean`                                                  | `false`                  |
-| `hasOTP`                 | `has-o-t-p`            |             | `boolean`                                                  | `false`                  |
-| `isLoading`              | `is-loading`           |             | `boolean`                                                  | `false`                  |
-| `isLoadingExtension`     | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
-| `isOTP`                  | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
-| `localSignup`            | `local-signup`         |             | `boolean`                                                  | `false`                  |
-| `recents`                | --                     |             | `RecentType[]`                                             | `[]`                     |
-| `startScreen`            | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
-| `theme`                  | `theme`                |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
-| `welcomeDescription`     | `welcome-description`  |             | `string`                                                   | `''`                     |
-| `welcomeTitle`           | `welcome-title`        |             | `string`                                                   | `''`                     |
+| Property                   | Attribute              | Description | Type                                                       | Default                  |
+| -------------------------- | ---------------------- | ----------- | ---------------------------------------------------------- | ------------------------ |
+| `accounts`                 | --                     |             | `Info[]`                                                   | `[]`                     |
+| `authMethods`              | --                     |             | `AuthMethod[]`                                             | `[]`                     |
+| `authUrl`                  | `auth-url`             |             | `string`                                                   | `''`                     |
+| `bunkers`                  | `bunkers`              |             | `string`                                                   | `''`                     |
+| `connectionString`         | `connection-string`    |             | `string`                                                   | `""`                     |
+| `connectionStringServices` | --                     |             | `ConnectionString[]`                                       | `[]`                     |
+| `darkMode`                 | `dark-mode`            |             | `boolean`                                                  | `false`                  |
+| `error`                    | `error`                |             | `string`                                                   | `''`                     |
+| `hasExtension`             | `has-extension`        |             | `boolean`                                                  | `false`                  |
+| `hasOTP`                   | `has-o-t-p`            |             | `boolean`                                                  | `false`                  |
+| `isLoading`                | `is-loading`           |             | `boolean`                                                  | `false`                  |
+| `isLoadingExtension`       | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
+| `isOTP`                    | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
+| `localSignup`              | `local-signup`         |             | `boolean`                                                  | `false`                  |
+| `recents`                  | --                     |             | `RecentType[]`                                             | `[]`                     |
+| `startScreen`              | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
+| `theme`                    | `theme`                |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
+| `welcomeDescription`       | `welcome-description`  |             | `string`                                                   | `''`                     |
+| `welcomeTitle`             | `welcome-title`        |             | `string`                                                   | `''`                     |
 
 
 ## Events

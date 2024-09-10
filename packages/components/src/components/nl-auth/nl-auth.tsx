@@ -26,7 +26,7 @@ export class NlAuth {
   @Prop() welcomeTitle: string = '';
   @Prop() welcomeDescription: string = '';
   @Prop() connectionString: string = "";
-  @Prop() createConnectionString: ConnectionString[] = [];
+  @Prop() connectionStringServices: ConnectionString[] = [];
 
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
@@ -119,7 +119,7 @@ export class NlAuth {
         case CURRENT_MODULE.CONFIRM_LOGOUT:
           return <nl-confirm-logout />;
         case CURRENT_MODULE.IMPORT_FLOW:
-          return <nl-import-flow />;
+          return <nl-import-flow services={this.connectionStringServices.filter(s => s.canImport)} />;
         case CURRENT_MODULE.INFO:
           return <nl-info />;
         case CURRENT_MODULE.EXTENSION:
@@ -137,7 +137,7 @@ export class NlAuth {
         case CURRENT_MODULE.CONNECTION_STRING:
           return <nl-signin-connection-string connectionString={this.connectionString}/>;
         case CURRENT_MODULE.CONNECT:
-          return <nl-connect createConnectionString={this.createConnectionString} authMethods={this.authMethods} />;
+          return <nl-connect connectionStringServices={this.connectionStringServices} authMethods={this.authMethods} />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
           return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
         default:

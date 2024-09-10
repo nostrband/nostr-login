@@ -1,5 +1,6 @@
-import { Component, h, Fragment, State, Prop, Event, EventEmitter, Watch } from '@stencil/core';
+import { Component, h, Fragment, State, Prop, Event, EventEmitter } from '@stencil/core';
 import { state } from '@/store';
+import { ConnectionString } from '@/types';
 
 @Component({
   tag: 'nl-import-flow',
@@ -7,46 +8,32 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlImportFlow {
-  @Prop() titleInfo = 'Backup your account (Coming soon!)';
+  @Prop() titleInfo = 'Backup your account';
   @Prop() textInfo =
     'Nostr accounts are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import them into a proper key storage service to avoid losing them, and to use with other Nostr apps.';
   @Prop() titleImport = 'Choose a service';
   @Prop() textImport = 'Your Nostr keys will be imported into this provider, and you will manage your keys on their website.';
-  @Prop() bunkers: string = 'nsec.app';
+  @Prop() services: ConnectionString[] = [];
 
   @State() isAvailable = false;
   @State() isContinued = false;
 
   @Event() nlImportAccount: EventEmitter<string>;
 
-  formatServers(bunkers: string) {
-    return bunkers.split(',').map(d => ({
-      name: '@' + d,
-      value: d,
-    }));
-  }
-
   handleDomainSelect(event: CustomEvent<string>) {
-    state.nlSignup.domain = event.detail;
-    // this.nlCheckSignup.emit(`${state.nlSignup.signupName}@${event.detail}`);
+    const s = this.services.find(s => s.domain === event.detail);
+    state.nlImport.relay = s!.relay;
+    state.nlImport.nostrConnect = s!.link;
   }
 
   handleCreateAccount(e: MouseEvent) {
     e.preventDefault();
-//    this.nlImportAccount.emit(state.nlSignup.domain);
+    window.open(state.nlImport.nostrConnect, '_blank');
+    this.nlImportAccount.emit(state.nlImport.relay);
   }
 
   handleContinue() {
     this.isContinued = true;
-  }
-
-  @Watch('bunkers')
-  watchBunkersHandler(newValue: string) {
-    state.nlSignup.servers = this.formatServers(newValue);
-  }
-
-  componentWillLoad() {
-    state.nlSignup.servers = this.formatServers(this.bunkers);
   }
 
   render() {
@@ -70,6 +57,8 @@ export class NlImportFlow {
       );
     }
 
+    const options = this.services.map(s => ({ name: s.domain!, value: s.domain! }));
+
     return (
       <Fragment>
         <div class="p-4 overflow-y-auto">
@@ -81,7 +70,7 @@ export class NlImportFlow {
 
         <div class="max-w-72 mx-auto mb-5">
           <div class="mb-0.5">
-            <nl-select onSelectDomain={e => this.handleDomainSelect(e)} selected={0} options={state.nlSignup.servers}></nl-select>
+            <nl-select onSelectDomain={e => this.handleDomainSelect(e)} selected={0} options={options}></nl-select>
           </div>
           <p class="nl-title font-light text-sm mb-2">Default provider is a fine choice to start with.</p>
 

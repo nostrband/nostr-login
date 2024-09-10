@@ -13,6 +13,8 @@ const DEFAULT_NOSTRCONNECT_RELAY = 'wss://relay.nsec.app/';
 const NOSTRCONNECT_APPS: ConnectionString[] = [
   {
     name: 'Nsec.app',
+    domain: 'nsec.app',
+    canImport: true,
     img: 'https://nsec.app/assets/favicon.ico',
     link: 'https://use.nsec.app/<nostrconnect>',
     relay: 'wss://relay.nsec.app/',
@@ -89,7 +91,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
-  public async nostrConnect(relay?: string) {
+  public async nostrConnect(relay?: string, importConnect = false) {
     relay = relay || DEFAULT_NOSTRCONNECT_RELAY;
 
     const info: Info = {
@@ -107,7 +109,9 @@ class AuthNostrService extends EventEmitter implements Signer {
     info.bunkerUrl = `bunker://${remotePubkey}?relay=${relay}`;
 
     // callback
-    this.onAuth('login', info);
+    if (!importConnect) this.onAuth('login', info);
+
+    return info;
   }
 
   // public async cancelListenNostrConnect() {
@@ -130,6 +134,10 @@ class AuthNostrService extends EventEmitter implements Signer {
     };
     const nostrconnect = `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}&secret=${this.nostrConnectSecret}`;
 
+    // if we've got local keys then we're using this method
+    // to import local keys to these services
+    const nsec = this.localSigner ? '#import=' + nip19.nsecEncode(this.localSigner.privateKey!) : '';
+
     // copy defaults
     const apps = NOSTRCONNECT_APPS.map(a => ({ ...a }));
     for (const a of apps) {
@@ -145,11 +153,11 @@ class AuthNostrService extends EventEmitter implements Signer {
           console.log('Bad app info', e, url);
         }
       }
-      const nc = nostrconnect + '&relay=' + relay;
+      const nc = nostrconnect + '&relay=' + relay + nsec;
       a.link = a.link.replace('<nostrconnect>', nc);
     }
 
-    return [nostrconnect, apps];
+    return [nostrconnect + nsec, apps];
   }
 
   public async localSignup(name: string) {
@@ -174,9 +182,12 @@ class AuthNostrService extends EventEmitter implements Signer {
     this.onAuth('login', info);
   }
 
-  public async importCurrentUser(domain: string) {
-    console.log(`importCurrentUser domain: ${domain}`);
-    await new Promise(ok => setTimeout(ok, 1000));
+  public async importAndConnect(relay: string) {
+    const info = await this.nostrConnect(relay, true);
+
+    await this.logout();
+
+    this.onAuth('login', info);
   }
 
   public setReadOnly(pubkey: string) {

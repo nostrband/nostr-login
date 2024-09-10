@@ -42,6 +42,11 @@ const { state, onChange, reset } = createStore({
     loginName: '',
     code: '',
   },
+
+  nlImport: {
+    nostrConnect: '',
+    relay: '',
+  }
 });
 
 // control show screens & manage history (like as router)
