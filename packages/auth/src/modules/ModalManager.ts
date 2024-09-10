@@ -84,7 +84,7 @@ class ModalManager extends EventEmitter {
     this.modal.isLoadingExtension = false;
     this.modal.isLoading = false;
 
-    [this.modal.connectionString, this.modal.createConnectionString] = await this.authNostrService.getNostrConnectServices();
+    [this.modal.connectionString, this.modal.connectionStringServices] = await this.authNostrService.getNostrConnectServices();
 
     dialog.appendChild(this.modal);
     document.body.appendChild(dialog);
@@ -160,27 +160,26 @@ class ModalManager extends EventEmitter {
           });
       };
 
-      const importKeys = (bunker: string) => {
+      const importKeys = async (relay: string) => {
         if (this.modal) {
           this.modal.isLoading = true;
         }
 
-        this.authNostrService
-          .importCurrentUser(bunker)
-          .then(() => {
-            if (this.modal) {
-              this.modal.isLoading = false;
-            }
-            dialog.close();
-            ok();
-          })
-          .catch((e: Error) => {
-            console.log('error', e);
-            if (this.modal) {
-              this.modal.isLoading = false;
-              this.modal.error = e.toString();
-            }
-          });
+        try {
+          await this.authNostrService.importAndConnect(relay);
+
+          if (this.modal) {
+            this.modal.isLoading = false;
+          }
+          dialog.close();
+          ok();
+        } catch (e: any) {
+          console.log('error', e);
+          if (this.modal) {
+            this.modal.isLoading = false;
+            this.modal.error = e.toString();
+          }
+        }
       };
 
       const nostrConnect = async (relay?: string) => {

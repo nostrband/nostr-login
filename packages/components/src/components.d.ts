@@ -22,7 +22,7 @@ export namespace Components {
         "authUrl": string;
         "bunkers": string;
         "connectionString": string;
-        "createConnectionString": ConnectionString[];
+        "connectionStringServices": ConnectionString[];
         "darkMode": boolean;
         "error": string;
         "hasExtension": boolean;
@@ -67,12 +67,12 @@ export namespace Components {
     }
     interface NlConnect {
         "authMethods": AuthMethod[];
-        "createConnectionString": ConnectionString[];
+        "connectionStringServices": ConnectionString[];
         "hasOTP": boolean;
         "titleWelcome": string;
     }
     interface NlImportFlow {
-        "bunkers": string;
+        "services": ConnectionString[];
         "textImport": string;
         "textInfo": string;
         "titleImport": string;
@@ -608,7 +608,7 @@ declare namespace LocalJSX {
         "authUrl"?: string;
         "bunkers"?: string;
         "connectionString"?: string;
-        "createConnectionString"?: ConnectionString[];
+        "connectionStringServices"?: ConnectionString[];
         "darkMode"?: boolean;
         "error"?: string;
         "hasExtension"?: boolean;
@@ -668,14 +668,14 @@ declare namespace LocalJSX {
     }
     interface NlConnect {
         "authMethods"?: AuthMethod[];
-        "createConnectionString"?: ConnectionString[];
+        "connectionStringServices"?: ConnectionString[];
         "hasOTP"?: boolean;
         "onNlNostrConnect"?: (event: NlConnectCustomEvent<string>) => void;
         "titleWelcome"?: string;
     }
     interface NlImportFlow {
-        "bunkers"?: string;
         "onNlImportAccount"?: (event: NlImportFlowCustomEvent<string>) => void;
+        "services"?: ConnectionString[];
         "textImport"?: string;
         "textInfo"?: string;
         "titleImport"?: string;

@@ -92,7 +92,7 @@ export interface IModal {
   welcomeTitle?: string;
   welcomeDescription?: string;
   connectionString?: string;
-  createConnectionString?: ConnectionString[];
+  connectionStringServices?: ConnectionString[];
 }
 
 export type TypeModal = IModal & HTMLElement;

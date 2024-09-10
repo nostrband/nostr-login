@@ -68,4 +68,6 @@ export interface ConnectionString {
   img: string;
   link: string;
   relay: string;
+  domain?: string;
+  canImport?: boolean;
 }
