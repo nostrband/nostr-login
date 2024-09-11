@@ -9,7 +9,7 @@ import { state } from '@/store';
 })
 export class NlConfirmLogout {
   @Prop() titleModal = "Delete keys?";
-  @Prop() description = "Your account keys are stored in this browser tab and will be deleted if you log out, and your account will be inaccessible.";
+  @Prop() description = "Your profile keys are stored in this browser tab and will be deleted if you log out, and your profile will be inaccessible.";
   @Event() handleLogoutBanner: EventEmitter<string>;
   @Event() handleBackUpModal: EventEmitter<string>;
   @Event() nlCloseModal: EventEmitter;

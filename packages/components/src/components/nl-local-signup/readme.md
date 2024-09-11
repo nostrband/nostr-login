@@ -8,7 +8,7 @@
 | Property      | Attribute      | Description | Type     | Default                                                  |
 | ------------- | -------------- | ----------- | -------- | -------------------------------------------------------- |
 | `description` | `description`  |             | `string` | `'Choose any username, you can always change it later.'` |
-| `titleSignup` | `title-signup` |             | `string` | `'Create keys for your account'`                         |
+| `titleSignup` | `title-signup` |             | `string` | `'Create Nostr profile'`                                 |
 
 
 ## Events

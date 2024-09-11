@@ -74,7 +74,6 @@ export namespace Components {
     interface NlImportFlow {
         "services": ConnectionString[];
         "textImport": string;
-        "textInfo": string;
         "titleImport": string;
         "titleInfo": string;
     }
@@ -83,6 +82,7 @@ export namespace Components {
     interface NlInfoExtension {
     }
     interface NlLoading {
+        "path": string;
     }
     interface NlLocalSignup {
         "description": string;
@@ -677,7 +677,6 @@ declare namespace LocalJSX {
         "onNlImportAccount"?: (event: NlImportFlowCustomEvent<string>) => void;
         "services"?: ConnectionString[];
         "textImport"?: string;
-        "textInfo"?: string;
         "titleImport"?: string;
         "titleInfo"?: string;
     }
@@ -688,6 +687,7 @@ declare namespace LocalJSX {
     interface NlLoading {
         "onHandleContinue"?: (event: NlLoadingCustomEvent<boolean>) => void;
         "onStopFetchHandler"?: (event: NlLoadingCustomEvent<boolean>) => void;
+        "path"?: string;
     }
     interface NlLocalSignup {
         "description"?: string;

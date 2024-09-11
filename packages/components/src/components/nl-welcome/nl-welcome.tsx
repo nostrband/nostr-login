@@ -8,8 +8,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlWelcome {
-  @Prop() titleWelcome = 'Join Nostr!';
-  @Prop() description = 'This website is part of the Nostr network. Log in with your Nostr account or sign up to join.';
+  @Prop() titleWelcome = 'Welcome to Nostr!';
+  @Prop() description = 'This website is part of the Nostr network. Log in with your Nostr profile or sign up to join.';
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];

@@ -53,6 +53,10 @@ export interface NostrLoginOptions {
   // welcome screen's title/desc
   title?: string;
   description?: string;
+
+  // comma-separated list of relays added 
+  // to relay list of new profiles created with local signup
+  signupRelays?: string;
 }
 
 export interface IBanner {

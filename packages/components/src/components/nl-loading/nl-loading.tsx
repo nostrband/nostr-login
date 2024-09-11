@@ -1,5 +1,6 @@
-import { Component, Event, EventEmitter, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 import { state } from '@/store';
+import { CURRENT_MODULE } from '@/types';
 
 @Component({
   tag: 'nl-loading',
@@ -9,6 +10,7 @@ import { state } from '@/store';
 export class NlLoading {
   @Event() stopFetchHandler: EventEmitter<boolean>;
   @Event() handleContinue: EventEmitter<boolean>;
+  @Prop() path: string;
 
   handleStop(e) {
     e.preventDefault();
@@ -22,19 +24,27 @@ export class NlLoading {
   }
 
   render() {
+    let title = 'Connecting...';
+    let text = 'Establishing connection to your key storage.';
+    if (this.path === CURRENT_MODULE.LOCAL_SIGNUP) {
+      title = 'Creating...';
+      text = 'Publishing your profile on Nostr.';
+    } else if (state.authUrl) {
+      if (state.isLoading) {
+        title = 'Confirming...';
+        text = 'Please confirm the connection in your key storage app.';
+      } else {
+        title = 'Almost ready!';
+        text = 'Continue to confirm the connection to your key storage.';
+      }
+    }
+
+    const canCancel = this.path !== CURRENT_MODULE.LOCAL_SIGNUP;
+
     return (
       <div class="p-4 overflow-y-auto">
-        <h1 class="nl-title font-bold text-center text-4xl">
-          {state.authUrl && !state.isLoading && 'Almost ready!'}
-          {!state.authUrl && state.isLoading && !state.localSignup && 'Connecting...'}
-          {state.authUrl && state.isLoading && 'Confirming...'}
-          {!state.authUrl && state.localSignup && state.isLoading && 'Create a local account...'}
-        </h1>
-        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">
-          {state.authUrl && !state.isLoading && 'Continue to confirm the connection to your key storage.'}
-          {!state.authUrl && state.isLoading && 'Establishing connection to your key storage.'}
-          {state.authUrl && state.isLoading && 'Please confirm the connection in your key storage app.'}
-        </p>
+        <h1 class="nl-title font-bold text-center text-4xl">{title}</h1>
+        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{text}</p>
         {!state.authUrl && state.isLoading && (
           <div class="mt-10 mb-10 ml-auto mr-auto w-20">
             <span
@@ -48,18 +58,20 @@ export class NlLoading {
         <div class="ps-4 pe-4 overflow-y-auto">
           <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
         </div>
-        <div class="mt-3 ml-auto mr-auto w-72">
-          <button-base
-            onClick={e => {
-              if (state.authUrl && !state.isLoading) {
-                this.handleContinueClick(e);
-              } else {
-                this.handleStop(e);
-              }
-            }}
-            titleBtn={!state.isLoading ? 'Continue' : 'Cancel'}
-          />
-        </div>
+        {canCancel && (
+          <div class="mt-3 ml-auto mr-auto w-72">
+            <button-base
+              onClick={e => {
+                if (state.authUrl && !state.isLoading) {
+                  this.handleContinueClick(e);
+                } else {
+                  this.handleStop(e);
+                }
+              }}
+              titleBtn={!state.isLoading ? 'Continue' : 'Cancel'}
+            />
+          </div>
+        )}
       </div>
     );
   }

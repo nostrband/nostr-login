@@ -9,7 +9,7 @@ import { state } from '@/store';
 })
 export class NlWelcomeSignUp {
   @Prop() titleWelcome = 'Sign up';
-  @Prop() description = 'Nostr accounts are based on cryptographic keys. You can create keys right here, or with a key storage app.';
+  @Prop() description = 'Nostr profiles are based on cryptographic keys. You can create keys right here, or with a key storage app.';
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];

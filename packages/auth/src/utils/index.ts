@@ -6,6 +6,8 @@ import { NostrLoginOptions, RecentType } from '../types';
 const LOCAL_STORE_KEY = '__nostrlogin_nip46';
 const LOGGED_IN_ACCOUNTS = '__nostrlogin_accounts';
 const RECENT_ACCOUNTS = '__nostrlogin_recent';
+const OUTBOX_RELAYS = ['wss://purplepag.es', 'wss://relay.nos.social', 'wss://user.kindpag.es', 'wss://relay.damus.io', 'wss://nos.lol'];
+const DEFAULT_SIGNUP_RELAYS = ['wss://relay.damus.io/', 'wss://nos.lol/'];
 
 export const localStorageSetItem = (key: string, value: string) => {
   localStorage.setItem(key, value);
@@ -35,27 +37,46 @@ export const fetchProfile = async (info: Info, profileNdk: NDK) => {
   return await user.fetchProfile();
 };
 
-export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSigner) => {
-  const origin = window.location.origin;
+export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSigner, signupRelays?: string) => {
   const meta = {
     name: info.name,
-    about: `I joined Nostr on ${origin}}`,
   };
 
-  const event = new NDKEvent(profileNdk, {
+  const profileEvent = new NDKEvent(profileNdk, {
     kind: 0,
     created_at: Math.floor(Date.now() / 1000),
     pubkey: info.pubkey,
     content: JSON.stringify(meta),
     tags: [],
   });
+  if (window.location.hostname) profileEvent.tags.push(['client', window.location.hostname]);
 
-  await event.sign(signer);
-  console.log('signed profile', event);
-  await event.publish(
-    NDKRelaySet.fromRelayUrls(['wss://nostr.mutinywallet.com', 'wss://purplepag.es', 'wss://user.kindpag.es', 'wss://relay.damus.io', 'wss://nos.lol'], profileNdk),
-  );
-  console.log('published profile', event);
+  const relaysEvent = new NDKEvent(profileNdk, {
+    kind: 10002,
+    created_at: Math.floor(Date.now() / 1000),
+    pubkey: info.pubkey,
+    content: '',
+    tags: [],
+  });
+
+  const relays = (signupRelays || '')
+    .split(',')
+    .map(r => r.trim())
+    .filter(r => r.startsWith('ws'));
+  if (!relays.length) relays.push(...DEFAULT_SIGNUP_RELAYS);
+  for (const r of relays) {
+    relaysEvent.tags.push(['r', r]);
+  }
+
+  await profileEvent.sign(signer);
+  console.log('signed profile', profileEvent);
+  await relaysEvent.sign(signer);
+  console.log('signed relays', relaysEvent);
+
+  await profileEvent.publish(NDKRelaySet.fromRelayUrls(OUTBOX_RELAYS, profileNdk));
+  console.log('published profile', profileEvent);
+  await relaysEvent.publish(NDKRelaySet.fromRelayUrls(OUTBOX_RELAYS, profileNdk));
+  console.log('published relays', relaysEvent);
 };
 
 export const bunkerUrlToInfo = (bunkerUrl: string, sk = ''): Info => {
