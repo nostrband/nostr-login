@@ -204,6 +204,29 @@ class ModalManager extends EventEmitter {
         }
       };
 
+      const localSignup = async (name?: string) => {
+        if (this.modal) {
+          this.modal.isLoading = true;
+        }
+
+        try {
+          if (!name) throw new Error("Please enter some nickname");
+          await this.authNostrService.localSignup(name);
+          if (this.modal) {
+            this.modal.isLoading = false;
+          }
+
+          dialog.close();
+          ok();
+        } catch (e: any) {
+          console.log('error', e);
+          if (this.modal) {
+            this.modal.isLoading = false;
+            this.modal.error = e.toString();
+          }
+        }
+      };
+
       if (!this.modal) throw new Error('WTH?');
 
       this.modal.addEventListener('handleContinue', () => {
@@ -222,8 +245,7 @@ class ModalManager extends EventEmitter {
       });
 
       this.modal.addEventListener('nlLocalSignup', (event: any) => {
-        this.authNostrService.localSignup(event.detail);
-        dialog.close();
+        localSignup(event.detail);
       });
 
       this.modal.addEventListener('nlImportAccount', (event: any) => {

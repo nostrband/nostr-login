@@ -54,6 +54,9 @@ import { NostrLoginOptions, StartScreens } from './types';
       const description = cs.getAttribute('data-description');
       if (description) options.description = description;
 
+      const signupRelays = cs.getAttribute('data-signup-relays');
+      if (signupRelays) options.signupRelays = signupRelays;
+
       console.log("nostr-login options", options);
     }
 

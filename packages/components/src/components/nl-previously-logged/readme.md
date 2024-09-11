@@ -8,9 +8,9 @@
 | Property      | Attribute     | Description | Type           | Default                                                                   |
 | ------------- | ------------- | ----------- | -------------- | ------------------------------------------------------------------------- |
 | `accounts`    | --            |             | `Info[]`       | `[]`                                                                      |
-| `description` | `description` |             | `string`       | `'Switch between active accounts or choose a recent one for fast login.'` |
+| `description` | `description` |             | `string`       | `'Switch between active profiles or choose a recent one for fast login.'` |
 | `recents`     | --            |             | `RecentType[]` | `[]`                                                                      |
-| `titlePage`   | `title-page`  |             | `string`       | `'Your accounts'`                                                         |
+| `titlePage`   | `title-page`  |             | `string`       | `'Your profiles'`                                                         |
 
 
 ## Events

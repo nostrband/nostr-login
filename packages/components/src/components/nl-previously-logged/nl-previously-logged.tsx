@@ -8,8 +8,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlPreviouslyLogged {
-  @Prop() titlePage = 'Your accounts';
-  @Prop() description = 'Switch between active accounts or choose a recent one for fast login.';
+  @Prop() titlePage = 'Your profiles';
+  @Prop() description = 'Switch between active profiles or choose a recent one for fast login.';
 
   @Prop() accounts: Info[] = [];
   @Prop() recents: RecentType[] = [];
@@ -60,7 +60,7 @@ export class NlPreviouslyLogged {
         <div class="p-4">
         {Boolean(this.accounts.length) && (
           <div class="max-w-96 mx-auto">
-            <p class="nl-description font-medium text-sm pb-1.5">Active accounts</p>
+            <p class="nl-description font-medium text-sm pb-1.5">Active profiles</p>
             <ul class="p-2 rounded-lg border border-blue-200 flex flex-col w-full gap-0.5">
               {this.accounts.map(el => {
                 const isShowImg = Boolean(el?.picture);
@@ -114,7 +114,7 @@ export class NlPreviouslyLogged {
 
         {Boolean(this.recents.length) && (
           <div class="max-w-96 mx-auto pt-5">
-            <p class="nl-description font-medium text-sm pb-1.5">Recent accounts</p>
+            <p class="nl-description font-medium text-sm pb-1.5">Recent profiles</p>
             <ul class="p-2 rounded-lg border border-gray-200 flex flex-col w-full gap-0.5">
               {this.recents.map(el => {
                 const isShowImg = Boolean(el?.picture);
@@ -181,7 +181,7 @@ export class NlPreviouslyLogged {
           <p class="nl-footer font-light text-center text-sm max-w-96 mx-auto">
             You can also{' '}
             <span onClick={() => this.handleGoToWelcome()} class="cursor-pointer pb-3 text-blue-500">
-              add another account
+              add another profile
             </span>
           </p>
         </div>

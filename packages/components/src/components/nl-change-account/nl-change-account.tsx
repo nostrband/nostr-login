@@ -86,7 +86,7 @@ export class NLChangeAccount {
             type="button"
             class="nl-select peer py-3 px-4 flex items-center w-full justify-between border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
           >
-            <span class="text-gray-500">Switch account</span>
+            <span class="text-gray-500">Switch profile</span>
             <svg
               class={arrowClass}
               xmlns="http://www.w3.org/2000/svg"
@@ -143,7 +143,7 @@ export class NLChangeAccount {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                   </svg>
                 </div>
-                Add account
+                Add profile
               </div>
             </li>
           </ul>

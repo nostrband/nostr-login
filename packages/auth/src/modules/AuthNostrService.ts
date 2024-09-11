@@ -170,7 +170,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     this.releaseSigner();
     this.localSigner = new NDKPrivateKeySigner(info.sk);
 
-    if (create) await createProfile(info, this.profileNdk, this.localSigner);
+    if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays);
 
     this.onAuth('login', info);
   }
@@ -180,7 +180,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // logout to remove local keys from storage
     // but keep the connect signer
-    await this.logout(/*keepSigner*/true);
+    await this.logout(/*keepSigner*/ true);
 
     // release local one
     this.localSigner = null;

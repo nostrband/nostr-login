@@ -7,8 +7,8 @@ import { state } from '@/store';
   shadow: false,
 })
 export class NlSigninBunkerUrl {
-  @Prop() titleLogin = 'Log in with bunker url';
-  @Prop() description = 'Please enter your bunker url.';
+  @Prop() titleLogin = 'Connect with bunker url';
+  @Prop() description = 'Please enter a bunker url provided by key store.';
   @State() isGood = false;
 
   @Event() nlLogin: EventEmitter<string>;
@@ -65,14 +65,22 @@ export class NlSigninBunkerUrl {
             <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
           </div>
 
-          <button-base titleBtn="Log in" disabled={state.isLoading} onClick={e => this.handleLogin(e)}>
-            {state.isLoading && (
+          <button-base titleBtn="Connect" disabled={state.isLoading} onClick={e => this.handleLogin(e)}>
+            {state.isLoading ? (
               <span
                 slot="icon-start"
                 class="animate-spin-loading inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full"
                 role="status"
                 aria-label="loading"
               ></span>
+            ) : (
+              <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
+                />
+              </svg>
             )}
           </button-base>
         </div>

@@ -226,9 +226,9 @@ export class NlBanner {
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     {isTemporary && (
                       <Fragment>
-                        <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your account may be lost if you close this tab</p>
+                        <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your profile may be lost if you close this tab</p>
                         <div class="mb-2">
-                          <button-base onClick={() => this.handleImport()} theme="lemonade" titleBtn="Backup account" />
+                          <button-base onClick={() => this.handleImport()} theme="lemonade" titleBtn="Backup profile" />
                         </div>
                       </Fragment>
                     )}

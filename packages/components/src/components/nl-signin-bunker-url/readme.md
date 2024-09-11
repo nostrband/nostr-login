@@ -5,10 +5,10 @@
 
 ## Properties
 
-| Property      | Attribute     | Description | Type     | Default                           |
-| ------------- | ------------- | ----------- | -------- | --------------------------------- |
-| `description` | `description` |             | `string` | `'Please enter your bunker url.'` |
-| `titleLogin`  | `title-login` |             | `string` | `'Log in with bunker url'`        |
+| Property      | Attribute     | Description | Type     | Default                                              |
+| ------------- | ------------- | ----------- | -------- | ---------------------------------------------------- |
+| `description` | `description` |             | `string` | `'Please enter a bunker url provided by key store.'` |
+| `titleLogin`  | `title-login` |             | `string` | `'Connect with bunker url'`                          |
 
 
 ## Events

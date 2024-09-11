@@ -100,7 +100,7 @@ export class NlSignup {
             <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
           </div>
 
-          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create account">
+          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create profile">
             {state.isLoading ? (
               <span
                 slot="icon-start"

@@ -248,7 +248,7 @@ export class NlAuth {
               </div>
             )}
             {state.isLoading || state.authUrl ? (
-              <nl-loading />
+              <nl-loading path={lastValuePath} />
             ) : (
               <Fragment>
                 {renderModule()}
@@ -263,7 +263,7 @@ export class NlAuth {
                     {lastValuePath === CURRENT_MODULE.WELCOME_SIGNUP || lastValuePath === CURRENT_MODULE.SIGNUP || lastValuePath === CURRENT_MODULE.LOCAL_SIGNUP ? (
                       <div class="p-4 overflow-y-auto">
                         <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-                          If you already have an account please{' '}
+                          If you already have a profile please{' '}
                           <span onClick={() => this.switchSignSignUpStrategy(CURRENT_MODULE.WELCOME_LOGIN)} class="cursor-pointer text-blue-400">
                             log in
                           </span>
@@ -274,7 +274,7 @@ export class NlAuth {
                       signup && (
                         <div class="p-4 overflow-y-auto">
                           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
-                            If you don't have an account please{' '}
+                            If you don't have a profile please{' '}
                             <span
                               onClick={() =>
                                 this.localSignup ? this.switchSignSignUpStrategy(CURRENT_MODULE.LOCAL_SIGNUP) : this.switchSignSignUpStrategy(CURRENT_MODULE.WELCOME_SIGNUP)

@@ -8,9 +8,9 @@ import { ConnectionString } from '@/types';
   shadow: false,
 })
 export class NlImportFlow {
-  @Prop() titleInfo = 'Backup your account';
-  @Prop() textInfo =
-    'Nostr accounts are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import them into a proper key storage service to avoid losing them, and to use with other Nostr apps.';
+  @Prop() titleInfo = 'Backup your keys';
+  // @Prop() textInfo =
+  //   'Nostr profiles are controlled by cryptographic keys. Your keys are currently only stored in this browser tab. You should import your keys into a proper key storage service to avoid losing them, and to use with other Nostr apps.';
   @Prop() titleImport = 'Choose a service';
   @Prop() textImport = 'Your Nostr keys will be imported into this provider, and you will manage your keys on their website.';
   @Prop() services: ConnectionString[] = [];
@@ -42,7 +42,7 @@ export class NlImportFlow {
         <div class="p-4 overflow-y-auto">
           <h1 class="nl-title font-bold text-center text-2xl">{this.titleInfo}</h1>
           <p class="nl-description font-light text-sm pt-2 pb-2 max-w-96 mx-auto">
-            Nostr accounts are controlled by cryptographic keys.
+            Nostr profiles are controlled by cryptographic keys.
             <br />
             <br />
             Your keys are currently only stored in this browser tab.
