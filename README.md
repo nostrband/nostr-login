@@ -26,6 +26,8 @@ You can set these attributes to the `script` tag to customize the behavior:
 - `data-otp-reply-url` - URL for replying with OTP code
 - `data-title` - title for the welcome screen
 - `data-description` - description for the welcome screen
+- `data-start-screen` - screen shown by default (banner click, window.nostr.* call), options: `welcome`, `welcome-login`, `welcome-signup`, `signup`, `local-signup`, `login`, `otp`, `connect`, `login-bunker-url`, `login-read-only`, `connection-string`, `switch-account`, `import`
+- `data-signup-relays` - comma-separated list of relays for nip65 event published on local signup
 
 Example:
 ```

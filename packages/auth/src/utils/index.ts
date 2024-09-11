@@ -7,7 +7,7 @@ const LOCAL_STORE_KEY = '__nostrlogin_nip46';
 const LOGGED_IN_ACCOUNTS = '__nostrlogin_accounts';
 const RECENT_ACCOUNTS = '__nostrlogin_recent';
 const OUTBOX_RELAYS = ['wss://purplepag.es', 'wss://relay.nos.social', 'wss://user.kindpag.es', 'wss://relay.damus.io', 'wss://nos.lol'];
-const DEFAULT_SIGNUP_RELAYS = ['wss://relay.damus.io/', 'wss://nos.lol/'];
+const DEFAULT_SIGNUP_RELAYS = ['wss://relay.damus.io/', 'wss://nos.lol/', 'wss://relay.primal.net/'];
 
 export const localStorageSetItem = (key: string, value: string) => {
   localStorage.setItem(key, value);
