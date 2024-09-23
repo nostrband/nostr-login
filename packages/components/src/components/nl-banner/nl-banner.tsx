@@ -90,11 +90,22 @@ export class NlBanner {
   }
 
   handleLogout() {
+    const isBackupKey = localStorage.getItem('backupKey')
+
+    if(isBackupKey) {
+      this.handleLogoutBanner.emit(METHOD_MODULE.LOGOUT);
+      this.handleClose()
+      localStorage.removeItem('backupKey')
+
+      return
+    }
+
     if (this.userInfo.authMethod === 'local') {
       this.handleConfirmLogout.emit();
     } else {
       this.handleLogoutBanner.emit(METHOD_MODULE.LOGOUT);
     }
+
     this.handleClose();
   }
 
@@ -115,6 +126,7 @@ export class NlBanner {
     const userName = this.userInfo?.name || this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
     const isShowUserName = Boolean(userName);
     const isTemporary = this.userInfo && this.userInfo.authMethod === 'local';
+    const isBackupKey = localStorage.getItem('backupKey')
 
     return (
       <div class={`theme-${this.theme} ${!this.isOpen && this.hiddenMode ? 'hidden' : ''}`}>
@@ -226,7 +238,7 @@ export class NlBanner {
                     {this.titleBanner && <p class="mb-2 text-center show-slow max-w-40 min-w-40 mx-auto">{this.titleBanner}</p>}
                     {isTemporary && (
                       <Fragment>
-                        <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your profile may be lost if you close this tab</p>
+                        {!isBackupKey && <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your profile may be lost if you close this tab</p>}
                         <div class="mb-2">
                           <button-base onClick={() => this.handleImport()} theme="lemonade" titleBtn="Backup profile" />
                         </div>

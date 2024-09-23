@@ -107,6 +107,9 @@ export class NlAuth {
     const renderModule = () => {
       if (state.isOTP) return <nl-signin-otp />;
 
+      // @ts-ignore
+      // const t: CURRENT_MODULE = 'import' // lastValuePath
+
       switch (lastValuePath) {
         case CURRENT_MODULE.WELCOME:
           return <nl-welcome titleWelcome={this.welcomeTitle || undefined} description={this.welcomeDescription || undefined} />;
