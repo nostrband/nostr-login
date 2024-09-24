@@ -240,7 +240,7 @@ export class NlBanner {
                       <Fragment>
                         {!isBackupKey && <p class="mb-2 text-center show-slow text-red-400 max-w-40 min-w-40 mx-auto">Your profile may be lost if you close this tab</p>}
                         <div class="mb-2">
-                          <button-base onClick={() => this.handleImport()} theme="lemonade" titleBtn="Backup profile" />
+                          <button-base onClick={() => this.handleImport()} theme="lemonade" titleBtn="Back up profile" />
                         </div>
                       </Fragment>
                     )}

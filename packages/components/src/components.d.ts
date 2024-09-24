@@ -325,6 +325,7 @@ declare global {
     };
     interface HTMLNlImportFlowElementEventMap {
         "nlImportAccount": string;
+        "nlExportKeys": void;
     }
     interface HTMLNlImportFlowElement extends Components.NlImportFlow, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlImportFlowElementEventMap>(type: K, listener: (this: HTMLNlImportFlowElement, ev: NlImportFlowCustomEvent<HTMLNlImportFlowElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -674,6 +675,7 @@ declare namespace LocalJSX {
         "titleWelcome"?: string;
     }
     interface NlImportFlow {
+        "onNlExportKeys"?: (event: NlImportFlowCustomEvent<void>) => void;
         "onNlImportAccount"?: (event: NlImportFlowCustomEvent<string>) => void;
         "services"?: ConnectionString[];
         "textImport"?: string;

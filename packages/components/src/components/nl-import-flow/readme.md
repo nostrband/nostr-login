@@ -10,13 +10,14 @@
 | `services`    | --             |             | `ConnectionString[]` | `[]`                                                                                                     |
 | `textImport`  | `text-import`  |             | `string`             | `'Your Nostr keys will be imported into this provider, and you will manage your keys on their website.'` |
 | `titleImport` | `title-import` |             | `string`             | `'Choose a service'`                                                                                     |
-| `titleInfo`   | `title-info`   |             | `string`             | `'Backup your keys'`                                                                                     |
+| `titleInfo`   | `title-info`   |             | `string`             | `'Back up your keys'`                                                                                    |
 
 
 ## Events
 
 | Event             | Description | Type                  |
 | ----------------- | ----------- | --------------------- |
+| `nlExportKeys`    |             | `CustomEvent<void>`   |
 | `nlImportAccount` |             | `CustomEvent<string>` |
 
 
