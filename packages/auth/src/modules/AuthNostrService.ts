@@ -282,6 +282,12 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
+  public exportKeys() {
+    if (!this.params.userInfo) return '';
+    if (this.params.userInfo.authMethod !== "local") return '';
+    return nip19.nsecEncode(this.params.userInfo.sk!);
+  }
+
   private onAuth(type: 'login' | 'signup' | 'logout', info: Info | null = null) {
     if (type !== 'logout' && !info) throw new Error('No user info in onAuth');
 

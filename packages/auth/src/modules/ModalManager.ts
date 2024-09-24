@@ -1,5 +1,5 @@
 import { NostrLoginOptions, RecentType, StartScreens, TypeModal } from '../types';
-import { checkNip05, getBunkerUrl, getDarkMode, localStorageRemoveRecent } from '../utils';
+import { checkNip05, getBunkerUrl, getDarkMode, localStorageRemoveRecent, localStorageSetItem } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { Info } from 'nostr-login-components/dist/types/types';
@@ -160,6 +160,15 @@ class ModalManager extends EventEmitter {
           });
       };
 
+      const exportKeys = async () => {
+        try {
+          await navigator.clipboard.writeText(this.authNostrService.exportKeys());
+          localStorageSetItem('backupKey', 'true');
+        } catch (err) {
+          console.error('Failed to copy to clipboard: ', err);
+        }
+      };
+
       const importKeys = async (relay: string) => {
         if (this.modal) {
           this.modal.isLoading = true;
@@ -210,7 +219,7 @@ class ModalManager extends EventEmitter {
         }
 
         try {
-          if (!name) throw new Error("Please enter some nickname");
+          if (!name) throw new Error('Please enter some nickname');
           await this.authNostrService.localSignup(name);
           if (this.modal) {
             this.modal.isLoading = false;
@@ -250,6 +259,10 @@ class ModalManager extends EventEmitter {
 
       this.modal.addEventListener('nlImportAccount', (event: any) => {
         importKeys(event.detail);
+      });
+
+      this.modal.addEventListener('nlExportKeys', (event: any) => {
+        exportKeys();
       });
 
       this.modal.addEventListener('handleLogoutBanner', () => {
