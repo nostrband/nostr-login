@@ -2,15 +2,3 @@
   display: block;
 }
 
-.show-slow {
-  opacity: 0;
-  display: none;
-  transition: 0.1s;
-}
-
-.isOpen .show-slow {
-  opacity: 1;
-  display: block;
-  transition: 0.2s;
-  transition-delay: 0.2s;
-}

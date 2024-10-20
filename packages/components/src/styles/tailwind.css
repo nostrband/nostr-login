@@ -466,3 +466,44 @@
 .theme-crab .dark .nl-button {
   @apply bg-red-800 border-red-950 text-red-200 hover:bg-red-900;
 }
+
+.show-slow {
+  opacity: 0;
+  display: none;
+  transition: 0.1s;
+}
+
+.isOpen .show-slow {
+  opacity: 1;
+  display: block;
+  transition: 0.2s;
+  transition-delay: 0.2s;
+}
+
+.active {
+  animation: blink 0.7s infinite alternate;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-spin-loading {
+  background: var(--qa-dark-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
