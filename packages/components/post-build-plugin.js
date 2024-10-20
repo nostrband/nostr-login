@@ -4,7 +4,7 @@ const path = require('path');
 const folderPath = './dist/components';
 const cssFilePath = './dist/components/css.js';
 let countFileRead = 0
-// Функция для поиска файлов в папке
+
 function getFilesInDirectory(dir) {
   const files = fs.readdirSync(dir);
   return files.filter(file => file.endsWith('.js'));
