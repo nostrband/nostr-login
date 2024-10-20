@@ -16,7 +16,6 @@ function processFile(filePath, cssContent) {
   
   const updatedContent = fileContent.replace(/const\s+(\w+Css)\s*=\s*(`[^`]*`|".*?"|'.*?')(?:\s*;|(\s*\/\/.*?))?(?=\s*const|$)/g, (match, varName, varValue) => {
     // Сохраняем CSS переменные и их значения в cssContent
-    console.log(varName);
     if (countFileRead === 0) {
         cssContent.push(`export const baseCss = ${varValue};`);
         countFileRead = countFileRead + 1;

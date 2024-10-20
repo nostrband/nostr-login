@@ -480,30 +480,3 @@
   transition-delay: 0.2s;
 }
 
-.active {
-  animation: blink 0.7s infinite alternate;
-}
-
-@keyframes blink {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-.animate-spin-loading {
-  background: var(--qa-dark-color);
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
-
-
