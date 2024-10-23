@@ -14,7 +14,7 @@ export class NlConnect {
   @Prop() connectionStringServices: ConnectionString[] = [];
 
   @State() isOpenAdvancedLogin: boolean = false;
-  @Event() nlNostrConnect: EventEmitter<string>;
+  @Event() nlNostrConnect: EventEmitter<ConnectionString>;
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];
@@ -30,8 +30,9 @@ export class NlConnect {
 
   componentWillLoad() {}
 
-  handleOpenLink(relay: string) {
-    this.nlNostrConnect.emit(relay);
+  handleOpenLink(e: Event, cs: ConnectionString) {
+    e.preventDefault();
+    this.nlNostrConnect.emit(cs);
   }
 
   render() {
@@ -54,7 +55,7 @@ export class NlConnect {
                       <a
                         href={el.link}
                         target="_blank"
-                        onClick={() => this.handleOpenLink(el.relay)}
+                        onClick={e => this.handleOpenLink(e, el)}
                         class="flex items-center gap-x-3.5 w-full hover:bg-gray-300 flex cursor-pointer items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm justify-between"
                       >
                         <div class="w-full max-w-7 h-7 flex relative">
@@ -82,6 +83,9 @@ export class NlConnect {
               </ul>
             </div>
           )}
+        </div>
+        <div class="ps-4 pe-4 overflow-y-auto">
+          <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
         </div>
         <div class="max-w-52 mx-auto pb-5">
           {(this.allowAuthMethod('connect') || this.allowAuthMethod('readOnly')) && (

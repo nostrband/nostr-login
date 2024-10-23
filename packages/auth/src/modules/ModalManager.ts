@@ -1,10 +1,11 @@
-import { NostrLoginOptions, RecentType, StartScreens, TypeModal } from '../types';
+import { NostrLoginOptions, StartScreens, TypeModal } from '../types';
 import { checkNip05, getBunkerUrl, getDarkMode, localStorageRemoveRecent, localStorageSetItem } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
-import { Info } from 'nostr-login-components/dist/types/types';
+import { ConnectionString, Info, RecentType } from 'nostr-login-components/dist/types/types';
 import { nip19 } from 'nostr-tools';
 import { setDarkMode } from '..';
+import { ReadyListener } from './Nip46';
 
 class ModalManager extends EventEmitter {
   private modal: TypeModal | null = null;
@@ -15,6 +16,7 @@ class ModalManager extends EventEmitter {
   private accounts: Info[] = [];
   private recents: RecentType[] = [];
   private opt?: NostrLoginOptions;
+  private modalIframeReady?: ReadyListener;
 
   constructor(params: NostrParams, authNostrService: AuthNostrService, extensionManager: NostrExtensionService) {
     super();
@@ -59,7 +61,9 @@ class ModalManager extends EventEmitter {
     if (opt.bunkers) {
       this.modal.setAttribute('bunkers', opt.bunkers);
     } else {
-      this.modal.setAttribute('bunkers', 'nsec.app,highlighter.com');
+      let bunkers = 'nsec.app,highlighter.com';
+      if (opt.dev) bunkers += ',new.nsec.app';
+      this.modal.setAttribute('bunkers', bunkers);
     }
 
     if (opt.methods !== undefined) {
@@ -100,6 +104,7 @@ class ModalManager extends EventEmitter {
           // reset state
           this.modal.isLoading = false;
           this.modal.authUrl = '';
+          this.modal.iframeUrl = '';
           this.modal.error = '';
           this.modal.isLoadingExtension = false;
 
@@ -110,54 +115,52 @@ class ModalManager extends EventEmitter {
         }
       });
 
-      const login = (name: string) => {
-        if (this.modal) {
-          this.modal.isLoading = true;
-        }
-        // convert name to bunker url
-        getBunkerUrl(name, this.params.optionsModal)
-          // connect to bunker by url
-          .then(bunkerUrl => this.authNostrService.authNip46('login', name, bunkerUrl))
-          .then(() => {
-            if (this.modal) {
-              this.modal.isLoading = false;
-            }
-            dialog.close();
-            ok();
-          })
-          .catch((e: Error) => {
-            console.log('error', e);
-            if (this.modal) {
-              this.modal.isLoading = false;
-              this.modal.error = e.toString();
-            }
-          });
+      const done = async (ok: () => void) => {
+        // make sure starter has finished
+        if (this.modalIframeReady) await this.modalIframeReady.wait();
+        if (this.modal) this.modal.isLoading = false;
+        await this.authNostrService.onReady();
+        dialog.close();
+        ok();
       };
 
-      const signup = (name: string) => {
+      const exec = async (body: () => Promise<void>) => {
         if (this.modal) {
           this.modal.isLoading = true;
         }
 
-        // create acc on service and get bunker url
-        this.authNostrService
-          .createAccount(name)
+        try {
+          await body();
+          await done(ok);
+        } catch (e: any) {
+          console.log('error', e);
+          if (this.modal) {
+            this.modal.isLoading = false;
+            this.modal.authUrl = '';
+            this.modal.iframeUrl = '';
+            this.modal.error = e.toString();
+          }
+        }
+      };
+
+      const login = async (name: string, domain?: string) => {
+        await exec(async () => {
+          // convert name to bunker url
+          const bunkerUrl = await getBunkerUrl(name, this.params.optionsModal);
+
           // connect to bunker by url
-          .then(({ bunkerUrl, sk }) => this.authNostrService.authNip46('signup', name, bunkerUrl, sk))
-          .then(() => {
-            if (this.modal) {
-              this.modal.isLoading = false;
-            }
-            dialog.close();
-            ok();
-          })
-          .catch((e: Error) => {
-            console.log('error', e);
-            if (this.modal) {
-              this.modal.isLoading = false;
-              this.modal.error = e.toString();
-            }
-          });
+          await this.authNostrService.authNip46('login', { name, bunkerUrl, domain });
+        });
+      };
+
+      const signup = async (name: string) => {
+        await exec(async () => {
+          // create acc on service and get bunker url
+          const { bunkerUrl, sk } = await this.authNostrService.createAccount(name);
+
+          // connect to bunker by url
+          await this.authNostrService.authNip46('signup', { name, bunkerUrl, sk });
+        });
       };
 
       const exportKeys = async () => {
@@ -169,71 +172,44 @@ class ModalManager extends EventEmitter {
         }
       };
 
-      const importKeys = async (relay: string) => {
-        if (this.modal) {
-          this.modal.isLoading = true;
-        }
+      const importKeys = async (cs: ConnectionString) => {
+        await exec(async () => {
+          const { link, iframeUrl } = cs;
 
-        try {
-          await this.authNostrService.importAndConnect(relay);
+          if (this.modal && iframeUrl) {
+            // we pass the link down to iframe so it could open it
+            this.modal.authUrl = link;
+            this.modal.iframeUrl = iframeUrl;
+            this.modal.isLoading = false;
+            console.log('nostrconnect authUrl', this.modal.authUrl, this.modal.iframeUrl);
+          }
 
-          if (this.modal) {
-            this.modal.isLoading = false;
-          }
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          if (this.modal) {
-            this.modal.isLoading = false;
-            this.modal.error = e.toString();
-          }
-        }
+          await this.authNostrService.importAndConnect(cs);
+        });
       };
 
-      const nostrConnect = async (relay?: string) => {
-        if (relay && this.modal) {
-          this.modal.isLoading = true;
-        }
+      const nostrConnect = async (cs?: ConnectionString) => {
+        await exec(async () => {
+          const { relay, domain, link, iframeUrl } = cs || {};
+          console.log('nostrConnect', cs, relay, domain, link, iframeUrl);
 
-        try {
-          await this.authNostrService.nostrConnect(relay);
-          if (this.modal) {
+          if (this.modal && iframeUrl) {
+            // we pass the link down to iframe so it could open it
+            this.modal.authUrl = link;
+            this.modal.iframeUrl = iframeUrl;
             this.modal.isLoading = false;
+            console.log('nostrconnect authUrl', this.modal.authUrl, this.modal.iframeUrl);
           }
 
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          if (this.modal) {
-            this.modal.isLoading = false;
-            this.modal.error = e.toString();
-          }
-        }
+          await this.authNostrService.nostrConnect(relay, { domain, link, iframeUrl });
+        });
       };
 
       const localSignup = async (name?: string) => {
-        if (this.modal) {
-          this.modal.isLoading = true;
-        }
-
-        try {
+        await exec(async () => {
           if (!name) throw new Error('Please enter some nickname');
           await this.authNostrService.localSignup(name);
-          if (this.modal) {
-            this.modal.isLoading = false;
-          }
-
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          if (this.modal) {
-            this.modal.isLoading = false;
-            this.modal.error = e.toString();
-          }
-        }
+        });
       };
 
       if (!this.modal) throw new Error('WTH?');
@@ -270,7 +246,7 @@ class ModalManager extends EventEmitter {
       });
 
       this.modal.addEventListener('nlNostrConnect', (event: any) => {
-        nostrConnect(event.detail as string);
+        nostrConnect(event.detail);
       });
 
       this.modal.addEventListener('nlNostrConnectDefault', () => {
@@ -294,7 +270,6 @@ class ModalManager extends EventEmitter {
           this.authNostrService.setReadOnly(userInfo.pubkey);
           dialog.close();
         } else if (userInfo.authMethod === 'otp') {
-          console.log('recent otp login', userInfo);
           try {
             this.modal!.dispatchEvent(
               new CustomEvent('nlLoginOTPUser', {
@@ -310,7 +285,7 @@ class ModalManager extends EventEmitter {
         } else {
           const input = userInfo.bunkerUrl || userInfo.nip05;
           if (!input) throw new Error('Bad connect info');
-          login(input);
+          login(input, userInfo.domain);
         }
       });
 
@@ -337,23 +312,11 @@ class ModalManager extends EventEmitter {
       };
 
       this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
-        if (!this.modal) return;
-
-        this.modal.isLoading = true;
-
-        const nameNpub = event.detail;
-        try {
+        await exec(async () => {
+          const nameNpub = event.detail;
           const pubkey = await nameToPubkey(nameNpub);
           this.authNostrService.setReadOnly(pubkey);
-
-          this.modal.isLoading = false;
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          this.modal.isLoading = false;
-          this.modal.error = e.toString() || e;
-        }
+        });
       });
 
       this.modal.addEventListener('nlLoginExtension', async () => {
@@ -361,32 +324,19 @@ class ModalManager extends EventEmitter {
           throw new Error('No extension');
         }
 
-        if (this.modal) {
-          try {
-            this.modal.isLoadingExtension = true;
-
-            await this.extensionService.setExtension();
-
-            this.modal.isLoadingExtension = false;
-
-            dialog.close();
-
-            ok();
-          } catch (e) {
-            console.log('extension error', e);
-            // @ts-ignore
-            this.modal.error = e.toString();
-          }
-        }
+        await exec(async () => {
+          if (!this.modal) return;
+          this.modal.isLoadingExtension = true;
+          await this.extensionService.setExtension();
+          this.modal.isLoadingExtension = false;
+        });
       });
 
       this.modal.addEventListener('nlLoginOTPUser', async (event: any) => {
-        if (!this.modal) return;
+        await exec(async () => {
+          if (!this.modal) return;
 
-        this.modal.isLoading = true;
-
-        const nameNpub = event.detail;
-        try {
+          const nameNpub = event.detail;
           const pubkey = await nameToPubkey(nameNpub);
           const url = this.opt!.otpRequestUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + pubkey;
           const r = await fetch(url);
@@ -400,22 +350,13 @@ class ModalManager extends EventEmitter {
 
           // remember for code handler below
           otpPubkey = pubkey;
-
-          this.modal.isLoading = false;
-        } catch (e: any) {
-          console.log('error', e);
-          this.modal.isLoading = false;
-          this.modal.error = e.toString() || e;
-        }
+        });
       });
 
       this.modal.addEventListener('nlLoginOTPCode', async (event: any) => {
-        if (!this.modal) return;
-
-        this.modal.isLoading = true;
-
-        const code = event.detail;
-        try {
+        await exec(async () => {
+          if (!this.modal) return;
+          const code = event.detail;
           const url = this.opt!.otpReplyUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + otpPubkey + '&code=' + code;
           const r = await fetch(url);
           if (r.status !== 200) {
@@ -427,16 +368,7 @@ class ModalManager extends EventEmitter {
           this.authNostrService.setOTP(otpPubkey, data);
 
           this.modal.isOTP = false;
-          this.modal.isLoading = false;
-
-          dialog.close();
-
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          this.modal.isLoading = false;
-          this.modal.error = e.toString() || e;
-        }
+        });
       });
 
       this.modal.addEventListener('nlCheckSignup', async (event: any) => {
@@ -523,6 +455,15 @@ class ModalManager extends EventEmitter {
     if (this.modal) {
       this.modal.authUrl = url;
       this.modal.isLoading = false;
+    }
+  }
+
+  public onIframeUrl(url: string) {
+    if (this.modal) {
+      this.modal.iframeUrl = url;
+      console.log("modal iframe url", url);
+      if (url) this.modalIframeReady = new ReadyListener('starterDone', new URL(url).origin);
+      else this.modalIframeReady = undefined;
     }
   }
 

@@ -57,6 +57,9 @@ import { NostrLoginOptions, StartScreens } from './types';
       const signupRelays = cs.getAttribute('data-signup-relays');
       if (signupRelays) options.signupRelays = signupRelays;
 
+      const dev = cs.getAttribute('data-dev') === 'true';
+      if (dev) options.dev = dev;
+
       console.log("nostr-login options", options);
     }
 

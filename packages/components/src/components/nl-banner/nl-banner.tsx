@@ -41,7 +41,7 @@ export class NlBanner {
     this.isNotConfirmToSend = true;
     this.isOpen = true;
     this.isOpenConfirm = true;
-    this.domain = this.userInfo?.nip05?.split('@')?.[1] || '';
+    this.domain = this.userInfo?.domain || this.userInfo?.nip05?.split('@')?.[1] || '';
 
     if (notify.url) {
       this.urlNotify = notify.url;

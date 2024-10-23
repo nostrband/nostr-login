@@ -17,6 +17,7 @@
 | `error`                    | `error`                |             | `string`                                                   | `''`                     |
 | `hasExtension`             | `has-extension`        |             | `boolean`                                                  | `false`                  |
 | `hasOTP`                   | `has-o-t-p`            |             | `boolean`                                                  | `false`                  |
+| `iframeUrl`                | `iframe-url`           |             | `string`                                                   | `''`                     |
 | `isLoading`                | `is-loading`           |             | `boolean`                                                  | `false`                  |
 | `isLoadingExtension`       | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
 | `isOTP`                    | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |

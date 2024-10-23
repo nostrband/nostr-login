@@ -18,6 +18,7 @@ export class NlAuth {
   @Prop() isLoadingExtension: boolean = false;
   @Prop() isOTP: boolean = false;
   @Prop() authUrl: string = '';
+  @Prop() iframeUrl: string = '';
   @Prop() error: string = '';
   @Prop() localSignup: boolean = false;
   @Prop({ mutable: true }) accounts: Info[] = [];
@@ -54,6 +55,11 @@ export class NlAuth {
   @Watch('authUrl')
   watchAuthUrlHandler(newValue: string) {
     state.authUrl = newValue;
+  }
+
+  @Watch('iframeUrl')
+  watchIframeUrlHandler(newValue: string) {
+    state.iframeUrl = newValue;
   }
 
   @Watch('error')

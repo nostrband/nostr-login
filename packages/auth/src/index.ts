@@ -54,12 +54,15 @@ export class NostrLoginInitializer {
       this.bannerManager.onCallStart();
     });
 
+    this.authNostrService.on('onIframeUrl', (url) => {
+      this.modalManager.onIframeUrl(url);
+    })
+
     this.authNostrService.on('onAuthUrl', ({ url, eventToAddAccount }) => {
       this.processManager.onAuthUrl();
 
       if (eventToAddAccount) {
         this.modalManager.onAuthUrl(url);
-
         return;
       }
 
@@ -83,7 +86,7 @@ export class NostrLoginInitializer {
     });
 
     this.modalManager.on('onAuthUrlClick', url => {
-      this.popupManager.ensurePopup(url);
+      this.openPopup(url);
     });
 
     this.modalManager.on('onSwitchAccount', async (info: Info) => {
@@ -109,7 +112,7 @@ export class NostrLoginInitializer {
     });
 
     this.bannerManager.on('onAuthUrlClick', url => {
-      this.popupManager.ensurePopup(url);
+      this.openPopup(url);
     });
 
     this.bannerManager.on('onSwitchAccount', async (info: Info) => {
@@ -131,6 +134,10 @@ export class NostrLoginInitializer {
     this.bannerManager.on('launch', startScreen => {
       this.launch(startScreen);
     });
+  }
+
+  private openPopup (url: string) {
+    this.popupManager.openPopup(url);
   }
 
   private async switchAccount(info: Info) {

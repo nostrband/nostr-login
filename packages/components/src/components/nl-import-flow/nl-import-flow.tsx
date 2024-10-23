@@ -21,19 +21,17 @@ export class NlImportFlow {
 
   @State() isCopy = false;
 
-  @Event() nlImportAccount: EventEmitter<string>;
+  @Event() nlImportAccount: EventEmitter<ConnectionString>;
   @Event() nlExportKeys: EventEmitter<void>;
 
   handleDomainSelect(event: CustomEvent<string>) {
     const s = this.services.find(s => s.domain === event.detail);
-    state.nlImport.relay = s!.relay;
-    state.nlImport.nostrConnect = s!.link;
+    state.nlImport = s;
   }
 
   handleCreateAccount(e: MouseEvent) {
     e.preventDefault();
-    window.open(state.nlImport.nostrConnect, '_blank');
-    this.nlImportAccount.emit(state.nlImport.relay);
+    this.nlImportAccount.emit(state.nlImport);
   }
 
   handleContinue() {
@@ -42,7 +40,6 @@ export class NlImportFlow {
 
   handleContinueKeyBackup() {
     this.isKeyBackup = true;
-    // this.titleInfo = 'Key export'
   }
 
   async copyToClipboard() {
@@ -74,10 +71,10 @@ export class NlImportFlow {
             <br />
             You can also export your keys and save them in your password manager. */}
           </p>
-          <div class="ml-auto mr-auto w-72">
+          <div class="ml-auto mr-auto mb-2 w-72">
             <button-base onClick={() => this.handleContinue()} titleBtn="Import to key store" />
           </div>
-          <div class="ml-auto mr-auto mb-2 w-72">
+          <div class="ml-auto mr-auto w-72">
             <button-base onClick={() => this.handleContinueKeyBackup()} titleBtn="Export keys" />
           </div>
         </div>

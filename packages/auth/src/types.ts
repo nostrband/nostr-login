@@ -1,4 +1,4 @@
-import { Info, AuthMethod, ConnectionString } from 'nostr-login-components/dist/types/types';
+import { Info, AuthMethod, ConnectionString, RecentType } from 'nostr-login-components/dist/types/types';
 
 export interface NostrLoginAuthOptions {
   localNsec?: string;
@@ -57,6 +57,9 @@ export interface NostrLoginOptions {
   // comma-separated list of relays added 
   // to relay list of new profiles created with local signup
   signupRelays?: string;
+
+  // dev mode
+  dev?: boolean;
 }
 
 export interface IBanner {
@@ -80,6 +83,7 @@ export type TypeBanner = IBanner & HTMLElement;
 
 export interface IModal {
   authUrl?: string;
+  iframeUrl?: string;
   isLoading?: boolean;
   isOTP?: boolean;
   isLoadingExtension?: boolean;
@@ -105,5 +109,3 @@ export interface Response {
   result?: string;
   error?: string;
 }
-
-export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;

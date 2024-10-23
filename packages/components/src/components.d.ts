@@ -27,6 +27,7 @@ export namespace Components {
         "error": string;
         "hasExtension": boolean;
         "hasOTP": boolean;
+        "iframeUrl": string;
         "isLoading": boolean;
         "isLoadingExtension": boolean;
         "isOTP": boolean;
@@ -307,7 +308,7 @@ declare global {
         new (): HTMLNlConfirmLogoutElement;
     };
     interface HTMLNlConnectElementEventMap {
-        "nlNostrConnect": string;
+        "nlNostrConnect": ConnectionString;
     }
     interface HTMLNlConnectElement extends Components.NlConnect, HTMLStencilElement {
         addEventListener<K extends keyof HTMLNlConnectElementEventMap>(type: K, listener: (this: HTMLNlConnectElement, ev: NlConnectCustomEvent<HTMLNlConnectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -324,7 +325,7 @@ declare global {
         new (): HTMLNlConnectElement;
     };
     interface HTMLNlImportFlowElementEventMap {
-        "nlImportAccount": string;
+        "nlImportAccount": ConnectionString;
         "nlExportKeys": void;
     }
     interface HTMLNlImportFlowElement extends Components.NlImportFlow, HTMLStencilElement {
@@ -614,6 +615,7 @@ declare namespace LocalJSX {
         "error"?: string;
         "hasExtension"?: boolean;
         "hasOTP"?: boolean;
+        "iframeUrl"?: string;
         "isLoading"?: boolean;
         "isLoadingExtension"?: boolean;
         "isOTP"?: boolean;
@@ -671,12 +673,12 @@ declare namespace LocalJSX {
         "authMethods"?: AuthMethod[];
         "connectionStringServices"?: ConnectionString[];
         "hasOTP"?: boolean;
-        "onNlNostrConnect"?: (event: NlConnectCustomEvent<string>) => void;
+        "onNlNostrConnect"?: (event: NlConnectCustomEvent<ConnectionString>) => void;
         "titleWelcome"?: string;
     }
     interface NlImportFlow {
         "onNlExportKeys"?: (event: NlImportFlowCustomEvent<void>) => void;
-        "onNlImportAccount"?: (event: NlImportFlowCustomEvent<string>) => void;
+        "onNlImportAccount"?: (event: NlImportFlowCustomEvent<ConnectionString>) => void;
         "services"?: ConnectionString[];
         "textImport"?: string;
         "titleImport"?: string;

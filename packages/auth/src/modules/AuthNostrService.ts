@@ -2,11 +2,12 @@ import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, get
 import { ConnectionString, Info } from 'nostr-login-components/dist/types/types';
 import { generatePrivateKey, getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
-import NDK, { NDKEvent, NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser, NDKRpcRequest } from '@nostr-dev-kit/ndk';
+import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser, NDKRpcRequest } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
 import { Signer } from './Nostr';
 import { Nip44 } from '../utils/nip44';
+import { IframeNostrRpc, ReadyListener } from './Nip46';
 
 const OUTBOX_RELAYS = ['wss://user.kindpag.es', 'wss://purplepag.es', 'wss://relay.nos.social'];
 const DEFAULT_NOSTRCONNECT_RELAY = 'wss://relay.nsec.app/';
@@ -44,6 +45,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   private nip44Codec = new Nip44();
   private nostrConnectKey: string = '';
   private nostrConnectSecret: string = '';
+  private iframe?: HTMLIFrameElement;
 
   nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string>;
@@ -77,6 +79,10 @@ class AuthNostrService extends EventEmitter implements Signer {
     };
   }
 
+  public isIframe() {
+    return !!this.iframe;
+  }
+
   public async waitReady() {
     if (this.signerPromise) {
       try {
@@ -91,16 +97,37 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
-  public async nostrConnect(relay?: string, importConnect = false) {
+  public async nostrConnect(
+    relay?: string,
+    {
+      domain = '',
+      link = '',
+      iframeUrl = '',
+      importConnect = false,
+    }: {
+      domain?: string;
+      link?: string;
+      importConnect?: boolean;
+      iframeUrl?: string;
+    } = {},
+  ) {
     relay = relay || DEFAULT_NOSTRCONNECT_RELAY;
 
     const info: Info = {
       authMethod: 'connect',
       pubkey: '', // unknown yet!
       sk: this.nostrConnectKey,
+      domain: domain,
       relays: [relay],
+      iframeUrl,
     };
 
+    console.log('nostrconnect iframeUrl', iframeUrl, link);
+
+    // non-iframe flow
+    if (link && !iframeUrl) window.open(link, '_blank', 'width=400,height=700');
+
+    // init nip46 signer
     const remotePubkey = await this.initSigner(info, { listen: true });
 
     // signer learns the remote pubkey
@@ -133,17 +160,29 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // copy defaults
     const apps = NOSTRCONNECT_APPS.map(a => ({ ...a }));
+    if (this.params.optionsModal.dev) {
+      apps.push({
+        name: 'Dev.Nsec.app',
+        domain: 'new.nsec.app',
+        canImport: true,
+        img: 'https://new.nsec.app/assets/favicon.ico',
+        link: 'https://dev.nsec.app/<nostrconnect>',
+        relay: 'wss://relay.nsec.app/',
+      });
+    }
+
     for (const a of apps) {
       let relay = DEFAULT_NOSTRCONNECT_RELAY;
       if (a.link.startsWith('https://')) {
-        const url = new URL(a.link);
+        let domain = a.domain || new URL(a.link).hostname;
         try {
-          const info = await (await fetch(`${url.origin}/.well-known/nostr.json`)).json();
+          const info = await (await fetch(`https://${domain}/.well-known/nostr.json`)).json();
           const pubkey = info.names['_'];
           const relays = info.nip46[pubkey] as string[];
           if (relays && relays.length) relay = relays[0];
+          a.iframeUrl = info.nip46.iframe_url || '';
         } catch (e) {
-          console.log('Bad app info', e, url);
+          console.log('Bad app info', e, a);
         }
       }
       const nc = nostrconnect + '&relay=' + relay + nsec;
@@ -175,8 +214,11 @@ class AuthNostrService extends EventEmitter implements Signer {
     this.onAuth('login', info);
   }
 
-  public async importAndConnect(relay: string) {
-    const info = await this.nostrConnect(relay, true);
+  public async importAndConnect(cs: ConnectionString) {
+    const { relay, domain, link, iframeUrl } = cs;
+    if (!domain) throw new Error('Domain required');
+
+    const info = await this.nostrConnect(relay, { domain, link, importConnect: true, iframeUrl });
 
     // logout to remove local keys from storage
     // but keep the connect signer
@@ -208,6 +250,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     this.releaseSigner();
     await this.initSigner(info);
     this.onAuth('login', info);
+    await this.onReady();
   }
 
   public async createAccount(nip05: string) {
@@ -219,6 +262,8 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // parse bunker url and generate local nsec
     const info = bunkerUrlToInfo(bunkerUrl);
+    info.domain = domain; // to make sure iframeUrl works
+
     const eventToAddAccount = Boolean(this.params.userInfo);
 
     // init signer to talk to the bunker (not the user!)
@@ -284,7 +329,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
   public exportKeys() {
     if (!this.params.userInfo) return '';
-    if (this.params.userInfo.authMethod !== "local") return '';
+    if (this.params.userInfo.authMethod !== 'local') return '';
     return nip19.nsecEncode(this.params.userInfo.sk!);
   }
 
@@ -326,7 +371,11 @@ class AuthNostrService extends EventEmitter implements Signer {
         type,
       };
 
-      if (type !== 'logout') {
+      if (type === 'logout') {
+        // reset
+        if (this.iframe) this.iframe.remove();
+        this.iframe = undefined;
+      } else {
         options.pubkey = info!.pubkey;
 
         if (info!.sk) {
@@ -356,6 +405,85 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
 
+  private async createIframe(iframeUrl?: string) {
+    if (!iframeUrl) return undefined;
+
+    // ensure iframe
+    const domain = new URL(iframeUrl).hostname;
+    let iframe: HTMLIFrameElement | undefined;
+
+    // one iframe per domain
+    const id = '__nostr-login-worker-iframe-' + domain;
+    iframe = document.querySelector(`#${id}`) as HTMLIFrameElement;
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.setAttribute('width', '300');
+      iframe.setAttribute('height', '600');
+      iframe.style.display = 'block';
+      // iframe.setAttribute('sandbox', 'allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts');
+      iframe.id = id;
+      document.body.append(iframe);
+    }
+
+    // wait until loaded
+    iframe.setAttribute('src', iframeUrl);
+
+    // we start listening right now to avoid races
+    // with 'load' event below
+    const ready = new ReadyListener('workerReady', new URL(iframeUrl).origin);
+
+    await new Promise(ok => {
+      iframe!.addEventListener('load', ok);
+    });
+
+    // now make sure the iframe is ready,
+    // timeout timer starts here
+    await ready.wait();
+
+    // FIXME wait until the iframe is ready to accept requests,
+    // maybe it should send us some message?
+
+    console.log('nostr-login iframe ready', iframeUrl);
+
+    return iframe;
+  }
+
+  // public async openIframePopup(url: string) {
+  //   console.log('openIframePopup', url, this.iframe);
+  //   this.iframe!.contentWindow!.postMessage(
+  //     {
+  //       authUrl: url,
+  //     },
+  //     {
+  //       targetOrigin: new URL(url).origin,
+  //     },
+  //   );
+  // }
+
+  private async getIframeUrl(domain?: string) {
+    if (!domain) return '';
+    try {
+      const r = await fetch(`https://${domain}/.well-known/nostr.json`);
+      const data = await r.json();
+      return data.nip46?.iframe_url || '';
+    } catch (e) {
+      console.log('failed to fetch iframe url', e, domain);
+      return '';
+    }
+  }
+  public async onReady() {
+    console.log("onReady", this.params.userInfo);
+    if (this.params.userInfo && this.params.userInfo.iframeUrl) {
+      // create iframe
+      this.iframe = await this.createIframe(this.params.userInfo.iframeUrl);
+      if (!this.iframe) return;
+
+      // assign iframe to RPC object
+      const origin = new URL(this.params.userInfo.iframeUrl!).origin;
+      (this.signer!.rpc as IframeNostrRpc).setIframe(origin, this.iframe);
+    }
+  }
+
   public async initSigner(info: Info, { listen = false, connect = false, eventToAddAccount = false } = {}) {
     // mutex
     if (this.signerPromise) {
@@ -364,8 +492,14 @@ class AuthNostrService extends EventEmitter implements Signer {
       } catch {}
     }
 
+    info.iframeUrl = info.iframeUrl || (await this.getIframeUrl(info.domain));
+    console.log('iframeUrl', info.iframeUrl);
+    this.emit('onIframeUrl', info.iframeUrl);
+
     this.signerPromise = new Promise<string | undefined>(async (ok, err) => {
       try {
+        // pre-connect if we're creating the connection (listen|connect) or
+        // not iframe mode
         if (info.relays) {
           for (const r of info.relays) {
             this.ndk.addExplicitRelay(r, undefined);
@@ -376,85 +510,68 @@ class AuthNostrService extends EventEmitter implements Signer {
         // signer won't start properly
         await this.ndk.connect();
 
-        // console.log('creating signer', { info, connect });
         // create and prepare the signer
-        this.signer = new NDKNip46Signer(this.ndk, info.pubkey, new NDKPrivateKeySigner(info.sk));
+        const localPubkey = getPublicKey(info.sk!);
+        const localSigner = new NDKPrivateKeySigner(info.sk);
+        this.signer = new NDKNip46Signer(this.ndk, info.pubkey, localSigner);
+
+        // override with our own rpc implementation
+        const rpc = new IframeNostrRpc(this.ndk, localPubkey, localSigner);
+        this.signer.rpc = rpc;
 
         // OAuth flow
         if (!listen) {
-          this.signer.on('authUrl', url => {
+          rpc.on('authUrl', (url: string) => {
             console.log('nostr login auth url', url);
+
+            // tell iframe about the authUrl to-be-opened
+            // if (this.iframe && authUrl) this.openIframePopup(authUrl);
+
+            // notify our UI
             this.emit('onAuthUrl', { url, eventToAddAccount });
           });
         }
 
+        // We connection is created (or we're re-creating an
+        // existing one) we might switch to the iframe-based comms.
+        // User will need to confirm the new connection using UI
+        // which means it's hard for our invisible iframe to be
+        // the sender of 'ack', and so it's simpler to establish
+        // the connection using plain nip46 over relays and then
+        // switch to iframe
+        const onOk = async (pubkey?: string) => {
+          // plain nip46 mode?
+          console.log('onOk', pubkey, this.iframe);
+          // if (!this.iframe) {
+          //   ok(pubkey);
+          //   return;
+          // }
+
+          // // assign iframe to RPC object
+          // const origin = new URL(info.iframeUrl!).origin;
+          // rpc.setIframe(origin, this.iframe);
+
+          // ok
+          ok(pubkey);
+        };
+
         // nostrconnect: flow
         if (listen) {
-          // ndk doesn't support nostrconnect:
-          // we just listed to an unsolicited reply to
-          // our pubkey and if it's ack - we're fine
-          const pubkey = getPublicKey(info.sk!);
-          console.log('nostr-login listening for conn to', pubkey);
-          const sub = await this.signer.rpc.subscribe({
-            'kinds': [24133],
-            '#p': [pubkey],
-          });
-          sub.on('event', async (event: NDKEvent) => {
-            // console.log("ack?", event);
-            try {
-              const parsedEvent = await this.signer!.rpc.parseEvent(event);
-              // console.log("parsedEvent", parsedEvent);
-              if (!(parsedEvent as NDKRpcRequest).method) {
-                const response = parsedEvent as NDKRpcResponse;
-
-                // ignore
-                if (response.result === 'auth_url') return;
-
-                // FIXME for now accept 'ack' replies, later on only
-                // accept secrets
-                if (response.result === 'ack' || response.result === this.nostrConnectSecret) {
-                  // now ensure the remote pubkey
-                  this.signer!.remotePubkey = event.pubkey;
-                  this.signer!.remoteUser = new NDKUser({ pubkey: event.pubkey });
-                  info.pubkey = event.pubkey;
-
-                  ok(event.pubkey);
-                } else {
-                  err(response.error);
-                }
-              }
-            } catch (e) {
-              console.log('error parsing event', e, event.rawEvent());
-            }
-            // done
-            sub.stop();
-          });
+          // wait for the incoming message from signer with their pubkey
+          const remotePubkey = await rpc.listen(this.nostrConnectSecret);
+          this.signer!.remotePubkey = remotePubkey;
+          this.signer!.remoteUser = new NDKUser({ pubkey: remotePubkey });
+          info.pubkey = remotePubkey;
+          onOk(remotePubkey);
         } else {
           // bunker-url based flow
 
           // if we're doing it for the first time then
           // we should send 'connect' NIP46 request
-          if (connect) {
-            // since ndk doesn't yet support perms param
-            // we reimplement the 'connect' call here
-            // await signer.blockUntilReady();
-
-            await new Promise<void>((ok, err) => {
-              if (this.signer && info.sk) {
-                const connectParams = [info.pubkey!, info.token || '', this.params.optionsModal.perms || ''];
-                this.signer.rpc.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
-                  if (response.result === 'ack') {
-                    ok();
-                  } else {
-                    err(response.error);
-                  }
-                });
-              }
-            });
-          }
+          if (connect) await rpc.connect(info, this.params.optionsModal.perms);
 
           // resolve after we've connected, if required
-          ok(undefined);
+          onOk(undefined);
         }
       } catch (e) {
         console.log('initSigner failure', e);
@@ -467,11 +584,15 @@ class AuthNostrService extends EventEmitter implements Signer {
     return this.signerPromise;
   }
 
-  public async authNip46(type: 'login' | 'signup', name: string, bunkerUrl: string, sk = '') {
+  public async authNip46(type: 'login' | 'signup', { name, bunkerUrl, sk = '', domain = '' }: { name: string; bunkerUrl: string; sk?: string; domain?: string }) {
     try {
       const info = bunkerUrlToInfo(bunkerUrl, sk);
       if (isBunkerUrl(name)) info.bunkerUrl = name;
-      else info.nip05 = name;
+      else {
+        info.nip05 = name;
+        info.domain = name.split('@')[1];
+      }
+      if (domain) info.domain = domain;
 
       // console.log('nostr login auth info', info);
       if (!info.pubkey || !info.sk || !info.relays?.[0]) {
@@ -479,6 +600,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       }
 
       const eventToAddAccount = Boolean(this.params.userInfo);
+      console.log('authNip46', type, info);
 
       await this.initSigner(info, { connect: true, eventToAddAccount });
 
