@@ -17,7 +17,7 @@
     ".": "./dist/components/index.js"
   },
   "scripts": {
-    "build": "stencil build --docs --prod",
+    "build": "stencil build --docs --prod && node post-build-plugin.js",
     "dev": "stencil build --dev --watch --serve",
     "test": "stencil test --spec --e2e",
     "test.watch": "stencil test --spec --e2e --watchAll",

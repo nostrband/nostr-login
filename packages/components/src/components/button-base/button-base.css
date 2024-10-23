@@ -1,3 +1,27 @@
 :host {
   display: block;
 }
+
+.animate-spin-loading {
+  background: var(--qa-dark-color);
+  animation: spin2 1s linear infinite;
+}
+
+@keyframes spin2 {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.active {
+  animation: blink 0.7s infinite alternate;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
