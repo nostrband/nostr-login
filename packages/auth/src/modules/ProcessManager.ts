@@ -15,13 +15,21 @@ class ProcessManager extends EventEmitter {
     }
   }
 
+  public onIframeUrl() {
+    if (Boolean(this.callTimer)) {
+      clearTimeout(this.callTimer);
+    }
+  }
+
   public async wait<T>(cb: () => Promise<T>): Promise<T> {
+    // FIXME only allow 1 parallel req
+
     if (!this.callTimer) {
       this.callTimer = setTimeout(() => this.emit('onCallTimeout'), CALL_TIMEOUT);
     }
 
     if (!this.callCount) {
-      await this.emit('onCallStart');
+      this.emit('onCallStart');
     }
 
     this.callCount++;
@@ -37,7 +45,7 @@ class ProcessManager extends EventEmitter {
 
     this.callCount--;
 
-    await this.emit('onCallEnd');
+    this.emit('onCallEnd');
 
     if (this.callTimer) {
       clearTimeout(this.callTimer);
@@ -49,7 +57,7 @@ class ProcessManager extends EventEmitter {
       throw error;
     }
 
-    // we can't return undefined bcs an exception is 
+    // we can't return undefined bcs an exception is
     // thrown above on error
     // @ts-ignore
     return result;

@@ -5,18 +5,17 @@
 
 ## Properties
 
-| Property       | Attribute      | Description | Type                                                              | Default     |
-| -------------- | -------------- | ----------- | ----------------------------------------------------------------- | ----------- |
-| `accounts`     | --             |             | `Info[]`                                                          | `[]`        |
-| `darkMode`     | `dark-mode`    |             | `boolean`                                                         | `false`     |
-| `hiddenMode`   | `hidden-mode`  |             | `boolean`                                                         | `false`     |
-| `isLoading`    | `is-loading`   |             | `boolean`                                                         | `false`     |
-| `isOpen`       | `is-open`      |             | `boolean`                                                         | `false`     |
-| `listNotifies` | --             |             | `string[]`                                                        | `[]`        |
-| `notify`       | --             |             | `{ confirm: number; url?: string; timeOut?: { link: string; }; }` | `null`      |
-| `theme`        | `theme`        |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"`        | `'default'` |
-| `titleBanner`  | `title-banner` |             | `string`                                                          | `''`        |
-| `userInfo`     | --             |             | `Info`                                                            | `null`      |
+| Property      | Attribute      | Description | Type                                                                                  | Default     |
+| ------------- | -------------- | ----------- | ------------------------------------------------------------------------------------- | ----------- |
+| `accounts`    | --             |             | `Info[]`                                                                              | `[]`        |
+| `darkMode`    | `dark-mode`    |             | `boolean`                                                                             | `false`     |
+| `hiddenMode`  | `hidden-mode`  |             | `boolean`                                                                             | `false`     |
+| `isLoading`   | `is-loading`   |             | `boolean`                                                                             | `false`     |
+| `isOpen`      | `is-open`      |             | `boolean`                                                                             | `false`     |
+| `notify`      | --             |             | `{ confirm: number; url?: string; iframeUrl?: string; timeOut?: { link: string; }; }` | `null`      |
+| `theme`       | `theme`        |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"`                            | `'default'` |
+| `titleBanner` | `title-banner` |             | `string`                                                                              | `''`        |
+| `userInfo`    | --             |             | `Info`                                                                                | `null`      |
 
 
 ## Events
@@ -29,8 +28,6 @@
 | `handleLogoutBanner`        |             | `CustomEvent<string>` |
 | `handleNotifyConfirmBanner` |             | `CustomEvent<string>` |
 | `handleOpenWelcomeModal`    |             | `CustomEvent<string>` |
-| `handleRetryConfirmBanner`  |             | `CustomEvent<string>` |
-| `handleSetConfirmBanner`    |             | `CustomEvent<string>` |
 
 
 ## Dependencies

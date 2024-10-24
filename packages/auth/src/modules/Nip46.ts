@@ -4,10 +4,15 @@ import { validateEvent, verifySignature } from 'nostr-tools';
 
 class NostrRpc extends NDKNostrRpc {
   private pubkey: string;
+  protected _ndk: NDK;
+  protected _signer: NDKSigner;
+  protected requests: Set<string> = new Set();
   private sub?: NDKSubscription;
 
   public constructor(ndk: NDK, localPubkey: string, signer: NDKSigner) {
     super(ndk, signer, ndk.debug.extend('nip46:signer:rpc'));
+    this._ndk = ndk;
+    this._signer = signer;
     this.pubkey = localPubkey;
   }
 
@@ -76,6 +81,194 @@ class NostrRpc extends NDKNostrRpc {
       });
     });
   }
+
+  protected getId(): string {
+    return Math.random().toString(36).substring(7);
+  }
+
+  public async sendRequest(remotePubkey: string, method: string, params: string[] = [], kind = 24133, cb?: (res: NDKRpcResponse) => void): Promise<NDKRpcResponse> {
+    const id = this.getId();
+
+    // response handler will deduplicate auth urls and responses
+    this.setResponseHandler(id, cb);
+
+    // create and sign request
+    const event = await this.createRequestEvent(id, remotePubkey, method, params, kind);
+
+    // send to relays
+    await event.publish();
+
+    // NOTE: ndk returns a promise that never resolves and
+    // in fact REQUIRES cb to be provided (otherwise no way
+    // to consume the result), we've already stepped on the bug
+    // of waiting for this unresolvable result, so now we return
+    // undefined to make sure waiters fail, not hang.
+    // @ts-ignore
+    return undefined as NDKRpcResponse;
+  }
+
+  protected setResponseHandler(id: string, cb?: (res: NDKRpcResponse) => void) {
+    let authUrlSent = false;
+    return new Promise<NDKRpcResponse>(() => {
+      const responseHandler = (response: NDKRpcResponse) => {
+        if (response.result === 'auth_url') {
+          if (!authUrlSent) {
+            authUrlSent = true;
+            this.once(`response-${id}`, responseHandler);
+            this.emit('authUrl', response.error);
+          }
+        } else if (cb) {
+          if (this.requests.has(id)) {
+            this.requests.delete(id);
+            cb(response);
+          }
+        }
+      };
+
+      this.once(`response-${id}`, responseHandler);
+    });
+  }
+
+  protected async createRequestEvent(id: string, remotePubkey: string, method: string, params: string[] = [], kind = 24133) {
+    this.requests.add(id);
+    const localUser = await this._signer.user();
+    const remoteUser = this._ndk.getUser({ pubkey: remotePubkey });
+    const request = { id, method, params };
+
+    const event = new NDKEvent(this._ndk, {
+      kind,
+      content: JSON.stringify(request),
+      tags: [['p', remotePubkey]],
+      pubkey: localUser.pubkey,
+    } as NostrEvent);
+
+    event.content = await this._signer.encrypt(remoteUser, event.content);
+    await event.sign(this._signer);
+
+    return event;
+  }
+}
+
+export class IframeNostrRpc extends NostrRpc {
+  private peerOrigin?: string;
+  private iframe?: HTMLIFrameElement;
+  private iframeRequests = new Map<string, { id: string, pubkey: string }>();
+
+  public constructor(ndk: NDK, localPubkey: string, signer: NDKSigner) {
+    super(ndk, localPubkey, signer);
+    this._ndk = ndk;
+  }
+
+  public setIframe(peerOrigin: string, iframe: HTMLIFrameElement) {
+    this.peerOrigin = peerOrigin;
+    this.iframe = iframe;
+
+    window.addEventListener('message', async ev => {
+      // ignore other origins just in case
+      if (ev.origin !== this.peerOrigin) return;
+      // ignore ready events from starter iframe
+      if (ev.data === 'workerReady' || ev.data === 'starterDone') return;
+
+      console.log('iframe-nip46 got response from', this.peerOrigin, ev.data);
+      if (typeof ev.data === 'string' && ev.data.startsWith('errorNoKey')) {
+        const event_id = ev.data.split(':')[1];
+        const { id = '', pubkey = '' } = this.iframeRequests.get(event_id) || {};
+        if (id && pubkey && this.requests.has(id))
+          this.emit(`iframeRestart-${pubkey}`);
+        return;
+      }
+
+      // a copy-paste from rpc.subscribe
+      try {
+        const event = ev.data;
+
+        if (!validateEvent(event)) throw new Error('Invalid event from iframe');
+        if (!verifySignature(event)) throw new Error('Invalid event signature from iframe');
+        const nevent = new NDKEvent(this._ndk, event);
+        const parsedEvent = await this.parseEvent(nevent);
+        // we're only implementing client-side rpc
+        if (!(parsedEvent as NDKRpcRequest).method) {
+          this.emit(`response-${parsedEvent.id}`, parsedEvent);
+        }
+      } catch (e) {
+        console.log('error parsing event', e, ev.data);
+      }
+    });
+  }
+
+  public async sendRequest(remotePubkey: string, method: string, params: string[] = [], kind = 24133, cb?: (res: NDKRpcResponse) => void): Promise<NDKRpcResponse> {
+    const id = this.getId();
+
+    // set response handler, it will dedup auth urls,
+    // and also dedup response handlers - we're sending
+    // to relays and to iframe
+    this.setResponseHandler(id, cb);
+
+    // create and sign request event
+    const event = await this.createRequestEvent(id, remotePubkey, method, params, kind);
+
+    if (this.iframe) {
+      // map request event id to request id, if iframe
+      // has no key it will reply with error:event_id (it can't
+      // decrypt the request id without keys)
+      this.iframeRequests.set(event.id, { id, pubkey: remotePubkey });
+
+      // send to iframe
+      console.log('iframe-nip46 sending request to', this.peerOrigin, event.rawEvent());
+      this.iframe.contentWindow?.postMessage(event.rawEvent(), {
+        targetOrigin: this.peerOrigin,
+      });
+    }
+
+    // also send to relays
+    await event.publish();
+
+    // see notes in 'super'
+    // @ts-ignore
+    return undefined as NDKRpcResponse;
+
+    // // send nip46 request over relay
+    // const promises = [];
+
+    // if (this.iframe) {
+    //   // a copy of rpc.sendRequest
+    //   const id = Math.random().toString(36).substring(7);
+    //   const localUser = await this._signer.user();
+    //   const remoteUser = this._ndk.getUser({ pubkey: remotePubkey });
+    //   const request = { id, method, params };
+    //   const promise = new Promise<NDKRpcResponse>(() => {
+    //     const responseHandler = (response: NDKRpcResponse) => {
+    //       if (response.result === 'auth_url') {
+    //         this.once(`response-${id}`, responseHandler);
+    //         this.emit('authUrl', response.error);
+    //       } else if (cb) {
+    //         cb(response);
+    //       }
+    //     };
+
+    //     this.once(`response-${id}`, responseHandler);
+    //   });
+
+    //   const event = new NDKEvent(this._ndk, {
+    //     kind,
+    //     content: JSON.stringify(request),
+    //     tags: [['p', remotePubkey]],
+    //     pubkey: localUser.pubkey,
+    //   } as NostrEvent);
+
+    //   event.content = await this._signer.encrypt(remoteUser, event.content);
+    //   await event.sign(this._signer);
+
+    //   console.log('iframe-nip46 sending request to', this.peerOrigin, event.rawEvent());
+    //   this.iframe.contentWindow?.postMessage(event.rawEvent(), {
+    //     targetOrigin: this.peerOrigin,
+    //   });
+
+    //   promises.push(promise);
+    // }
+
+    // return Promise.any(promises);
+  }
 }
 
 export class ReadyListener {
@@ -87,7 +280,7 @@ export class ReadyListener {
     this.origin = origin;
     this.message = message;
     this.promise = new Promise<void>(ok => {
-      console.log(new Date(), "started listener for", this.message);
+      console.log(new Date(), 'started listener for', this.message);
 
       // ready message handler
       const onReady = async (e: MessageEvent) => {
@@ -109,102 +302,14 @@ export class ReadyListener {
   }
 
   async wait() {
-    console.log(new Date(), "waiting for", this.message);
+    console.log(new Date(), 'waiting for', this.message);
     await new Promise<void>((ok, err) => {
       // 10 sec should be more than enough
-      setTimeout(() => err(new Date() + ' timeout for '+this.message), 30000);
+      setTimeout(() => err(new Date() + ' timeout for ' + this.message), 30000);
 
       // if promise already resolved or will resolve in the future
       this.promise.then(ok);
     });
-    console.log(new Date(), "finished waiting for", this.message);
-  }
-}
-
-export class IframeNostrRpc extends NostrRpc {
-  private _ndk: NDK;
-  private _signer: NDKSigner;
-  private peerOrigin?: string;
-  private iframe?: HTMLIFrameElement;
-
-  public constructor(ndk: NDK, localPubkey: string, signer: NDKSigner) {
-    super(ndk, localPubkey, signer);
-    this._ndk = ndk;
-    this._signer = signer;
-  }
-
-  public setIframe(peerOrigin: string, iframe: HTMLIFrameElement) {
-    this.peerOrigin = peerOrigin;
-    this.iframe = iframe;
-
-    window.addEventListener('message', async ev => {
-      // ignore other origins just in case
-      if (ev.origin !== this.peerOrigin) return;
-      // ignore ready events from starter iframe
-      if (ev.data === 'workerReady' || ev.data === "starterDone") return;
-
-      console.log('iframe-nip46 got response from', this.peerOrigin, ev.data);
-
-      // a copy-paste from rpc.sendRequest
-      try {
-        const event = ev.data;
-
-        if (!validateEvent(event)) throw new Error('Invalid event from iframe');
-        if (!verifySignature(event)) throw new Error('Invalid event signature from iframe');
-        const nevent = new NDKEvent(this._ndk, event);
-        const parsedEvent = await this.parseEvent(nevent);
-        if ((parsedEvent as NDKRpcRequest).method) {
-          this.emit('request', parsedEvent);
-        } else {
-          this.emit(`response-${parsedEvent.id}`, parsedEvent);
-        }
-      } catch (e) {
-        console.log('error parsing event', e, ev.data);
-      }
-    });
-  }
-
-  public async sendRequest(remotePubkey: string, method: string, params: string[] = [], kind = 24133, cb?: (res: NDKRpcResponse) => void): Promise<NDKRpcResponse> {
-    // send nip46 request over relay
-    const promises = [super.sendRequest(remotePubkey, method, params, kind, cb)];
-
-    if (this.iframe) {
-      // a copy of rpc.sendRequest
-      const id = Math.random().toString(36).substring(7);
-      const localUser = await this._signer.user();
-      const remoteUser = this._ndk.getUser({ pubkey: remotePubkey });
-      const request = { id, method, params };
-      const promise = new Promise<NDKRpcResponse>(() => {
-        const responseHandler = (response: NDKRpcResponse) => {
-          if (response.result === 'auth_url') {
-            this.once(`response-${id}`, responseHandler);
-            this.emit('authUrl', response.error);
-          } else if (cb) {
-            cb(response);
-          }
-        };
-
-        this.once(`response-${id}`, responseHandler);
-      });
-
-      const event = new NDKEvent(this._ndk, {
-        kind,
-        content: JSON.stringify(request),
-        tags: [['p', remotePubkey]],
-        pubkey: localUser.pubkey,
-      } as NostrEvent);
-
-      event.content = await this._signer.encrypt(remoteUser, event.content);
-      await event.sign(this._signer);
-
-      console.log('iframe-nip46 sending request to', this.peerOrigin, event.rawEvent());
-      this.iframe.contentWindow?.postMessage(event.rawEvent(), {
-        targetOrigin: this.peerOrigin,
-      });
-
-      promises.push(promise);
-    }
-
-    return Promise.any(promises);
+    console.log(new Date(), 'finished waiting for', this.message);
   }
 }

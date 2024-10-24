@@ -7,29 +7,29 @@ import { Info, METHOD_MODULE, NlTheme } from '@/types';
   shadow: true,
 })
 export class NlBanner {
-  @State() isLogin: boolean = false;
   @Prop({ mutable: true }) theme: NlTheme = 'default';
   @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop({ mutable: true }) hiddenMode: boolean = false;
   @Prop() titleBanner: string = '';
-  @State() domain: string = '';
-  @State() urlNotify: string = '';
-  @Prop() listNotifies: string[] = [];
-  @State() isOpenNotifyTimeOut: boolean = false;
-  // @State() imgUrl: string = '';
+  // @Prop() listNotifies: string[] = [];
   @Prop({ mutable: true }) isOpen: boolean = false;
-  @State() isConfirm: boolean = true;
-  @State() isOpenConfirm: boolean = false;
 
   @Prop() isLoading: boolean = false;
-  @Prop() notify: { confirm: number; url?: string; timeOut?: { link: string } } | null = null;
-  @State() isNotConfirmToSend: boolean = false;
+  @Prop() notify: { confirm: number; url?: string; iframeUrl?: string; timeOut?: { link: string } } | null = null;
   @Prop() userInfo: Info | null = null;
   @Prop({ mutable: true }) accounts: Info[] = [];
 
-  @Event() handleRetryConfirmBanner: EventEmitter<string>;
+  // @State() isLogin: boolean = false;
+  @State() domain: string = '';
+  @State() mode: '' | 'url' | 'iframe' | 'timeout' = '';
+  @State() url: string = '';
+  // @State() isConfirm: boolean = true;
+  @State() isOpenConfirm: boolean = false;
+  // @State() isNotConfirmToSend: boolean = false;
+
+  // @Event() handleRetryConfirmBanner: EventEmitter<string>;
   @Event() handleNotifyConfirmBanner: EventEmitter<string>;
-  @Event() handleSetConfirmBanner: EventEmitter<string>;
+  // @Event() handleSetConfirmBanner: EventEmitter<string>;
   @Event() handleLoginBanner: EventEmitter<string>;
   @Event() handleLogoutBanner: EventEmitter<string>;
   @Event() handleOpenWelcomeModal: EventEmitter<string>;
@@ -37,19 +37,29 @@ export class NlBanner {
   @Event() handleImportModal: EventEmitter<string>;
 
   @Watch('notify')
-  watchNotifyHandler(notify: { confirm: number; url?: string; timeOut?: boolean }) {
-    this.isNotConfirmToSend = true;
+  watchNotifyHandler(notify: { confirm: number; url?: string; iframeUrl?: string; timeOut?: boolean }) {
+    // this.isNotConfirmToSend = true;
     this.isOpen = true;
     this.isOpenConfirm = true;
     this.domain = this.userInfo?.domain || this.userInfo?.nip05?.split('@')?.[1] || '';
 
-    if (notify.url) {
-      this.urlNotify = notify.url;
-      this.isOpenNotifyTimeOut = false;
-    }
-
-    if (!this.urlNotify && notify.timeOut) {
-      this.isOpenNotifyTimeOut = true;
+    if (notify.iframeUrl) {
+      this.url = notify.iframeUrl;
+      this.mode = 'iframe';
+    } else if (notify.url) {
+      // prioritize it!
+      if (!notify.iframeUrl) {
+        this.url = notify.url;
+        this.mode = 'url';
+      }
+    } else if (notify.timeOut) {
+      this.url = '';
+      this.mode = 'timeout';
+    } else {
+      this.url = '';
+      this.mode = '';
+      this.isOpenConfirm = false;
+      this.isOpen = false;
     }
   }
 
@@ -63,15 +73,14 @@ export class NlBanner {
 
   handleClose() {
     this.isOpen = false;
-    this.isOpenNotifyTimeOut = false;
-    this.isOpenConfirm = false;
+    // this.isOpenConfirm = false;
 
-    if (this.isNotConfirmToSend) {
-      this.handleSetConfirmBanner.emit(this.urlNotify);
-      this.isNotConfirmToSend = false;
-    }
+    // if (this.isNotConfirmToSend) {
+    //   this.handleSetConfirmBanner.emit(this.url);
+    //   this.isNotConfirmToSend = false;
+    // }
 
-    this.urlNotify = '';
+    this.url = '';
   }
 
   handleLogin() {
@@ -90,14 +99,14 @@ export class NlBanner {
   }
 
   handleLogout() {
-    const isBackupKey = localStorage.getItem('backupKey')
+    const isBackupKey = localStorage.getItem('backupKey');
 
-    if(isBackupKey) {
+    if (isBackupKey) {
       this.handleLogoutBanner.emit(METHOD_MODULE.LOGOUT);
-      this.handleClose()
-      localStorage.removeItem('backupKey')
+      this.handleClose();
+      localStorage.removeItem('backupKey');
 
-      return
+      return;
     }
 
     if (this.userInfo.authMethod === 'local') {
@@ -110,23 +119,23 @@ export class NlBanner {
   }
 
   handleConfirm() {
-    this.handleNotifyConfirmBanner.emit(this.urlNotify);
-    this.isNotConfirmToSend = false;
+    this.handleNotifyConfirmBanner.emit(this.url);
+    // this.isNotConfirmToSend = false;
     this.handleClose();
   }
 
-  handleRetryConfirm() {
-    this.handleRetryConfirmBanner.emit();
-    this.isNotConfirmToSend = false;
-    this.handleClose();
-  }
+  // handleRetryConfirm() {
+  //   this.handleRetryConfirmBanner.emit();
+  //   // this.isNotConfirmToSend = false;
+  //   this.handleClose();
+  // }
 
   render() {
     const isShowImg = Boolean(this.userInfo?.picture);
     const userName = this.userInfo?.name || this.userInfo?.nip05?.split('@')?.[0] || this.userInfo?.pubkey || '';
     const isShowUserName = Boolean(userName);
     const isTemporary = this.userInfo && this.userInfo.authMethod === 'local';
-    const isBackupKey = localStorage.getItem('backupKey')
+    const isBackupKey = localStorage.getItem('backupKey');
 
     return (
       <div class={`theme-${this.theme} ${!this.isOpen && this.hiddenMode ? 'hidden' : ''}`}>
@@ -216,10 +225,10 @@ export class NlBanner {
                     </svg>
                   </div>
                   <p class="mb-2 text-center max-w-40 min-w-40 mx-auto">
-                    {this.isOpenNotifyTimeOut ? 'Keys not responding, check your key storage app' : `Confirmation required at ${this.domain}`}
+                    {this.mode === 'timeout' ? 'Keys not responding, check your key storage app' : `Confirmation required at ${this.domain}`}
                   </p>
 
-                  {this.isOpenNotifyTimeOut ? (
+                  {this.mode === 'timeout' ? (
                     <a
                       onClick={() => this.handleClose()}
                       href={`https://${this.domain}`}
@@ -228,8 +237,10 @@ export class NlBanner {
                     >
                       Go to {this.domain}
                     </a>
-                  ) : (
+                  ) : this.mode === 'url' ? (
                     <button-base onClick={() => this.handleConfirm()} titleBtn="Confirm" />
+                  ) : (
+                    <iframe src={this.url} width={'180'} height={'80'}></iframe>
                   )}
                 </div>
               ) : (
@@ -247,14 +258,14 @@ export class NlBanner {
                     <div class="mb-2">
                       <nl-change-account currentAccount={this.userInfo} accounts={this.accounts} />
                     </div>
-                    {Boolean(this.listNotifies.length) && (
+                    {/* {Boolean(this.listNotifies.length) && (
                       <div
                         onClick={() => this.handleRetryConfirm()}
                         class="show-slow border border-yellow-600 text-yellow-600 bg-yellow-100 p-2 rounded-lg mb-2 cursor-pointer w-44 text-xs m-auto text-center"
                       >
                         Requests: {this.listNotifies.length}
                       </div>
-                    )}
+                    )} */}
                     {!this.userInfo ? (
                       <div>
                         <button-base onClick={() => this.handleLogin()} titleBtn="Log in">

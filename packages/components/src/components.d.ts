@@ -44,8 +44,7 @@ export namespace Components {
         "hiddenMode": boolean;
         "isLoading": boolean;
         "isOpen": boolean;
-        "listNotifies": string[];
-        "notify": { confirm: number; url?: string; timeOut?: { link: string } } | null;
+        "notify": { confirm: number; url?: string; iframeUrl?: string; timeOut?: { link: string } } | null;
         "theme": NlTheme;
         "titleBanner": string;
         "userInfo": Info | null;
@@ -241,9 +240,7 @@ declare global {
         new (): HTMLNlAuthElement;
     };
     interface HTMLNlBannerElementEventMap {
-        "handleRetryConfirmBanner": string;
         "handleNotifyConfirmBanner": string;
-        "handleSetConfirmBanner": string;
         "handleLoginBanner": string;
         "handleLogoutBanner": string;
         "handleOpenWelcomeModal": string;
@@ -634,16 +631,13 @@ declare namespace LocalJSX {
         "hiddenMode"?: boolean;
         "isLoading"?: boolean;
         "isOpen"?: boolean;
-        "listNotifies"?: string[];
-        "notify"?: { confirm: number; url?: string; timeOut?: { link: string } } | null;
+        "notify"?: { confirm: number; url?: string; iframeUrl?: string; timeOut?: { link: string } } | null;
         "onHandleConfirmLogout"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleImportModal"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleLoginBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleLogoutBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleNotifyConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "onHandleOpenWelcomeModal"?: (event: NlBannerCustomEvent<string>) => void;
-        "onHandleRetryConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
-        "onHandleSetConfirmBanner"?: (event: NlBannerCustomEvent<string>) => void;
         "theme"?: NlTheme;
         "titleBanner"?: string;
         "userInfo"?: Info | null;

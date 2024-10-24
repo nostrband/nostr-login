@@ -58,6 +58,11 @@ export class NostrLoginInitializer {
       this.modalManager.onIframeUrl(url);
     })
 
+    this.authNostrService.on('iframeRestart', ({ iframeUrl }) => {
+      this.processManager.onIframeUrl();
+      this.bannerManager.onIframeRestart(iframeUrl);
+    })
+
     this.authNostrService.on('onAuthUrl', ({ url, eventToAddAccount }) => {
       this.processManager.onAuthUrl();
 

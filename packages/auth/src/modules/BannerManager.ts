@@ -1,12 +1,14 @@
 import { NostrLoginOptions, TypeBanner } from '../types';
 import { NostrParams } from '.';
-import { CURRENT_MODULE, Info } from 'nostr-login-components/dist/types/types';
+import { Info } from 'nostr-login-components/dist/types/types';
 import { EventEmitter } from 'tseep';
 import { getDarkMode } from '../utils';
+import { ReadyListener } from './Nip46';
 
 class BannerManager extends EventEmitter {
   private banner: TypeBanner | null = null;
   private listNotifies: string[] = [];
+  private iframeReady?: ReadyListener;
 
   private params: NostrParams;
 
@@ -17,7 +19,6 @@ class BannerManager extends EventEmitter {
 
   public onAuthUrl(url: string) {
     if (this.banner) {
-      // banner.isLoading = false;
       this.banner.notify = {
         confirm: Date.now(),
         url,
@@ -25,14 +26,19 @@ class BannerManager extends EventEmitter {
     }
   }
 
+  public onIframeRestart(iframeUrl: string) {
+    if (this.banner) {
+      this.iframeReady = new ReadyListener('starterDone', new URL(iframeUrl).origin);
+      this.banner.notify = {
+        confirm: Date.now(),
+        iframeUrl,
+      };
+    }
+  }
+
   public onUserInfo(info: Info | null) {
     if (this.banner) {
       this.banner.userInfo = info;
-      // if (info) {
-      //   this.banner.titleBanner = info.extension ? 'You are using extension' : info.sk ? 'You are logged in' : 'You are read only';
-      // } else {
-      //   this.banner.titleBanner = '';
-      // } // 'Use with Nostr';
     }
   }
 
@@ -51,9 +57,14 @@ class BannerManager extends EventEmitter {
     }
   }
 
-  public onCallEnd() {
+  public async onCallEnd() {
     if (this.banner) {
+      if (this.iframeReady) {
+        await this.iframeReady.wait();
+        this.iframeReady = undefined;
+      }
       this.banner.isLoading = false;
+      this.banner.notify = {};
     }
   }
 
@@ -95,13 +106,13 @@ class BannerManager extends EventEmitter {
       this.emit('onAuthUrlClick', event.detail);
     });
 
-    this.banner.addEventListener('handleSetConfirmBanner', (event: any) => {
-      this.listNotifies.push(event.detail);
+    // this.banner.addEventListener('handleSetConfirmBanner', (event: any) => {
+    //   this.listNotifies.push(event.detail);
 
-      if (this.banner) {
-        this.banner.listNotifies = this.listNotifies;
-      }
-    });
+    //   if (this.banner) {
+    //     this.banner.listNotifies = this.listNotifies;
+    //   }
+    // });
 
     this.banner.addEventListener('handleSwitchAccount', (event: any) => {
       this.emit('onSwitchAccount', event.detail);
@@ -115,19 +126,19 @@ class BannerManager extends EventEmitter {
       }
     });
 
-    this.banner.addEventListener('handleRetryConfirmBanner', () => {
-      const url = this.listNotifies.pop();
-      // FIXME go to nip05 domain?
-      if (!url) {
-        return;
-      }
+    // this.banner.addEventListener('handleRetryConfirmBanner', () => {
+    //   const url = this.listNotifies.pop();
+    //   // FIXME go to nip05 domain?
+    //   if (!url) {
+    //     return;
+    //   }
 
-      if (this.banner) {
-        this.banner.listNotifies = this.listNotifies;
-      }
+    //   if (this.banner) {
+    //     this.banner.listNotifies = this.listNotifies;
+    //   }
 
-      this.emit('onAuthUrlClick', url);
-    });
+    //   this.emit('onAuthUrlClick', url);
+    // });
 
     document.body.appendChild(this.banner);
   }

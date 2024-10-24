@@ -62,7 +62,7 @@ export class NlLoading {
         </div>
         {iframeUrl && (
           <div class="mt-3 ml-auto mr-auto w-72">
-            <iframe src={iframeUrl} width="300px" height="300px" style={{ display: showIframe ? 'block' : 'none' }}></iframe>
+            <iframe src={iframeUrl} width="180px" height="80px" style={{ display: showIframe ? 'block' : 'none' }}></iframe>
           </div>
         )}
         {!showIframe && showButton && (

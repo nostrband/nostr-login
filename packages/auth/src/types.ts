@@ -73,6 +73,7 @@ export interface IBanner {
   notify?: {
     confirm?: number;
     url?: string;
+    iframeUrl?: string;
     timeOut?: {
       domain?: string | undefined;
     };

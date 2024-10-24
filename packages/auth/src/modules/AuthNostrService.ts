@@ -2,7 +2,7 @@ import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, get
 import { ConnectionString, Info } from 'nostr-login-components/dist/types/types';
 import { generatePrivateKey, getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
-import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser, NDKRpcRequest } from '@nostr-dev-kit/ndk';
+import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser, NDKRpcRequest, NDKEvent } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
 import { Signer } from './Nostr';
@@ -413,8 +413,11 @@ class AuthNostrService extends EventEmitter implements Signer {
     let iframe: HTMLIFrameElement | undefined;
 
     // one iframe per domain
-    const id = '__nostr-login-worker-iframe-' + domain;
+    const did = domain.replaceAll('.', '-');
+    console.log("did", did);
+    const id = '__nostr-login-worker-iframe-' + did;
     iframe = document.querySelector(`#${id}`) as HTMLIFrameElement;
+    console.log("iframe", id, iframe);
     if (!iframe) {
       iframe = document.createElement('iframe');
       iframe.setAttribute('width', '300');
@@ -472,7 +475,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     }
   }
   public async onReady() {
-    console.log("onReady", this.params.userInfo);
+    console.log('onReady', this.params.userInfo);
     if (this.params.userInfo && this.params.userInfo.iframeUrl) {
       // create iframe
       this.iframe = await this.createIframe(this.params.userInfo.iframeUrl);
@@ -519,13 +522,28 @@ class AuthNostrService extends EventEmitter implements Signer {
         const rpc = new IframeNostrRpc(this.ndk, localPubkey, localSigner);
         this.signer.rpc = rpc;
 
+        // we should notify the banner the same way as
+        // the onAuthUrl does
+        rpc.on(`iframeRestart-${info.pubkey}`, async () => {
+          // const token = new NDKEvent(this.ndk, {
+          //   pubkey: localPubkey,
+          //   created_at: Math.floor(Date.now() / 1000),
+          //   kind: 24133,
+          //   tags: [['p', info.pubkey], ['-']],
+          //   content: info.iframeUrl!,
+          // });
+          // token.sig = await token.sign(localSigner);
+
+          // const encToken = encodeURIComponent(btoa(JSON.stringify(token.rawEvent())));
+          // const iframeUrl = info.iframeUrl + (info.iframeUrl!.includes('?') ? '&' : '?') + 'token=' + encToken;
+          const iframeUrl = info.iframeUrl + (info.iframeUrl!.includes('?') ? '&' : '?') + 'pubkey=' + info.pubkey + '&rebind=' + localPubkey;
+          this.emit('iframeRestart', { pubkey: info.pubkey, iframeUrl });
+        });
+
         // OAuth flow
         if (!listen) {
           rpc.on('authUrl', (url: string) => {
             console.log('nostr login auth url', url);
-
-            // tell iframe about the authUrl to-be-opened
-            // if (this.iframe && authUrl) this.openIframePopup(authUrl);
 
             // notify our UI
             this.emit('onAuthUrl', { url, eventToAddAccount });
