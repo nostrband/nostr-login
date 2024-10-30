@@ -1,15 +1,17 @@
 import NDK, { NDKEvent, NDKFilter, NDKNostrRpc, NDKRpcRequest, NDKRpcResponse, NDKSigner, NDKSubscription, NostrEvent } from '@nostr-dev-kit/ndk';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { validateEvent, verifySignature } from 'nostr-tools';
+import { PrivateKeySigner } from './Signer';
 
 class NostrRpc extends NDKNostrRpc {
   private pubkey: string;
   protected _ndk: NDK;
-  protected _signer: NDKSigner;
+  protected _signer: PrivateKeySigner;
   protected requests: Set<string> = new Set();
   private sub?: NDKSubscription;
+  protected _useNip44: boolean = false;
 
-  public constructor(ndk: NDK, localPubkey: string, signer: NDKSigner) {
+  public constructor(ndk: NDK, localPubkey: string, signer: PrivateKeySigner) {
     super(ndk, signer, ndk.debug.extend('nip46:signer:rpc'));
     this._ndk = ndk;
     this._signer = signer;
@@ -25,6 +27,33 @@ class NostrRpc extends NDKNostrRpc {
     if (this.sub) {
       this.sub.stop();
       this.sub = undefined;
+    }
+  }
+
+  public setUseNip44(useNip44: boolean) {
+    this._useNip44 = useNip44;
+  }
+
+  private isNip04(ciphertext: string) {
+    const l = ciphertext.length;
+    if (l < 28) return false;
+    return ciphertext[l - 28] === '?' && ciphertext[l - 27] === 'i' && ciphertext[l - 26] === 'v' && ciphertext[l - 25] === '=';
+  }
+
+  // override to auto-decrypt nip04/nip44
+  public async parseEvent(event: NDKEvent): Promise<NDKRpcRequest | NDKRpcResponse> {
+    const remoteUser = this._ndk.getUser({ pubkey: event.pubkey });
+    remoteUser.ndk = this._ndk;
+    const decrypt = this.isNip04(event.content) ? this._signer.decrypt : this._signer.decryptNip44;
+    console.log('client event nip04', this.isNip04(event.content));
+    const decryptedContent = await decrypt.call(this._signer, remoteUser, event.content);
+    const parsedContent = JSON.parse(decryptedContent);
+    const { id, method, params, result, error } = parsedContent;
+
+    if (method) {
+      return { id, pubkey: event.pubkey, method, params, event };
+    } else {
+      return { id, result, error, event };
     }
   }
 
@@ -142,7 +171,8 @@ class NostrRpc extends NDKNostrRpc {
       pubkey: localUser.pubkey,
     } as NostrEvent);
 
-    event.content = await this._signer.encrypt(remoteUser, event.content);
+    const encrypt = this._useNip44 ? this._signer.encryptNip44 : this._signer.encrypt;
+    event.content = await encrypt.call(this._signer, remoteUser, event.content);
     await event.sign(this._signer);
 
     return event;
@@ -152,9 +182,9 @@ class NostrRpc extends NDKNostrRpc {
 export class IframeNostrRpc extends NostrRpc {
   private peerOrigin?: string;
   private iframe?: HTMLIFrameElement;
-  private iframeRequests = new Map<string, { id: string, pubkey: string }>();
+  private iframeRequests = new Map<string, { id: string; pubkey: string }>();
 
-  public constructor(ndk: NDK, localPubkey: string, signer: NDKSigner) {
+  public constructor(ndk: NDK, localPubkey: string, signer: PrivateKeySigner) {
     super(ndk, localPubkey, signer);
     this._ndk = ndk;
   }
@@ -167,14 +197,13 @@ export class IframeNostrRpc extends NostrRpc {
       // ignore other origins just in case
       if (ev.origin !== this.peerOrigin) return;
       // ignore ready events from starter iframe
-      if (ev.data === 'workerReady' || ev.data === 'starterDone') return;
+      if (ev.data === 'workerReady' || ev.data === 'starterDone' || ev.data === 'rebinderDone') return;
 
       console.log('iframe-nip46 got response from', this.peerOrigin, ev.data);
       if (typeof ev.data === 'string' && ev.data.startsWith('errorNoKey')) {
         const event_id = ev.data.split(':')[1];
         const { id = '', pubkey = '' } = this.iframeRequests.get(event_id) || {};
-        if (id && pubkey && this.requests.has(id))
-          this.emit(`iframeRestart-${pubkey}`);
+        if (id && pubkey && this.requests.has(id)) this.emit(`iframeRestart-${pubkey}`);
         return;
       }
 
@@ -226,48 +255,6 @@ export class IframeNostrRpc extends NostrRpc {
     // see notes in 'super'
     // @ts-ignore
     return undefined as NDKRpcResponse;
-
-    // // send nip46 request over relay
-    // const promises = [];
-
-    // if (this.iframe) {
-    //   // a copy of rpc.sendRequest
-    //   const id = Math.random().toString(36).substring(7);
-    //   const localUser = await this._signer.user();
-    //   const remoteUser = this._ndk.getUser({ pubkey: remotePubkey });
-    //   const request = { id, method, params };
-    //   const promise = new Promise<NDKRpcResponse>(() => {
-    //     const responseHandler = (response: NDKRpcResponse) => {
-    //       if (response.result === 'auth_url') {
-    //         this.once(`response-${id}`, responseHandler);
-    //         this.emit('authUrl', response.error);
-    //       } else if (cb) {
-    //         cb(response);
-    //       }
-    //     };
-
-    //     this.once(`response-${id}`, responseHandler);
-    //   });
-
-    //   const event = new NDKEvent(this._ndk, {
-    //     kind,
-    //     content: JSON.stringify(request),
-    //     tags: [['p', remotePubkey]],
-    //     pubkey: localUser.pubkey,
-    //   } as NostrEvent);
-
-    //   event.content = await this._signer.encrypt(remoteUser, event.content);
-    //   await event.sign(this._signer);
-
-    //   console.log('iframe-nip46 sending request to', this.peerOrigin, event.rawEvent());
-    //   this.iframe.contentWindow?.postMessage(event.rawEvent(), {
-    //     targetOrigin: this.peerOrigin,
-    //   });
-
-    //   promises.push(promise);
-    // }
-
-    // return Promise.any(promises);
   }
 }
 

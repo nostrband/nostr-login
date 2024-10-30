@@ -28,7 +28,7 @@ class BannerManager extends EventEmitter {
 
   public onIframeRestart(iframeUrl: string) {
     if (this.banner) {
-      this.iframeReady = new ReadyListener('starterDone', new URL(iframeUrl).origin);
+      this.iframeReady = new ReadyListener('rebinderDone', new URL(iframeUrl).origin);
       this.banner.notify = {
         confirm: Date.now(),
         iframeUrl,

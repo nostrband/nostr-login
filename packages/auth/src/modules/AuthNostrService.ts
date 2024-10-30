@@ -2,12 +2,13 @@ import { localStorageAddAccount, bunkerUrlToInfo, isBunkerUrl, fetchProfile, get
 import { ConnectionString, Info } from 'nostr-login-components/dist/types/types';
 import { generatePrivateKey, getEventHash, getPublicKey, nip19 } from 'nostr-tools';
 import { NostrLoginAuthOptions, Response } from '../types';
-import NDK, { NDKNip46Signer, NDKPrivateKeySigner, NDKRpcResponse, NDKUser, NDKRpcRequest, NDKEvent } from '@nostr-dev-kit/ndk';
+import NDK, { NDKNip46Signer, NDKRpcResponse, NDKUser } from '@nostr-dev-kit/ndk';
 import { NostrParams } from './';
 import { EventEmitter } from 'tseep';
 import { Signer } from './Nostr';
 import { Nip44 } from '../utils/nip44';
 import { IframeNostrRpc, ReadyListener } from './Nip46';
+import { PrivateKeySigner } from './Signer';
 
 const OUTBOX_RELAYS = ['wss://user.kindpag.es', 'wss://purplepag.es', 'wss://relay.nos.social'];
 const DEFAULT_NOSTRCONNECT_RELAY = 'wss://relay.nsec.app/';
@@ -38,7 +39,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   private ndk: NDK;
   private profileNdk: NDK;
   private signer: NDKNip46Signer | null = null;
-  private localSigner: NDKPrivateKeySigner | null = null;
+  private localSigner: PrivateKeySigner | null = null;
   private params: NostrParams;
   private signerPromise?: Promise<string | undefined>;
   private launcherPromise?: Promise<void>;
@@ -207,7 +208,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
   public async setLocal(info: Info, create?: boolean) {
     this.releaseSigner();
-    this.localSigner = new NDKPrivateKeySigner(info.sk);
+    this.localSigner = new PrivateKeySigner(info.sk);
 
     if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays);
 
@@ -414,14 +415,14 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // one iframe per domain
     const did = domain.replaceAll('.', '-');
-    console.log("did", did);
+    console.log('did', did);
     const id = '__nostr-login-worker-iframe-' + did;
     iframe = document.querySelector(`#${id}`) as HTMLIFrameElement;
-    console.log("iframe", id, iframe);
+    console.log('iframe', id, iframe);
     if (!iframe) {
       iframe = document.createElement('iframe');
-      iframe.setAttribute('width', '300');
-      iframe.setAttribute('height', '600');
+      iframe.setAttribute('width', this.params.optionsModal.dev ? '300' : '0');
+      iframe.setAttribute('height', this.params.optionsModal.dev ? '600' : '0');
       iframe.style.display = 'block';
       // iframe.setAttribute('sandbox', 'allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts');
       iframe.id = id;
@@ -515,27 +516,17 @@ class AuthNostrService extends EventEmitter implements Signer {
 
         // create and prepare the signer
         const localPubkey = getPublicKey(info.sk!);
-        const localSigner = new NDKPrivateKeySigner(info.sk);
+        const localSigner = new PrivateKeySigner(info.sk);
         this.signer = new NDKNip46Signer(this.ndk, info.pubkey, localSigner);
 
         // override with our own rpc implementation
         const rpc = new IframeNostrRpc(this.ndk, localPubkey, localSigner);
+        rpc.setUseNip44(!!this.params.optionsModal.dev);
         this.signer.rpc = rpc;
 
         // we should notify the banner the same way as
         // the onAuthUrl does
         rpc.on(`iframeRestart-${info.pubkey}`, async () => {
-          // const token = new NDKEvent(this.ndk, {
-          //   pubkey: localPubkey,
-          //   created_at: Math.floor(Date.now() / 1000),
-          //   kind: 24133,
-          //   tags: [['p', info.pubkey], ['-']],
-          //   content: info.iframeUrl!,
-          // });
-          // token.sig = await token.sign(localSigner);
-
-          // const encToken = encodeURIComponent(btoa(JSON.stringify(token.rawEvent())));
-          // const iframeUrl = info.iframeUrl + (info.iframeUrl!.includes('?') ? '&' : '?') + 'token=' + encToken;
           const iframeUrl = info.iframeUrl + (info.iframeUrl!.includes('?') ? '&' : '?') + 'pubkey=' + info.pubkey + '&rebind=' + localPubkey;
           this.emit('iframeRestart', { pubkey: info.pubkey, iframeUrl });
         });
@@ -550,29 +541,6 @@ class AuthNostrService extends EventEmitter implements Signer {
           });
         }
 
-        // We connection is created (or we're re-creating an
-        // existing one) we might switch to the iframe-based comms.
-        // User will need to confirm the new connection using UI
-        // which means it's hard for our invisible iframe to be
-        // the sender of 'ack', and so it's simpler to establish
-        // the connection using plain nip46 over relays and then
-        // switch to iframe
-        const onOk = async (pubkey?: string) => {
-          // plain nip46 mode?
-          console.log('onOk', pubkey, this.iframe);
-          // if (!this.iframe) {
-          //   ok(pubkey);
-          //   return;
-          // }
-
-          // // assign iframe to RPC object
-          // const origin = new URL(info.iframeUrl!).origin;
-          // rpc.setIframe(origin, this.iframe);
-
-          // ok
-          ok(pubkey);
-        };
-
         // nostrconnect: flow
         if (listen) {
           // wait for the incoming message from signer with their pubkey
@@ -580,7 +548,7 @@ class AuthNostrService extends EventEmitter implements Signer {
           this.signer!.remotePubkey = remotePubkey;
           this.signer!.remoteUser = new NDKUser({ pubkey: remotePubkey });
           info.pubkey = remotePubkey;
-          onOk(remotePubkey);
+          ok(remotePubkey);
         } else {
           // bunker-url based flow
 
@@ -589,7 +557,7 @@ class AuthNostrService extends EventEmitter implements Signer {
           if (connect) await rpc.connect(info, this.params.optionsModal.perms);
 
           // resolve after we've connected, if required
-          onOk(undefined);
+          ok(undefined);
         }
       } catch (e) {
         console.log('initSigner failure', e);
