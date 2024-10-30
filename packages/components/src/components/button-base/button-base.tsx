@@ -26,6 +26,7 @@ export class ButtonBase implements IButton {
   render() {
     return (
       <div class={`theme-${this.theme}`}>
+        <div class="animate-spin-loading active"></div>
         <button
           disabled={this.disabled}
           type="button"
