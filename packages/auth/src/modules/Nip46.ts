@@ -1,4 +1,15 @@
-import NDK, { NDKEvent, NDKFilter, NDKNostrRpc, NDKRpcRequest, NDKRpcResponse, NDKSigner, NDKSubscription, NostrEvent } from '@nostr-dev-kit/ndk';
+import NDK, {
+  NDKEvent,
+  NDKFilter,
+  NDKNostrRpc,
+  NDKRelaySet,
+  NDKRpcRequest,
+  NDKRpcResponse,
+  NDKSigner,
+  NDKSubscription,
+  NDKSubscriptionCacheUsage,
+  NostrEvent,
+} from '@nostr-dev-kit/ndk';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { validateEvent, verifySignature } from 'nostr-tools';
 import { PrivateKeySigner } from './Signer';
@@ -141,9 +152,9 @@ class NostrRpc extends NDKNostrRpc {
     return new Promise<NDKRpcResponse>(() => {
       const responseHandler = (response: NDKRpcResponse) => {
         if (response.result === 'auth_url') {
+          this.once(`response-${id}`, responseHandler);
           if (!authUrlSent) {
             authUrlSent = true;
-            this.once(`response-${id}`, responseHandler);
             this.emit('authUrl', response.error);
           }
         } else if (cb) {
@@ -277,7 +288,7 @@ export class ReadyListener {
         // same host or subdomain
         const validHost = messageHostname === originHostname || messageHostname.endsWith('.' + originHostname);
         if (!validHost || e.data !== this.message) {
-          console.log(new Date(), 'got invalid ready message', e.origin, e.data);
+          // console.log(new Date(), 'got invalid ready message', e.origin, e.data);
           return;
         }
 
