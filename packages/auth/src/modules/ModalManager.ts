@@ -62,7 +62,7 @@ class ModalManager extends EventEmitter {
       this.modal.setAttribute('bunkers', opt.bunkers);
     } else {
       let bunkers = 'nsec.app,highlighter.com';
-      if (opt.dev) bunkers += ',new.nsec.app';
+      // if (opt.dev) bunkers += ',new.nsec.app';
       this.modal.setAttribute('bunkers', bunkers);
     }
 
@@ -100,6 +100,8 @@ class ModalManager extends EventEmitter {
         // noop if already resolved
         err(new Error('Closed'));
 
+        this.authNostrService.resetAuth();
+
         if (this.modal) {
           // reset state
           this.modal.isLoading = false;
@@ -119,7 +121,7 @@ class ModalManager extends EventEmitter {
         // make sure starter has finished
         if (this.modalIframeReady) await this.modalIframeReady.wait();
         if (this.modal) this.modal.isLoading = false;
-        await this.authNostrService.onReady();
+        await this.authNostrService.endAuth();
         dialog.close();
         ok();
       };
@@ -130,6 +132,7 @@ class ModalManager extends EventEmitter {
         }
 
         try {
+          await this.authNostrService.startAuth();
           await body();
           await done(ok);
         } catch (e: any) {

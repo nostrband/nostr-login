@@ -171,7 +171,8 @@ class NostrRpc extends NDKNostrRpc {
       pubkey: localUser.pubkey,
     } as NostrEvent);
 
-    const encrypt = this._useNip44 ? this._signer.encryptNip44 : this._signer.encrypt;
+    const useNip44 = this._useNip44 && method !== 'create_account';
+    const encrypt = useNip44 ? this._signer.encryptNip44 : this._signer.encrypt;
     event.content = await encrypt.call(this._signer, remoteUser, event.content);
     await event.sign(this._signer);
 

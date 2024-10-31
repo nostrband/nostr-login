@@ -42,7 +42,9 @@ class AuthNostrService extends EventEmitter implements Signer {
   private localSigner: PrivateKeySigner | null = null;
   private params: NostrParams;
   private signerPromise?: Promise<string | undefined>;
-  private launcherPromise?: Promise<void>;
+  // private launcherPromise?: Promise<void>;
+  private readyPromise?: Promise<void>;
+  private readyCallback?: () => void;
   private nip44Codec = new Nip44();
   private nostrConnectKey: string = '';
   private nostrConnectSecret: string = '';
@@ -91,9 +93,15 @@ class AuthNostrService extends EventEmitter implements Signer {
       } catch {}
     }
 
-    if (this.launcherPromise) {
+    // if (this.launcherPromise) {
+    //   try {
+    //     await this.launcherPromise;
+    //   } catch {}
+    // }
+
+    if (this.readyPromise) {
       try {
-        await this.launcherPromise;
+        await this.readyPromise;
       } catch {}
     }
   }
@@ -161,16 +169,16 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // copy defaults
     const apps = NOSTRCONNECT_APPS.map(a => ({ ...a }));
-    if (this.params.optionsModal.dev) {
-      apps.push({
-        name: 'Dev.Nsec.app',
-        domain: 'new.nsec.app',
-        canImport: true,
-        img: 'https://new.nsec.app/assets/favicon.ico',
-        link: 'https://dev.nsec.app/<nostrconnect>',
-        relay: 'wss://relay.nsec.app/',
-      });
-    }
+    // if (this.params.optionsModal.dev) {
+    //   apps.push({
+    //     name: 'Dev.Nsec.app',
+    //     domain: 'new.nsec.app',
+    //     canImport: true,
+    //     img: 'https://new.nsec.app/assets/favicon.ico',
+    //     link: 'https://dev.nsec.app/<nostrconnect>',
+    //     relay: 'wss://relay.nsec.app/',
+    //   });
+    // }
 
     for (const a of apps) {
       let relay = DEFAULT_NOSTRCONNECT_RELAY;
@@ -249,9 +257,10 @@ class AuthNostrService extends EventEmitter implements Signer {
 
   public async setConnect(info: Info) {
     this.releaseSigner();
+    await this.startAuth();
     await this.initSigner(info);
     this.onAuth('login', info);
-    await this.onReady();
+    await this.endAuth();
   }
 
   public async createAccount(nip05: string) {
@@ -421,8 +430,8 @@ class AuthNostrService extends EventEmitter implements Signer {
     console.log('iframe', id, iframe);
     if (!iframe) {
       iframe = document.createElement('iframe');
-      iframe.setAttribute('width', this.params.optionsModal.dev ? '300' : '0');
-      iframe.setAttribute('height', this.params.optionsModal.dev ? '600' : '0');
+      iframe.setAttribute('width', '0'); // this.params.optionsModal.dev ? '300' : '0');
+      iframe.setAttribute('height', '0'); // this.params.optionsModal.dev ? '600' : '0');
       iframe.style.display = 'block';
       // iframe.setAttribute('sandbox', 'allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts');
       iframe.id = id;
@@ -475,8 +484,16 @@ class AuthNostrService extends EventEmitter implements Signer {
       return '';
     }
   }
-  public async onReady() {
-    console.log('onReady', this.params.userInfo);
+
+  public async startAuth() {
+    if (this.readyCallback) throw new Error('Already started');
+
+    // start the new promise
+    this.readyPromise = new Promise<void>(ok => (this.readyCallback = ok));
+  }
+
+  public async endAuth() {
+    console.log('endAuth', this.params.userInfo);
     if (this.params.userInfo && this.params.userInfo.iframeUrl) {
       // create iframe
       this.iframe = await this.createIframe(this.params.userInfo.iframeUrl);
@@ -486,6 +503,14 @@ class AuthNostrService extends EventEmitter implements Signer {
       const origin = new URL(this.params.userInfo.iframeUrl!).origin;
       (this.signer!.rpc as IframeNostrRpc).setIframe(origin, this.iframe);
     }
+
+    this.readyCallback!();
+    this.readyCallback = undefined;
+  }
+
+  public resetAuth() {
+    if (this.readyCallback) this.readyCallback();
+    this.readyCallback = undefined;
   }
 
   public async initSigner(info: Info, { listen = false, connect = false, eventToAddAccount = false } = {}) {
@@ -521,7 +546,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
         // override with our own rpc implementation
         const rpc = new IframeNostrRpc(this.ndk, localPubkey, localSigner);
-        rpc.setUseNip44(!!this.params.optionsModal.dev);
+        rpc.setUseNip44(true); // !!this.params.optionsModal.dev);
         this.signer.rpc = rpc;
 
         // we should notify the banner the same way as

@@ -61,7 +61,7 @@ export class NlLoading {
           <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
         </div>
         {iframeUrl && (
-          <div class="mt-3 ml-auto mr-auto w-72">
+          <div class="mt-3 ml-auto mr-auto w-72 flex justify-center">
             <iframe src={iframeUrl} width="180px" height="80px" style={{ display: showIframe ? 'block' : 'none' }}></iframe>
           </div>
         )}
