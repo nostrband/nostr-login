@@ -118,6 +118,7 @@ class ModalManager extends EventEmitter {
       });
 
       const done = async (ok: () => void) => {
+        // console.log("done", this.modalIframeReady);
         // make sure starter has finished
         if (this.modalIframeReady) await this.modalIframeReady.wait();
         if (this.modal) this.modal.isLoading = false;
@@ -159,10 +160,10 @@ class ModalManager extends EventEmitter {
       const signup = async (name: string) => {
         await exec(async () => {
           // create acc on service and get bunker url
-          const { bunkerUrl, sk } = await this.authNostrService.createAccount(name);
+          const { bunkerUrl, sk, iframeUrl } = await this.authNostrService.createAccount(name);
 
           // connect to bunker by url
-          await this.authNostrService.authNip46('signup', { name, bunkerUrl, sk });
+          await this.authNostrService.authNip46('signup', { name, bunkerUrl, sk, iframeUrl });
         });
       };
 

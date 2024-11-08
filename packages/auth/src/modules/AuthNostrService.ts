@@ -302,6 +302,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     return {
       bunkerUrl: `bunker://${r.result}?relay=${info.relays?.[0]}`,
       sk: info.sk, // reuse the same local key
+      iframeUrl: info.iframeUrl
     };
   }
 
@@ -424,7 +425,6 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // one iframe per domain
     const did = domain.replaceAll('.', '-');
-    console.log('did', did);
     const id = '__nostr-login-worker-iframe-' + did;
     iframe = document.querySelector(`#${id}`) as HTMLIFrameElement;
     console.log('iframe', id, iframe);
@@ -595,7 +595,10 @@ class AuthNostrService extends EventEmitter implements Signer {
     return this.signerPromise;
   }
 
-  public async authNip46(type: 'login' | 'signup', { name, bunkerUrl, sk = '', domain = '' }: { name: string; bunkerUrl: string; sk?: string; domain?: string }) {
+  public async authNip46(
+    type: 'login' | 'signup',
+    { name, bunkerUrl, sk = '', domain = '', iframeUrl = '' }: { name: string; bunkerUrl: string; sk?: string; domain?: string; iframeUrl?: string },
+  ) {
     try {
       const info = bunkerUrlToInfo(bunkerUrl, sk);
       if (isBunkerUrl(name)) info.bunkerUrl = name;
@@ -604,6 +607,7 @@ class AuthNostrService extends EventEmitter implements Signer {
         info.domain = name.split('@')[1];
       }
       if (domain) info.domain = domain;
+      if (iframeUrl) info.iframeUrl = iframeUrl;
 
       // console.log('nostr login auth info', info);
       if (!info.pubkey || !info.sk || !info.relays?.[0]) {
