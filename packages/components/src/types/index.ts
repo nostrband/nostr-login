@@ -16,6 +16,7 @@ export enum CURRENT_MODULE {
   LOGIN_OTP = 'otp',
   CONNECT = 'connect',
   CONNECTION_STRING = 'connection-string',
+  IFRAME = 'iframe',
 }
 
 export enum METHOD_MODULE {
@@ -75,4 +76,11 @@ export interface ConnectionString {
   domain?: string;
   canImport?: boolean;
   iframeUrl?: string;
+}
+
+export type BannerNotifyMode = '' | 'timeout' | 'authUrl' | 'iframeAuthUrl' | 'rebind';
+
+export interface BannerNotify {
+  mode: BannerNotifyMode;
+  url?: string;
 }

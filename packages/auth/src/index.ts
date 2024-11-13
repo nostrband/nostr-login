@@ -48,6 +48,7 @@ export class NostrLoginInitializer {
 
     this.processManager.on('onCallEnd', () => {
       this.bannerManager.onCallEnd();
+      this.modalManager.onCallEnd();
     });
 
     this.processManager.on('onCallStart', () => {
@@ -63,7 +64,7 @@ export class NostrLoginInitializer {
       this.bannerManager.onIframeRestart(iframeUrl);
     })
 
-    this.authNostrService.on('onAuthUrl', ({ url, eventToAddAccount }) => {
+    this.authNostrService.on('onAuthUrl', ({ url, iframeUrl, eventToAddAccount }) => {
       this.processManager.onAuthUrl();
 
       if (eventToAddAccount) {
@@ -73,7 +74,7 @@ export class NostrLoginInitializer {
 
       if (this.params.userInfo) {
         // show the 'Please confirm' banner
-        this.bannerManager.onAuthUrl(url);
+        this.bannerManager.onAuthUrl(url, iframeUrl);
       } else {
         // if it fails we will either return 'failed'
         // to the window.nostr caller, or show proper error
@@ -92,6 +93,10 @@ export class NostrLoginInitializer {
 
     this.modalManager.on('onAuthUrlClick', url => {
       this.openPopup(url);
+    });
+
+    this.bannerManager.on('onIframeAuthUrlClick', url => {
+      this.modalManager.showIframeUrl(url);
     });
 
     this.modalManager.on('onSwitchAccount', async (info: Info) => {

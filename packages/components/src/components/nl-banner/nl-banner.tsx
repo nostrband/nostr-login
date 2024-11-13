@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Fragment, h, Prop, State, Watch } from '@stencil/core';
-import { Info, METHOD_MODULE, NlTheme } from '@/types';
+import { BannerNotify, BannerNotifyMode, Info, METHOD_MODULE, NlTheme } from '@/types';
 
 @Component({
   tag: 'nl-banner',
@@ -11,25 +11,20 @@ export class NlBanner {
   @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop({ mutable: true }) hiddenMode: boolean = false;
   @Prop() titleBanner: string = '';
-  // @Prop() listNotifies: string[] = [];
   @Prop({ mutable: true }) isOpen: boolean = false;
 
   @Prop() isLoading: boolean = false;
-  @Prop() notify: { confirm: number; url?: string; iframeUrl?: string; timeOut?: { link: string } } | null = null;
+  @Prop() notify: BannerNotify | null = null;
   @Prop() userInfo: Info | null = null;
   @Prop({ mutable: true }) accounts: Info[] = [];
 
-  // @State() isLogin: boolean = false;
   @State() domain: string = '';
-  @State() mode: '' | 'url' | 'iframe' | 'timeout' = '';
+  @State() mode: BannerNotifyMode = '';
   @State() url: string = '';
-  // @State() isConfirm: boolean = true;
   @State() isOpenConfirm: boolean = false;
-  // @State() isNotConfirmToSend: boolean = false;
 
-  // @Event() handleRetryConfirmBanner: EventEmitter<string>;
   @Event() handleNotifyConfirmBanner: EventEmitter<string>;
-  // @Event() handleSetConfirmBanner: EventEmitter<string>;
+  @Event() handleNotifyConfirmBannerIframe: EventEmitter<string>;
   @Event() handleLoginBanner: EventEmitter<string>;
   @Event() handleLogoutBanner: EventEmitter<string>;
   @Event() handleOpenWelcomeModal: EventEmitter<string>;
@@ -37,27 +32,14 @@ export class NlBanner {
   @Event() handleImportModal: EventEmitter<string>;
 
   @Watch('notify')
-  watchNotifyHandler(notify: { confirm: number; url?: string; iframeUrl?: string; timeOut?: boolean }) {
-    // this.isNotConfirmToSend = true;
+  watchNotifyHandler(notify: BannerNotify) {
     this.isOpen = true;
     this.isOpenConfirm = true;
     this.domain = this.userInfo?.domain || this.userInfo?.nip05?.split('@')?.[1] || '';
 
-    if (notify.iframeUrl) {
-      this.url = notify.iframeUrl;
-      this.mode = 'iframe';
-    } else if (notify.url) {
-      // prioritize it!
-      if (!notify.iframeUrl) {
-        this.url = notify.url;
-        this.mode = 'url';
-      }
-    } else if (notify.timeOut) {
-      this.url = '';
-      this.mode = 'timeout';
-    } else {
-      this.url = '';
-      this.mode = '';
+    this.mode = notify.mode;
+    this.url = notify.url;
+    if (!this.mode) {
       this.isOpenConfirm = false;
       this.isOpen = false;
     }
@@ -73,14 +55,6 @@ export class NlBanner {
 
   handleClose() {
     this.isOpen = false;
-    // this.isOpenConfirm = false;
-
-    // if (this.isNotConfirmToSend) {
-    //   this.handleSetConfirmBanner.emit(this.url);
-    //   this.isNotConfirmToSend = false;
-    // }
-
-    this.url = '';
   }
 
   handleLogin() {
@@ -105,7 +79,6 @@ export class NlBanner {
       this.handleLogoutBanner.emit(METHOD_MODULE.LOGOUT);
       this.handleClose();
       localStorage.removeItem('backupKey');
-
       return;
     }
 
@@ -119,16 +92,16 @@ export class NlBanner {
   }
 
   handleConfirm() {
-    this.handleNotifyConfirmBanner.emit(this.url);
-    // this.isNotConfirmToSend = false;
+    switch (this.mode) {
+      case 'authUrl':
+        this.handleNotifyConfirmBanner.emit(this.url);
+        break;
+      case 'iframeAuthUrl':
+        this.handleNotifyConfirmBannerIframe.emit(this.url);
+        break;
+    }
     this.handleClose();
   }
-
-  // handleRetryConfirm() {
-  //   this.handleRetryConfirmBanner.emit();
-  //   // this.isNotConfirmToSend = false;
-  //   this.handleClose();
-  // }
 
   render() {
     const isShowImg = Boolean(this.userInfo?.picture);
@@ -237,10 +210,10 @@ export class NlBanner {
                     >
                       Go to {this.domain}
                     </a>
-                  ) : this.mode === 'url' ? (
-                    <button-base onClick={() => this.handleConfirm()} titleBtn="Confirm" />
-                  ) : (
+                  ) : this.mode === 'rebind' ? (
                     <iframe src={this.url} width={'180'} height={'80'}></iframe>
+                  ) : (
+                    <button-base onClick={() => this.handleConfirm()} titleBtn="Confirm" />
                   )}
                 </div>
               ) : (

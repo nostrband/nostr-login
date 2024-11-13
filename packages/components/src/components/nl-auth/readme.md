@@ -11,7 +11,7 @@
 | `authMethods`              | --                     |             | `AuthMethod[]`                                             | `[]`                     |
 | `authUrl`                  | `auth-url`             |             | `string`                                                   | `''`                     |
 | `bunkers`                  | `bunkers`              |             | `string`                                                   | `''`                     |
-| `connectionString`         | `connection-string`    |             | `string`                                                   | `""`                     |
+| `connectionString`         | `connection-string`    |             | `string`                                                   | `''`                     |
 | `connectionStringServices` | --                     |             | `ConnectionString[]`                                       | `[]`                     |
 | `darkMode`                 | `dark-mode`            |             | `boolean`                                                  | `false`                  |
 | `error`                    | `error`                |             | `string`                                                   | `''`                     |
@@ -57,6 +57,7 @@
 - [nl-signin-connection-string](../nl-signin-connection-string)
 - [nl-connect](../nl-connect)
 - [nl-previously-logged](../nl-previously-logged)
+- [nl-iframe](../nl-iframe)
 - [nl-loading](../nl-loading)
 
 ### Graph
@@ -78,6 +79,7 @@ graph TD;
   nl-auth --> nl-signin-connection-string
   nl-auth --> nl-connect
   nl-auth --> nl-previously-logged
+  nl-auth --> nl-iframe
   nl-auth --> nl-loading
   nl-signin-otp --> button-base
   nl-welcome --> button-base

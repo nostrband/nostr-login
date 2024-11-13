@@ -1,15 +1,4 @@
-import NDK, {
-  NDKEvent,
-  NDKFilter,
-  NDKNostrRpc,
-  NDKRelaySet,
-  NDKRpcRequest,
-  NDKRpcResponse,
-  NDKSigner,
-  NDKSubscription,
-  NDKSubscriptionCacheUsage,
-  NostrEvent,
-} from '@nostr-dev-kit/ndk';
+import NDK, { NDKEvent, NDKFilter, NDKNostrRpc, NDKRpcRequest, NDKRpcResponse, NDKSubscription, NostrEvent } from '@nostr-dev-kit/ndk';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { validateEvent, verifySignature } from 'nostr-tools';
 import { PrivateKeySigner } from './Signer';
@@ -65,6 +54,22 @@ class NostrRpc extends NDKNostrRpc {
       return { id, pubkey: event.pubkey, method, params, event };
     } else {
       return { id, result, error, event };
+    }
+  }
+
+  public async parseNostrConnectReply(reply: any, secret: string) {
+    const event = new NDKEvent(this._ndk, reply);
+    const parsedEvent = await this.parseEvent(event);
+    console.log('nostr connect parsedEvent', parsedEvent);
+    if (!(parsedEvent as NDKRpcRequest).method) {
+      const response = parsedEvent as NDKRpcResponse;
+      if (response.result === secret) {
+        return event.pubkey;
+      } else {
+        throw new Error(response.error);
+      }
+    } else {
+      throw new Error('Bad nostr connect reply');
     }
   }
 
@@ -149,6 +154,7 @@ class NostrRpc extends NDKNostrRpc {
 
   protected setResponseHandler(id: string, cb?: (res: NDKRpcResponse) => void) {
     let authUrlSent = false;
+    const now = Date.now();
     return new Promise<NDKRpcResponse>(() => {
       const responseHandler = (response: NDKRpcResponse) => {
         if (response.result === 'auth_url') {
@@ -160,6 +166,7 @@ class NostrRpc extends NDKNostrRpc {
         } else if (cb) {
           if (this.requests.has(id)) {
             this.requests.delete(id);
+            console.log('nostr-login iframe processed request in', Date.now() - now, 'ms');
             cb(response);
           }
         }
@@ -193,25 +200,27 @@ class NostrRpc extends NDKNostrRpc {
 
 export class IframeNostrRpc extends NostrRpc {
   private peerOrigin?: string;
-  private iframe?: HTMLIFrameElement;
+  private iframePort?: MessagePort;
   private iframeRequests = new Map<string, { id: string; pubkey: string }>();
 
-  public constructor(ndk: NDK, localPubkey: string, signer: PrivateKeySigner) {
+  public constructor(ndk: NDK, localPubkey: string, signer: PrivateKeySigner, iframePeerOrigin?: string) {
     super(ndk, localPubkey, signer);
     this._ndk = ndk;
+    this.peerOrigin = iframePeerOrigin;
   }
 
-  public setIframe(peerOrigin: string, iframe: HTMLIFrameElement) {
-    this.peerOrigin = peerOrigin;
-    this.iframe = iframe;
+  public async subscribe(filter: NDKFilter): Promise<NDKSubscription> {
+    if (!this.peerOrigin) return super.subscribe(filter);
+    return new NDKSubscription(this._ndk, {});
+  }
 
-    window.addEventListener('message', async ev => {
-      // ignore other origins just in case
-      if (ev.origin !== this.peerOrigin) return;
-      // ignore ready events from starter iframe
-      if (ev.data === 'workerReady' || ev.data === 'starterDone' || ev.data === 'rebinderDone') return;
+  public setWorkerIframePort(port: MessagePort) {
+    if (!this.peerOrigin) throw new Error('Unexpected iframe port');
 
-      console.log('iframe-nip46 got response from', this.peerOrigin, ev.data);
+    this.iframePort = port;
+
+    port.onmessage = async ev => {
+      console.log('iframe-nip46 got response', ev.data);
       if (typeof ev.data === 'string' && ev.data.startsWith('errorNoKey')) {
         const event_id = ev.data.split(':')[1];
         const { id = '', pubkey = '' } = this.iframeRequests.get(event_id) || {};
@@ -229,26 +238,27 @@ export class IframeNostrRpc extends NostrRpc {
         const parsedEvent = await this.parseEvent(nevent);
         // we're only implementing client-side rpc
         if (!(parsedEvent as NDKRpcRequest).method) {
+          console.log('parsed response', parsedEvent);
           this.emit(`response-${parsedEvent.id}`, parsedEvent);
         }
       } catch (e) {
         console.log('error parsing event', e, ev.data);
       }
-    });
+    };
   }
 
   public async sendRequest(remotePubkey: string, method: string, params: string[] = [], kind = 24133, cb?: (res: NDKRpcResponse) => void): Promise<NDKRpcResponse> {
     const id = this.getId();
+
+    // create and sign request event
+    const event = await this.createRequestEvent(id, remotePubkey, method, params, kind);
 
     // set response handler, it will dedup auth urls,
     // and also dedup response handlers - we're sending
     // to relays and to iframe
     this.setResponseHandler(id, cb);
 
-    // create and sign request event
-    const event = await this.createRequestEvent(id, remotePubkey, method, params, kind);
-
-    if (this.iframe) {
+    if (this.iframePort) {
       // map request event id to request id, if iframe
       // has no key it will reply with error:event_id (it can't
       // decrypt the request id without keys)
@@ -256,13 +266,12 @@ export class IframeNostrRpc extends NostrRpc {
 
       // send to iframe
       console.log('iframe-nip46 sending request to', this.peerOrigin, event.rawEvent());
-      this.iframe.contentWindow?.postMessage(event.rawEvent(), {
-        targetOrigin: this.peerOrigin,
-      });
+      this.iframePort.postMessage(event.rawEvent());
     }
 
     // also send to relays
-    await event.publish();
+    // FIXME checking iframe-exclusive
+    // await event.publish();
 
     // see notes in 'super'
     // @ts-ignore
@@ -272,14 +281,14 @@ export class IframeNostrRpc extends NostrRpc {
 
 export class ReadyListener {
   origin: string;
-  message: string;
-  promise: Promise<void>;
+  messages: string[];
+  promise: Promise<any>;
 
-  constructor(message: string, origin: string) {
+  constructor(messages: string[], origin: string) {
     this.origin = origin;
-    this.message = message;
-    this.promise = new Promise<void>(ok => {
-      console.log(new Date(), 'started listener for', this.message);
+    this.messages = messages;
+    this.promise = new Promise<any>(ok => {
+      console.log(new Date(), 'started listener for', this.messages);
 
       // ready message handler
       const onReady = async (e: MessageEvent) => {
@@ -287,28 +296,34 @@ export class ReadyListener {
         const messageHostname = new URL(e.origin).hostname;
         // same host or subdomain
         const validHost = messageHostname === originHostname || messageHostname.endsWith('.' + originHostname);
-        if (!validHost || e.data !== this.message) {
+        if (!validHost || !Array.isArray(e.data) || !e.data.length || !this.messages.includes(e.data[0])) {
           // console.log(new Date(), 'got invalid ready message', e.origin, e.data);
           return;
         }
 
-        console.log(new Date(), 'got ready message from', e.origin, this.message);
+        console.log(new Date(), 'got ready message from', e.origin, e.data);
         window.removeEventListener('message', onReady);
-        ok();
+        ok(e.data);
       };
       window.addEventListener('message', onReady);
     });
   }
 
-  async wait() {
-    console.log(new Date(), 'waiting for', this.message);
-    await new Promise<void>((ok, err) => {
-      // 10 sec should be more than enough
-      setTimeout(() => err(new Date() + ' timeout for ' + this.message), 30000);
+  async wait(): Promise<any> {
+    console.log(new Date(), 'waiting for', this.messages);
+    const r = await this.promise;
+    // NOTE: timer here doesn't help bcs it must be activated when
+    // user "confirms", but that's happening on a different
+    // origin and we can't really know.
+    // await new Promise<any>((ok, err) => {
+    //   // 10 sec should be more than enough
+    //   setTimeout(() => err(new Date() + ' timeout for ' + this.message), 10000);
 
-      // if promise already resolved or will resolve in the future
-      this.promise.then(ok);
-    });
-    console.log(new Date(), 'finished waiting for', this.message);
+    //   // if promise already resolved or will resolve in the future
+    //   this.promise.then(ok);
+    // });
+
+    console.log(new Date(), 'finished waiting for', this.messages, r);
+    return r;
   }
 }

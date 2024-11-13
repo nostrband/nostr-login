@@ -41,7 +41,7 @@ export class NlLoading {
 
     const showButton = this.path !== CURRENT_MODULE.LOCAL_SIGNUP;
     const showIframe = !state.isLoading && state.iframeUrl && state.authUrl;
-    const iframeUrl = `${state.iframeUrl}?auth_url=${encodeURIComponent(state.authUrl)}`;
+    const iframeUrl = `${state.iframeUrl}?connect=${encodeURIComponent(state.authUrl)}`;
 
     return (
       <div class="p-4 overflow-y-auto">

@@ -5,7 +5,6 @@ import { EventEmitter } from 'tseep';
 import { ConnectionString, Info, RecentType } from 'nostr-login-components/dist/types/types';
 import { nip19 } from 'nostr-tools';
 import { setDarkMode } from '..';
-import { ReadyListener } from './Nip46';
 
 class ModalManager extends EventEmitter {
   private modal: TypeModal | null = null;
@@ -16,7 +15,6 @@ class ModalManager extends EventEmitter {
   private accounts: Info[] = [];
   private recents: RecentType[] = [];
   private opt?: NostrLoginOptions;
-  private modalIframeReady?: ReadyListener;
 
   constructor(params: NostrParams, authNostrService: AuthNostrService, extensionManager: NostrExtensionService) {
     super();
@@ -30,16 +28,13 @@ class ModalManager extends EventEmitter {
       try {
         await this.launcherPromise;
       } catch {}
+      this.launcherPromise = undefined;
     }
   }
 
   public async launch(opt: NostrLoginOptions) {
     // mutex
-    if (this.launcherPromise) {
-      try {
-        await this.launcherPromise;
-      } catch {}
-    }
+    if (this.launcherPromise) await this.waitReady();
 
     this.opt = opt;
 
@@ -118,12 +113,10 @@ class ModalManager extends EventEmitter {
       });
 
       const done = async (ok: () => void) => {
-        // console.log("done", this.modalIframeReady);
-        // make sure starter has finished
-        if (this.modalIframeReady) await this.modalIframeReady.wait();
         if (this.modal) this.modal.isLoading = false;
         await this.authNostrService.endAuth();
         dialog.close();
+        this.modal = null;
         ok();
       };
 
@@ -417,10 +410,29 @@ class ModalManager extends EventEmitter {
         document.dispatchEvent(new CustomEvent('nlDarkMode', { detail: event.detail }));
       });
 
+      this.on('onIframeAuthUrlCallEnd', () => {
+        dialog.close();
+        this.modal = null;
+        ok();
+      });
+
       dialog.showModal();
     });
 
     return this.launcherPromise;
+  }
+
+  public async showIframeUrl(url: string) {
+    // make sure we consume the previous promise,
+    // otherwise launch will start await-ing
+    // before modal is created and setting iframeUrl will fail
+    await this.waitReady();
+
+    this.launch({
+      startScreen: 'iframe' as StartScreens,
+    }).catch(() => console.log('closed auth iframe'));
+
+    this.modal!.authUrl = url;
   }
 
   public connectModals(defaultOpt: NostrLoginOptions) {
@@ -464,10 +476,14 @@ class ModalManager extends EventEmitter {
 
   public onIframeUrl(url: string) {
     if (this.modal) {
+      console.log('modal iframe url', url);
       this.modal.iframeUrl = url;
-      console.log("modal iframe url", url);
-      if (url) this.modalIframeReady = new ReadyListener('starterDone', new URL(url).origin);
-      else this.modalIframeReady = undefined;
+    }
+  }
+
+  public onCallEnd() {
+    if (this.modal && this.modal.authUrl && this.params.userInfo?.iframeUrl) {
+      this.emit("onIframeAuthUrlCallEnd");
     }
   }
 

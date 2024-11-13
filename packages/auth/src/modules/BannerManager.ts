@@ -7,7 +7,6 @@ import { ReadyListener } from './Nip46';
 
 class BannerManager extends EventEmitter {
   private banner: TypeBanner | null = null;
-  private listNotifies: string[] = [];
   private iframeReady?: ReadyListener;
 
   private params: NostrParams;
@@ -17,21 +16,26 @@ class BannerManager extends EventEmitter {
     this.params = params;
   }
 
-  public onAuthUrl(url: string) {
+  public onAuthUrl(url: string, iframeUrl: string) {
     if (this.banner) {
-      this.banner.notify = {
-        confirm: Date.now(),
-        url,
-      };
+      if (url)
+        this.banner.notify = {
+          mode: iframeUrl ? 'iframeAuthUrl' : 'authUrl',
+          url,
+        };
+      else
+        this.banner.notify = {
+          mode: '',
+        };
     }
   }
 
   public onIframeRestart(iframeUrl: string) {
     if (this.banner) {
-      this.iframeReady = new ReadyListener('rebinderDone', new URL(iframeUrl).origin);
+      this.iframeReady = new ReadyListener(['rebinderDone', 'rebinderError'], new URL(iframeUrl).origin);
       this.banner.notify = {
-        confirm: Date.now(),
-        iframeUrl,
+        mode: 'rebind',
+        url: iframeUrl,
       };
     }
   }
@@ -45,8 +49,7 @@ class BannerManager extends EventEmitter {
   public onCallTimeout() {
     if (this.banner) {
       this.banner.notify = {
-        confirm: Date.now(),
-        timeOut: { domain: this.params.userInfo?.nip05?.split('@')[1] },
+        mode: 'timeout',
       };
     }
   }
@@ -64,7 +67,7 @@ class BannerManager extends EventEmitter {
         this.iframeReady = undefined;
       }
       this.banner.isLoading = false;
-      this.banner.notify = {};
+      this.banner.notify = { mode: '' };
     }
   }
 
@@ -106,13 +109,9 @@ class BannerManager extends EventEmitter {
       this.emit('onAuthUrlClick', event.detail);
     });
 
-    // this.banner.addEventListener('handleSetConfirmBanner', (event: any) => {
-    //   this.listNotifies.push(event.detail);
-
-    //   if (this.banner) {
-    //     this.banner.listNotifies = this.listNotifies;
-    //   }
-    // });
+    this.banner.addEventListener('handleNotifyConfirmBannerIframe', (event: any) => {
+      this.emit('onIframeAuthUrlClick', event.detail);
+    });
 
     this.banner.addEventListener('handleSwitchAccount', (event: any) => {
       this.emit('onSwitchAccount', event.detail);

@@ -1,4 +1,4 @@
-import { Info, AuthMethod, ConnectionString, RecentType } from 'nostr-login-components/dist/types/types';
+import { Info, AuthMethod, ConnectionString, RecentType, BannerNotify } from 'nostr-login-components/dist/types/types';
 
 export interface NostrLoginAuthOptions {
   localNsec?: string;
@@ -70,14 +70,7 @@ export interface IBanner {
   accounts?: Info[];
   isOpen?: boolean;
   darkMode?: boolean;
-  notify?: {
-    confirm?: number;
-    url?: string;
-    iframeUrl?: string;
-    timeOut?: {
-      domain?: string | undefined;
-    };
-  };
+  notify?: BannerNotify;
 }
 
 export type TypeBanner = IBanner & HTMLElement;
