@@ -267,11 +267,10 @@ export class IframeNostrRpc extends NostrRpc {
       // send to iframe
       console.log('iframe-nip46 sending request to', this.peerOrigin, event.rawEvent());
       this.iframePort.postMessage(event.rawEvent());
+    } else {
+      // send to relays
+      await event.publish();
     }
-
-    // also send to relays
-    // FIXME checking iframe-exclusive
-    // await event.publish();
 
     // see notes in 'super'
     // @ts-ignore

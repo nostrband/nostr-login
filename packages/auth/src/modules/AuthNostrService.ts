@@ -132,7 +132,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       iframeUrl,
     };
 
-    console.log('nostrconnect iframeUrl', iframeUrl, link);
+    console.log('nostrconnect info', info, link);
 
     // non-iframe flow
     if (link && !iframeUrl) window.open(link, '_blank', 'width=400,height=700');
@@ -151,7 +151,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     return info;
   }
 
-  public async getNostrConnectServices(): Promise<[string, ConnectionString[]]> {
+  public async createNostrConnect(relay?: string) {
     this.nostrConnectKey = generatePrivateKey();
     this.nostrConnectSecret = Math.random().toString(36).substring(7);
 
@@ -162,24 +162,25 @@ class AuthNostrService extends EventEmitter implements Signer {
       icon: await getIcon(),
       perms: this.params.optionsModal.perms,
     };
-    const nostrconnect = `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}&secret=${this.nostrConnectSecret}`;
 
-    // if we've got local keys then we're using this method
-    // to import local keys to these services
-    const nsec = this.localSigner ? '#import=' + nip19.nsecEncode(this.localSigner.privateKey!) : '';
+    return `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}&secret=${this.nostrConnectSecret}${relay ? `&relay=${relay}` : ''}`;
+  }
+
+  public async getNostrConnectServices(): Promise<[string, ConnectionString[]]> {
+    const nostrconnect = await this.createNostrConnect();
 
     // copy defaults
     const apps = NOSTRCONNECT_APPS.map(a => ({ ...a }));
-    // if (this.params.optionsModal.dev) {
-    //   apps.push({
-    //     name: 'Dev.Nsec.app',
-    //     domain: 'new.nsec.app',
-    //     canImport: true,
-    //     img: 'https://new.nsec.app/assets/favicon.ico',
-    //     link: 'https://dev.nsec.app/<nostrconnect>',
-    //     relay: 'wss://relay.nsec.app/',
-    //   });
-    // }
+    if (this.params.optionsModal.dev) {
+      apps.push({
+        name: 'Dev.Nsec.app',
+        domain: 'new.nsec.app',
+        canImport: true,
+        img: 'https://new.nsec.app/assets/favicon.ico',
+        link: 'https://dev.nsec.app/<nostrconnect>',
+        relay: 'wss://relay.nsec.app/',
+      });
+    }
 
     for (const a of apps) {
       let relay = DEFAULT_NOSTRCONNECT_RELAY;
@@ -195,7 +196,7 @@ class AuthNostrService extends EventEmitter implements Signer {
           console.log('Bad app info', e, a);
         }
       }
-      const nc = nostrconnect + '&relay=' + relay + nsec;
+      const nc = nostrconnect + '&relay=' + relay;
       if (a.iframeUrl) {
         // pass plain nc url for iframe-based flow
         a.link = nc;
@@ -205,7 +206,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       }
     }
 
-    return [nostrconnect + nsec, apps];
+    return [nostrconnect, apps];
   }
 
   public async localSignup(name: string) {
@@ -228,6 +229,11 @@ class AuthNostrService extends EventEmitter implements Signer {
     if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays);
 
     this.onAuth('login', info);
+  }
+
+  public prepareImportUrl(url: string) {
+    if (!this.localSigner || this.params.userInfo?.authMethod !== 'local') throw new Error('Most be local keys');
+    return url + '#import=' + nip19.nsecEncode(this.localSigner.privateKey!);
   }
 
   public async importAndConnect(cs: ConnectionString) {
@@ -279,7 +285,6 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // parse bunker url and generate local nsec
     const info = bunkerUrlToInfo(bunkerUrl);
-    info.domain = domain; // to make sure iframeUrl works
 
     const eventToAddAccount = Boolean(this.params.userInfo);
 
@@ -309,7 +314,10 @@ class AuthNostrService extends EventEmitter implements Signer {
     return {
       bunkerUrl: `bunker://${r.result}?relay=${info.relays?.[0]}`,
       sk: info.sk, // reuse the same local key
-      iframeUrl: info.iframeUrl,
+      // relays: info.relays,
+      // iframe-session after createAccount will
+      // only make sense when createAccount itself is migrated to nostrconnect
+      // iframeUrl: await this.getIframeUrl(domain),
     };
   }
 
@@ -469,18 +477,6 @@ class AuthNostrService extends EventEmitter implements Signer {
     return { iframe, port: r[1] as MessagePort };
   }
 
-  // public async openIframePopup(url: string) {
-  //   console.log('openIframePopup', url, this.iframe);
-  //   this.iframe!.contentWindow!.postMessage(
-  //     {
-  //       authUrl: url,
-  //     },
-  //     {
-  //       targetOrigin: new URL(url).origin,
-  //     },
-  //   );
-  // }
-
   // private async getIframeUrl(domain?: string) {
   //   if (!domain) return '';
   //   try {
@@ -504,7 +500,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     console.log('endAuth', this.params.userInfo);
     if (this.params.userInfo && this.params.userInfo.iframeUrl) {
       // create iframe
-      const { iframe, port } = await this.createIframe(this.params.userInfo.iframeUrl) || {};      
+      const { iframe, port } = (await this.createIframe(this.params.userInfo.iframeUrl)) || {};
       this.iframe = iframe;
       if (!this.iframe || !port) return;
 
@@ -522,7 +518,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   private async listen(info: Info, rpc: IframeNostrRpc) {
-    console.log("listen", info, rpc);
+    console.log('listen', info, rpc);
     if (!info.iframeUrl) return rpc.listen(this.nostrConnectSecret);
     const r = await this.starterReady!.wait();
     if (r[0] === 'starterError') throw new Error(r[1]);
@@ -540,7 +536,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     // we remove support for iframe from nip05 and bunker-url methods,
     // only nostrconnect flow will use it.
     // info.iframeUrl = info.iframeUrl || (await this.getIframeUrl(info.domain));
-    console.log('iframeUrl', info.iframeUrl, info);
+    console.log('initSigner info', info);
 
     // start listening for the ready signal
     const iframeOrigin = info.iframeUrl ? new URL(info.iframeUrl!).origin : undefined;

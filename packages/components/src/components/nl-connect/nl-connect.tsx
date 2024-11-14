@@ -15,6 +15,7 @@ export class NlConnect {
 
   @State() isOpenAdvancedLogin: boolean = false;
   @Event() nlNostrConnect: EventEmitter<ConnectionString>;
+  @Event() nlNostrConnectDefault: EventEmitter<void>;
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];
@@ -33,6 +34,11 @@ export class NlConnect {
   handleOpenLink(e: Event, cs: ConnectionString) {
     e.preventDefault();
     this.nlNostrConnect.emit(cs);
+  }
+
+  handleConnectionString() {
+    this.nlNostrConnectDefault.emit();
+    this.handleChangeScreen(CURRENT_MODULE.CONNECTION_STRING)
   }
 
   render() {
@@ -139,7 +145,7 @@ export class NlConnect {
             )}
 
             {this.allowAuthMethod('connect') && (
-              <button-base titleBtn="Connection string" onClick={() => this.handleChangeScreen(CURRENT_MODULE.CONNECTION_STRING)}>
+              <button-base titleBtn="Connection string" onClick={() => this.handleConnectionString()}>
                 <svg style={{ display: 'none' }} slot="icon-start" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path
                     stroke-linecap="round"

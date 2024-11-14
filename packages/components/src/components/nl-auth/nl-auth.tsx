@@ -76,13 +76,17 @@ export class NlAuth {
   }
 
   componentWillLoad() {
+    // init state
     state.path = [this.startScreen as CURRENT_MODULE];
     state.localSignup = this.localSignup;
+    state.error = '';
+    state.iframeUrl = '';
+    state.authUrl = '';
+    state.isLoading = false;
+    state.isLoadingExtension = false;
+    state.isOTP = false;
 
     console.log('path', state.path);
-
-    // reset
-    state.isOTP = false;
   }
 
   handleClickToBack() {

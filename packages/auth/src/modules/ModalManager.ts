@@ -121,6 +121,7 @@ class ModalManager extends EventEmitter {
       };
 
       const exec = async (body: () => Promise<void>) => {
+        console.log("exec")
         if (this.modal) {
           this.modal.isLoading = true;
         }
@@ -153,10 +154,10 @@ class ModalManager extends EventEmitter {
       const signup = async (name: string) => {
         await exec(async () => {
           // create acc on service and get bunker url
-          const { bunkerUrl, sk, iframeUrl } = await this.authNostrService.createAccount(name);
+          const { bunkerUrl, sk } = await this.authNostrService.createAccount(name);
 
           // connect to bunker by url
-          await this.authNostrService.authNip46('signup', { name, bunkerUrl, sk, iframeUrl });
+          await this.authNostrService.authNip46('signup', { name, bunkerUrl, sk });
         });
       };
 
@@ -171,7 +172,8 @@ class ModalManager extends EventEmitter {
 
       const importKeys = async (cs: ConnectionString) => {
         await exec(async () => {
-          const { link, iframeUrl } = cs;
+          const { iframeUrl } = cs;
+          const link = this.authNostrService.prepareImportUrl(cs.link);
 
           if (this.modal && iframeUrl) {
             // we pass the link down to iframe so it could open it
@@ -190,12 +192,16 @@ class ModalManager extends EventEmitter {
           const { relay, domain, link, iframeUrl } = cs || {};
           console.log('nostrConnect', cs, relay, domain, link, iframeUrl);
 
-          if (this.modal && iframeUrl) {
-            // we pass the link down to iframe so it could open it
-            this.modal.authUrl = link;
-            this.modal.iframeUrl = iframeUrl;
-            this.modal.isLoading = false;
-            console.log('nostrconnect authUrl', this.modal.authUrl, this.modal.iframeUrl);
+          if (this.modal) {
+            if (iframeUrl) {
+              // we pass the link down to iframe so it could open it
+              this.modal.authUrl = link;
+              this.modal.iframeUrl = iframeUrl;
+              this.modal.isLoading = false;
+              console.log('nostrconnect authUrl', this.modal.authUrl, this.modal.iframeUrl);
+            }
+
+            if (!cs) this.modal.isLoading = false;
           }
 
           await this.authNostrService.nostrConnect(relay, { domain, link, iframeUrl });
@@ -483,7 +489,7 @@ class ModalManager extends EventEmitter {
 
   public onCallEnd() {
     if (this.modal && this.modal.authUrl && this.params.userInfo?.iframeUrl) {
-      this.emit("onIframeAuthUrlCallEnd");
+      this.emit('onIframeAuthUrlCallEnd');
     }
   }
 
