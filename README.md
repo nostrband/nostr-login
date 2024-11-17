@@ -151,9 +151,9 @@ After user enters the code, a GET request is made to `<data-otp-reply-url>[?&]pu
 
 The reply payload may be used to supply the session token. If token is sent by the server as a cookie then payload might be empty, otherwise the payload should be used by the app to extract the token and use it in future API calls to the server.
 
-## Example Html Page
+## Example HTML Page
 
-Here is basic html example to test event signage and nip-04 and nip-44 encryption using this tool.
+Here is a basic  example to test event signage, nip-04 and nip-44 encryption using NostrLogin. Just save the following code as index.html and serve it with something like `python3 -m http.server 8080`
 
 ```html
 <!DOCTYPE html>
