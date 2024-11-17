@@ -151,6 +151,134 @@ After user enters the code, a GET request is made to `<data-otp-reply-url>[?&]pu
 
 The reply payload may be used to supply the session token. If token is sent by the server as a cookie then payload might be empty, otherwise the payload should be used by the app to extract the token and use it in future API calls to the server.
 
+## Example Html Page
+
+Here is basic html example to test event signage and nip-04 and nip-44 encryption using this tool.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input and Output Fields</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+        }
+        input, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Adds space between the buttons */
+        }
+        .button-container button {
+            flex: 1 1 calc(50% - 10px); /* Makes each button take up half the width minus the gap */
+            box-sizing: border-box;
+        }
+    </style>
+    <script src='https://www.unpkg.com/nostr-login@latest/dist/unpkg.js'></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Try Nostr-Login</h1>
+        <textarea id="inputField" rows="4" placeholder="Paste your json formatted event here"></textarea>
+        <label>Output:</label>
+        <textarea id="outputField" rows="4" placeholder="Output will be shown here" readonly></textarea>
+        <button onclick="fillExampleData()">Fill with example event</button>
+        <button onclick="SignEventFn()">Sign Event</button>
+        <div class="button-container">
+            <button onclick="cryptWithNIP04('encrypt')">Encrypt with NIP-04</button>
+            <button onclick="cryptWithNIP04('decrypt')">Decrypt with NIP-04</button>
+            <button onclick="cryptWithNIP44('encrypt')">Encrypt with NIP-44</button>
+            <button onclick="cryptWithNIP44('decrypt')">Decrypt with NIP-44</button>
+        </div>
+        <button onclick="switchOutputInput()">Switch Input Output</button>
+    </div>
+
+    <script>
+        // Example Nostr event as json string
+        var ExampleData = `{   "content": "hello world",   "created_at": 1731313613,   "id": "",   "kind": 1,   "pubkey": "568ad8bf00ed530eb44614e4b363271f36f6b645700630470c51f98e7e58fbf0",   "tags": [] }`
+
+        // Function to get public key
+        async function getPublicKey() {
+            return await window.nostr.getPublicKey();
+        }
+
+        // Function to encrypt with NIP-04
+        async function cryptWithNIP04(encryptType) {
+            try {
+                var publicKey = await getPublicKey();
+                var data = document.getElementById('inputField').value;
+                var result;
+                if (encryptType === "encrypt") {
+                    result = await window.nostr.nip04.encrypt(publicKey, data);
+                } else if (encryptType === "decrypt") {
+                    result = await window.nostr.nip04.decrypt(publicKey, data);
+                }
+                document.getElementById('outputField').value = result;
+            } catch (error) {
+                console.error("Error in cryptWithNIP04:", error);
+            }
+        }
+
+        // Function to encrypt with NIP-44
+        async function cryptWithNIP44(encryptType) {
+            try {
+                var publicKey = await getPublicKey();
+                var data = document.getElementById('inputField').value;
+                var result;
+                if (encryptType === "encrypt") {
+                    result = await window.nostr.nip44.encrypt(publicKey, data);
+                } else if (encryptType === "decrypt") {
+                    result = await window.nostr.nip44.decrypt(publicKey, data);
+                }
+                document.getElementById('outputField').value = result;
+            } catch (error) {
+                console.error("Error in cryptWithNIP44:", error);
+            }
+        }
+
+        // Sign nostr event
+        async function SignEventFn() {
+            try {
+                var input = document.getElementById('inputField').value;
+                // Convert the text from input to json object
+                var json_data = JSON.parse(input);
+                // Sign the event object using the plugin signEvent method
+                var signedEvent = await window.nostr.signEvent(json_data);
+                document.getElementById('outputField').value = JSON.stringify(signedEvent, null, 2);
+            } catch (error) {
+                console.error("Error in SignEventFn:", error);
+            }
+        }
+
+        // Fill example data for easy testing
+        function fillExampleData() {
+            document.getElementById('outputField').value = '';
+            document.getElementById('inputField').value = ExampleData;
+        }
+
+        // Switch input and output fields
+        function switchOutputInput() {
+            var tempOutput = document.getElementById('outputField').value;
+            document.getElementById('inputField').value = tempOutput;
+            document.getElementById('outputField').value = '';
+        }
+    </script>
+</body>
+</html>
+```
 
 ## TODO
 
