@@ -151,6 +151,9 @@ After user enters the code, a GET request is made to `<data-otp-reply-url>[?&]pu
 
 The reply payload may be used to supply the session token. If token is sent by the server as a cookie then payload might be empty, otherwise the payload should be used by the app to extract the token and use it in future API calls to the server.
 
+## Examples
+
+* [Basic HTML Example](./examples/usage.html)
 
 ## TODO
 
