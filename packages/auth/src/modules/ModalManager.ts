@@ -98,12 +98,13 @@ class ModalManager extends EventEmitter {
         this.authNostrService.resetAuth();
 
         if (this.modal) {
-          // reset state
-          this.modal.isLoading = false;
-          this.modal.authUrl = '';
-          this.modal.iframeUrl = '';
-          this.modal.error = '';
-          this.modal.isLoadingExtension = false;
+          // it's reset on modal creation
+          // // reset state
+          // this.modal.isLoading = false;
+          // this.modal.authUrl = '';
+          // this.modal.iframeUrl = '';
+          // this.modal.error = '';
+          // this.modal.isLoadingExtension = false;
 
           // drop it
           // @ts-ignore
@@ -263,6 +264,11 @@ class ModalManager extends EventEmitter {
 
         // wait a bit, if dialog closes before
         // switching finishes then launched promise rejects
+
+        // FIXME this calls resetAuth which then prevents
+        // endAuth from getting properly called. 300 is not
+        // enough to init iframe, so there should be a 
+        // feedback from switchAccount here
         setTimeout(() => dialog.close(), 300);
       });
 

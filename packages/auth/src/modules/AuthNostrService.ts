@@ -171,16 +171,16 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     // copy defaults
     const apps = NOSTRCONNECT_APPS.map(a => ({ ...a }));
-    if (this.params.optionsModal.dev) {
-      apps.push({
-        name: 'Dev.Nsec.app',
-        domain: 'new.nsec.app',
-        canImport: true,
-        img: 'https://new.nsec.app/assets/favicon.ico',
-        link: 'https://dev.nsec.app/<nostrconnect>',
-        relay: 'wss://relay.nsec.app/',
-      });
-    }
+    // if (this.params.optionsModal.dev) {
+    //   apps.push({
+    //     name: 'Dev.Nsec.app',
+    //     domain: 'new.nsec.app',
+    //     canImport: true,
+    //     img: 'https://new.nsec.app/assets/favicon.ico',
+    //     link: 'https://dev.nsec.app/<nostrconnect>',
+    //     relay: 'wss://relay.nsec.app/',
+    //   });
+    // }
 
     for (const a of apps) {
       let relay = DEFAULT_NOSTRCONNECT_RELAY;
@@ -232,6 +232,10 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public prepareImportUrl(url: string) {
+    // for OTP we choose interactive import
+    if (this.params.userInfo?.authMethod === 'otp') return url + '&import=true';
+
+    // for local we export our existing key
     if (!this.localSigner || this.params.userInfo?.authMethod !== 'local') throw new Error('Most be local keys');
     return url + '#import=' + nip19.nsecEncode(this.localSigner.privateKey!);
   }
