@@ -17,8 +17,8 @@
 
 | Event                  | Description | Type                                                                                                                                             |
 | ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `nlLoginRecentAccount` |             | `CustomEvent<{ picture?: string; name?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; domain?: string; }>` |
-| `nlRemoveRecent`       |             | `CustomEvent<{ picture?: string; name?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; domain?: string; }>` |
+| `nlLoginRecentAccount` |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; domain?: string; }>` |
+| `nlRemoveRecent`       |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; domain?: string; }>` |
 | `nlSwitchAccount`      |             | `CustomEvent<Info>`                                                                                                                              |
 
 

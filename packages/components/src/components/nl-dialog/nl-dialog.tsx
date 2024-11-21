@@ -9,7 +9,11 @@ export class NlDialog {
   private dialogElement?: HTMLDialogElement;
 
   componentDidLoad() {
-    this.dialogElement?.showModal();
+    const pos = window.scrollY;
+    this.dialogElement?.show();
+    // for some reason window is scrolled to where the dialog is,
+    // this way we cancel that misbehavior
+    setTimeout(() => (window.scroll(window.scrollX, pos)), 0);
   }
 
   disconnectedCallback() {
