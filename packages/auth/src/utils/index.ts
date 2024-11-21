@@ -1,7 +1,7 @@
-import { Info } from 'nostr-login-components/dist/types/types';
+import { Info, RecentType } from 'nostr-login-components/dist/types/types';
 import NDK, { NDKEvent, NDKRelaySet, NDKSigner, NDKUser } from '@nostr-dev-kit/ndk';
 import { generatePrivateKey } from 'nostr-tools';
-import { NostrLoginOptions, RecentType } from '../types';
+import { NostrLoginOptions } from '../types';
 
 const LOCAL_STORE_KEY = '__nostrlogin_nip46';
 const LOGGED_IN_ACCOUNTS = '__nostrlogin_accounts';

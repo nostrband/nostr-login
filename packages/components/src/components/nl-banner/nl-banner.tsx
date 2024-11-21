@@ -1,5 +1,5 @@
 import { Component, Event, EventEmitter, Fragment, h, Prop, State, Watch } from '@stencil/core';
-import { Info, METHOD_MODULE, NlTheme } from '@/types';
+import { BannerNotify, BannerNotifyMode, Info, METHOD_MODULE, NlTheme } from '@/types';
 
 @Component({
   tag: 'nl-banner',
@@ -7,31 +7,26 @@ import { Info, METHOD_MODULE, NlTheme } from '@/types';
   shadow: true,
 })
 export class NlBanner {
-  @State() isLogin: boolean = false;
   @Prop({ mutable: true }) theme: NlTheme = 'default';
   @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop({ mutable: true }) hiddenMode: boolean = false;
   @Prop() titleBanner: string = '';
-  @State() domain: string = '';
-  @State() urlNotify: string = '';
-  @Prop() listNotifies: string[] = [];
-  @State() isOpenNotifyTimeOut: boolean = false;
-  // @State() imgUrl: string = '';
   @Prop({ mutable: true }) isOpen: boolean = false;
-  @State() isConfirm: boolean = true;
-  @State() isOpenConfirm: boolean = false;
 
   @Prop() isLoading: boolean = false;
-  @Prop() notify: { confirm: number; url?: string; timeOut?: { link: string } } | null = null;
-  @State() isNotConfirmToSend: boolean = false;
+  @Prop() notify: BannerNotify | null = null;
   @Prop() userInfo: Info | null = null;
   @Prop({ mutable: true }) accounts: Info[] = [];
 
   @State() isUserImgError = false;
 
-  @Event() handleRetryConfirmBanner: EventEmitter<string>;
+  @State() domain: string = '';
+  @State() mode: BannerNotifyMode = '';
+  @State() url: string = '';
+  @State() isOpenConfirm: boolean = false;
+
   @Event() handleNotifyConfirmBanner: EventEmitter<string>;
-  @Event() handleSetConfirmBanner: EventEmitter<string>;
+  @Event() handleNotifyConfirmBannerIframe: EventEmitter<string>;
   @Event() handleLoginBanner: EventEmitter<string>;
   @Event() handleLogoutBanner: EventEmitter<string>;
   @Event() handleOpenWelcomeModal: EventEmitter<string>;
@@ -39,19 +34,16 @@ export class NlBanner {
   @Event() handleImportModal: EventEmitter<string>;
 
   @Watch('notify')
-  watchNotifyHandler(notify: { confirm: number; url?: string; timeOut?: boolean }) {
-    this.isNotConfirmToSend = true;
+  watchNotifyHandler(notify: BannerNotify) {
     this.isOpen = true;
     this.isOpenConfirm = true;
-    this.domain = this.userInfo?.nip05?.split('@')?.[1] || '';
+    this.domain = this.userInfo?.domain || this.userInfo?.nip05?.split('@')?.[1] || '';
 
-    if (notify.url) {
-      this.urlNotify = notify.url;
-      this.isOpenNotifyTimeOut = false;
-    }
-
-    if (!this.urlNotify && notify.timeOut) {
-      this.isOpenNotifyTimeOut = true;
+    this.mode = notify.mode;
+    this.url = notify.url;
+    if (!this.mode) {
+      this.isOpenConfirm = false;
+      this.isOpen = false;
     }
   }
 
@@ -65,15 +57,6 @@ export class NlBanner {
 
   handleClose() {
     this.isOpen = false;
-    this.isOpenNotifyTimeOut = false;
-    this.isOpenConfirm = false;
-
-    if (this.isNotConfirmToSend) {
-      this.handleSetConfirmBanner.emit(this.urlNotify);
-      this.isNotConfirmToSend = false;
-    }
-
-    this.urlNotify = '';
   }
 
   handleLogin() {
@@ -112,14 +95,14 @@ export class NlBanner {
   }
 
   handleConfirm() {
-    this.handleNotifyConfirmBanner.emit(this.urlNotify);
-    this.isNotConfirmToSend = false;
-    this.handleClose();
-  }
-
-  handleRetryConfirm() {
-    this.handleRetryConfirmBanner.emit();
-    this.isNotConfirmToSend = false;
+    switch (this.mode) {
+      case 'authUrl':
+        this.handleNotifyConfirmBanner.emit(this.url);
+        break;
+      case 'iframeAuthUrl':
+        this.handleNotifyConfirmBannerIframe.emit(this.url);
+        break;
+    }
     this.handleClose();
   }
 
@@ -222,10 +205,10 @@ export class NlBanner {
                 </svg>
               </div>
               <p class="mb-2 text-center max-w-40 min-w-40 mx-auto">
-                {this.isOpenNotifyTimeOut ? 'Keys not responding, check your key storage app' : `Confirmation required at ${this.domain}`}
+                {this.mode === 'timeout' ? 'Keys not responding, check your key storage app' : `Confirmation required at ${this.domain}`}
               </p>
 
-              {this.isOpenNotifyTimeOut ? (
+              {this.mode === 'timeout' ? (
                 <a
                   onClick={() => this.handleClose()}
                   href={`https://${this.domain}`}
@@ -234,6 +217,8 @@ export class NlBanner {
                 >
                   Go to {this.domain}
                 </a>
+              ) : this.mode === 'rebind' ? (
+                <iframe src={this.url} width={'180'} height={'80'}></iframe>
               ) : (
                 <button-base onClick={() => this.handleConfirm()} titleBtn="Confirm" />
               )}
@@ -253,14 +238,14 @@ export class NlBanner {
                 <div class="mb-2">
                   <nl-change-account currentAccount={this.userInfo} accounts={this.accounts} />
                 </div>
-                {Boolean(this.listNotifies.length) && (
-                  <div
-                    onClick={() => this.handleRetryConfirm()}
-                    class="show-slow border border-yellow-600 text-yellow-600 bg-yellow-100 p-2 rounded-lg mb-2 cursor-pointer w-44 text-xs m-auto text-center"
-                  >
-                    Requests: {this.listNotifies.length}
-                  </div>
-                )}
+                {/* {Boolean(this.listNotifies.length) && (
+                      <div
+                        onClick={() => this.handleRetryConfirm()}
+                        class="show-slow border border-yellow-600 text-yellow-600 bg-yellow-100 p-2 rounded-lg mb-2 cursor-pointer w-44 text-xs m-auto text-center"
+                      >
+                        Requests: {this.listNotifies.length}
+                      </div>
+                    )} */}
                 {!this.userInfo ? (
                   <div>
                     <button-base onClick={() => this.handleLogin()} titleBtn="Log in">

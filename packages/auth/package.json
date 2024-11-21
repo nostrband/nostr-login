@@ -1,6 +1,6 @@
 {
   "name": "nostr-login",
-  "version": "1.6.7",
+  "version": "1.6.8",
   "description": "",
   "main": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",

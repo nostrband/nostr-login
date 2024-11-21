@@ -1,8 +1,8 @@
-import { NostrLoginOptions, RecentType, StartScreens, TypeModal } from '../types';
+import { NostrLoginOptions, StartScreens, TypeModal } from '../types';
 import { checkNip05, getBunkerUrl, getDarkMode, localStorageRemoveRecent, localStorageSetItem } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
-import { Info } from 'nostr-login-components/dist/types/types';
+import { ConnectionString, Info, RecentType } from 'nostr-login-components/dist/types/types';
 import { nip19 } from 'nostr-tools';
 import { setDarkMode } from '..';
 
@@ -28,16 +28,13 @@ class ModalManager extends EventEmitter {
       try {
         await this.launcherPromise;
       } catch {}
+      this.launcherPromise = undefined;
     }
   }
 
   public async launch(opt: NostrLoginOptions) {
     // mutex
-    if (this.launcherPromise) {
-      try {
-        await this.launcherPromise;
-      } catch {}
-    }
+    if (this.launcherPromise) await this.waitReady();
 
     this.opt = opt;
 
@@ -59,7 +56,9 @@ class ModalManager extends EventEmitter {
     if (opt.bunkers) {
       this.modal.setAttribute('bunkers', opt.bunkers);
     } else {
-      this.modal.setAttribute('bunkers', 'nsec.app,highlighter.com');
+      let bunkers = 'nsec.app,highlighter.com';
+      // if (opt.dev) bunkers += ',new.nsec.app';
+      this.modal.setAttribute('bunkers', bunkers);
     }
 
     if (opt.methods !== undefined) {
@@ -96,12 +95,16 @@ class ModalManager extends EventEmitter {
         // noop if already resolved
         err(new Error('Closed'));
 
+        this.authNostrService.resetAuth();
+
         if (this.modal) {
-          // reset state
-          this.modal.isLoading = false;
-          this.modal.authUrl = '';
-          this.modal.error = '';
-          this.modal.isLoadingExtension = false;
+          // it's reset on modal creation
+          // // reset state
+          // this.modal.isLoading = false;
+          // this.modal.authUrl = '';
+          // this.modal.iframeUrl = '';
+          // this.modal.error = '';
+          // this.modal.isLoadingExtension = false;
 
           // drop it
           // @ts-ignore
@@ -110,54 +113,58 @@ class ModalManager extends EventEmitter {
         }
       });
 
-      const login = (name: string) => {
-        if (this.modal) {
-          this.modal.isLoading = true;
-        }
-        // convert name to bunker url
-        getBunkerUrl(name, this.params.optionsModal)
-          // connect to bunker by url
-          .then(bunkerUrl => this.authNostrService.authNip46('login', name, bunkerUrl))
-          .then(() => {
-            if (this.modal) {
-              this.modal.isLoading = false;
-            }
-            dialog.close();
-            ok();
-          })
-          .catch((e: Error) => {
-            console.log('error', e);
-            if (this.modal) {
-              this.modal.isLoading = false;
-              this.modal.error = e.toString();
-            }
-          });
+      const done = async (ok: () => void) => {
+        if (this.modal) this.modal.isLoading = false;
+        await this.authNostrService.endAuth();
+        dialog.close();
+        this.modal = null;
+        ok();
       };
 
-      const signup = (name: string) => {
+      const exec = async (
+        body: () => Promise<void>,
+        options?: {
+          start?: boolean;
+          end?: boolean;
+        },
+      ) => {
         if (this.modal) {
           this.modal.isLoading = true;
         }
 
-        // create acc on service and get bunker url
-        this.authNostrService
-          .createAccount(name)
+        try {
+          if (!options || options.start) await this.authNostrService.startAuth();
+          await body();
+          if (!options || options.end) await done(ok);
+        } catch (e: any) {
+          console.log('error', e);
+          if (this.modal) {
+            this.modal.isLoading = false;
+            this.modal.authUrl = '';
+            this.modal.iframeUrl = '';
+            this.modal.error = e.toString();
+          }
+        }
+      };
+
+      const login = async (name: string, domain?: string) => {
+        await exec(async () => {
+          // convert name to bunker url
+          const bunkerUrl = await getBunkerUrl(name, this.params.optionsModal);
+
           // connect to bunker by url
-          .then(({ bunkerUrl, sk }) => this.authNostrService.authNip46('signup', name, bunkerUrl, sk))
-          .then(() => {
-            if (this.modal) {
-              this.modal.isLoading = false;
-            }
-            dialog.close();
-            ok();
-          })
-          .catch((e: Error) => {
-            console.log('error', e);
-            if (this.modal) {
-              this.modal.isLoading = false;
-              this.modal.error = e.toString();
-            }
-          });
+          await this.authNostrService.authNip46('login', { name, bunkerUrl, domain });
+        });
+      };
+
+      const signup = async (name: string) => {
+        await exec(async () => {
+          // create acc on service and get bunker url
+          const { bunkerUrl, sk } = await this.authNostrService.createAccount(name);
+
+          // connect to bunker by url
+          await this.authNostrService.authNip46('signup', { name, bunkerUrl, sk });
+        });
       };
 
       const exportKeys = async () => {
@@ -169,71 +176,49 @@ class ModalManager extends EventEmitter {
         }
       };
 
-      const importKeys = async (relay: string) => {
-        if (this.modal) {
-          this.modal.isLoading = true;
-        }
+      const importKeys = async (cs: ConnectionString) => {
+        await exec(async () => {
+          const { iframeUrl } = cs;
+          const link = this.authNostrService.prepareImportUrl(cs.link);
 
-        try {
-          await this.authNostrService.importAndConnect(relay);
+          if (this.modal && iframeUrl) {
+            // we pass the link down to iframe so it could open it
+            this.modal.authUrl = link;
+            this.modal.iframeUrl = iframeUrl;
+            this.modal.isLoading = false;
+            console.log('nostrconnect authUrl', this.modal.authUrl, this.modal.iframeUrl);
+          }
 
-          if (this.modal) {
-            this.modal.isLoading = false;
-          }
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          if (this.modal) {
-            this.modal.isLoading = false;
-            this.modal.error = e.toString();
-          }
-        }
+          await this.authNostrService.importAndConnect(cs);
+        });
       };
 
-      const nostrConnect = async (relay?: string) => {
-        if (relay && this.modal) {
-          this.modal.isLoading = true;
-        }
+      const nostrConnect = async (cs?: ConnectionString) => {
+        await exec(async () => {
+          const { relay, domain, link, iframeUrl } = cs || {};
+          console.log('nostrConnect', cs, relay, domain, link, iframeUrl);
 
-        try {
-          await this.authNostrService.nostrConnect(relay);
           if (this.modal) {
-            this.modal.isLoading = false;
+            if (iframeUrl) {
+              // we pass the link down to iframe so it could open it
+              this.modal.authUrl = link;
+              this.modal.iframeUrl = iframeUrl;
+              this.modal.isLoading = false;
+              console.log('nostrconnect authUrl', this.modal.authUrl, this.modal.iframeUrl);
+            }
+
+            if (!cs) this.modal.isLoading = false;
           }
 
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          if (this.modal) {
-            this.modal.isLoading = false;
-            this.modal.error = e.toString();
-          }
-        }
+          await this.authNostrService.nostrConnect(relay, { domain, link, iframeUrl });
+        });
       };
 
       const localSignup = async (name?: string) => {
-        if (this.modal) {
-          this.modal.isLoading = true;
-        }
-
-        try {
+        await exec(async () => {
           if (!name) throw new Error('Please enter some nickname');
           await this.authNostrService.localSignup(name);
-          if (this.modal) {
-            this.modal.isLoading = false;
-          }
-
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          if (this.modal) {
-            this.modal.isLoading = false;
-            this.modal.error = e.toString();
-          }
-        }
+        });
       };
 
       if (!this.modal) throw new Error('WTH?');
@@ -270,7 +255,7 @@ class ModalManager extends EventEmitter {
       });
 
       this.modal.addEventListener('nlNostrConnect', (event: any) => {
-        nostrConnect(event.detail as string);
+        nostrConnect(event.detail);
       });
 
       this.modal.addEventListener('nlNostrConnectDefault', () => {
@@ -284,6 +269,11 @@ class ModalManager extends EventEmitter {
 
         // wait a bit, if dialog closes before
         // switching finishes then launched promise rejects
+
+        // FIXME this calls resetAuth which then prevents
+        // endAuth from getting properly called. 300 is not
+        // enough to init iframe, so there should be a
+        // feedback from switchAccount here
         setTimeout(() => dialog.close(), 300);
       });
 
@@ -294,7 +284,6 @@ class ModalManager extends EventEmitter {
           this.authNostrService.setReadOnly(userInfo.pubkey);
           dialog.close();
         } else if (userInfo.authMethod === 'otp') {
-          console.log('recent otp login', userInfo);
           try {
             this.modal!.dispatchEvent(
               new CustomEvent('nlLoginOTPUser', {
@@ -310,7 +299,7 @@ class ModalManager extends EventEmitter {
         } else {
           const input = userInfo.bunkerUrl || userInfo.nip05;
           if (!input) throw new Error('Bad connect info');
-          login(input);
+          login(input, userInfo.domain);
         }
       });
 
@@ -337,23 +326,11 @@ class ModalManager extends EventEmitter {
       };
 
       this.modal.addEventListener('nlLoginReadOnly', async (event: any) => {
-        if (!this.modal) return;
-
-        this.modal.isLoading = true;
-
-        const nameNpub = event.detail;
-        try {
+        await exec(async () => {
+          const nameNpub = event.detail;
           const pubkey = await nameToPubkey(nameNpub);
           this.authNostrService.setReadOnly(pubkey);
-
-          this.modal.isLoading = false;
-          dialog.close();
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          this.modal.isLoading = false;
-          this.modal.error = e.toString() || e;
-        }
+        });
       });
 
       this.modal.addEventListener('nlLoginExtension', async () => {
@@ -361,82 +338,60 @@ class ModalManager extends EventEmitter {
           throw new Error('No extension');
         }
 
-        if (this.modal) {
-          try {
-            this.modal.isLoadingExtension = true;
-
-            await this.extensionService.setExtension();
-
-            this.modal.isLoadingExtension = false;
-
-            dialog.close();
-
-            ok();
-          } catch (e) {
-            console.log('extension error', e);
-            // @ts-ignore
-            this.modal.error = e.toString();
-          }
-        }
+        await exec(async () => {
+          if (!this.modal) return;
+          this.modal.isLoadingExtension = true;
+          await this.extensionService.setExtension();
+          this.modal.isLoadingExtension = false;
+        });
       });
 
       this.modal.addEventListener('nlLoginOTPUser', async (event: any) => {
-        if (!this.modal) return;
+        await exec(
+          async () => {
+            if (!this.modal) return;
 
-        this.modal.isLoading = true;
+            const nameNpub = event.detail;
+            const pubkey = await nameToPubkey(nameNpub);
+            const url = this.opt!.otpRequestUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + pubkey;
+            const r = await fetch(url);
+            if (r.status !== 200) {
+              console.warn('nostr-login: bad otp reply', r);
+              throw new Error('Failed to send DM');
+            }
 
-        const nameNpub = event.detail;
-        try {
-          const pubkey = await nameToPubkey(nameNpub);
-          const url = this.opt!.otpRequestUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + pubkey;
-          const r = await fetch(url);
-          if (r.status !== 200) {
-            console.warn('nostr-login: bad otp reply', r);
-            throw new Error('Failed to send DM');
-          }
+            // switch to 'enter code' mode
+            this.modal.isOTP = true;
 
-          // switch to 'enter code' mode
-          this.modal.isOTP = true;
+            // remember for code handler below
+            otpPubkey = pubkey;
 
-          // remember for code handler below
-          otpPubkey = pubkey;
-
-          this.modal.isLoading = false;
-        } catch (e: any) {
-          console.log('error', e);
-          this.modal.isLoading = false;
-          this.modal.error = e.toString() || e;
-        }
+            // spinner off
+            this.modal.isLoading = false;
+          },
+          { start: true },
+        );
       });
 
       this.modal.addEventListener('nlLoginOTPCode', async (event: any) => {
-        if (!this.modal) return;
+        await exec(
+          async () => {
+            if (!this.modal) return;
+            const code = event.detail;
+            const url = this.opt!.otpReplyUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + otpPubkey + '&code=' + code;
+            const r = await fetch(url);
+            if (r.status !== 200) {
+              console.warn('nostr-login: bad otp reply', r);
+              throw new Error('Invalid code');
+            }
 
-        this.modal.isLoading = true;
+            const data = await r.text();
+            this.authNostrService.setOTP(otpPubkey, data);
 
-        const code = event.detail;
-        try {
-          const url = this.opt!.otpReplyUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + otpPubkey + '&code=' + code;
-          const r = await fetch(url);
-          if (r.status !== 200) {
-            console.warn('nostr-login: bad otp reply', r);
-            throw new Error('Invalid code');
-          }
-
-          const data = await r.text();
-          this.authNostrService.setOTP(otpPubkey, data);
-
-          this.modal.isOTP = false;
-          this.modal.isLoading = false;
-
-          dialog.close();
-
-          ok();
-        } catch (e: any) {
-          console.log('error', e);
-          this.modal.isLoading = false;
-          this.modal.error = e.toString() || e;
-        }
+            this.modal.isOTP = false;
+          },
+          { end: true },
+        );
       });
 
       this.modal.addEventListener('nlCheckSignup', async (event: any) => {
@@ -481,10 +436,29 @@ class ModalManager extends EventEmitter {
         document.dispatchEvent(new CustomEvent('nlDarkMode', { detail: event.detail }));
       });
 
+      this.on('onIframeAuthUrlCallEnd', () => {
+        dialog.close();
+        this.modal = null;
+        ok();
+      });
+
       dialog.showModal();
     });
 
     return this.launcherPromise;
+  }
+
+  public async showIframeUrl(url: string) {
+    // make sure we consume the previous promise,
+    // otherwise launch will start await-ing
+    // before modal is created and setting iframeUrl will fail
+    await this.waitReady();
+
+    this.launch({
+      startScreen: 'iframe' as StartScreens,
+    }).catch(() => console.log('closed auth iframe'));
+
+    this.modal!.authUrl = url;
   }
 
   public connectModals(defaultOpt: NostrLoginOptions) {
@@ -523,6 +497,19 @@ class ModalManager extends EventEmitter {
     if (this.modal) {
       this.modal.authUrl = url;
       this.modal.isLoading = false;
+    }
+  }
+
+  public onIframeUrl(url: string) {
+    if (this.modal) {
+      console.log('modal iframe url', url);
+      this.modal.iframeUrl = url;
+    }
+  }
+
+  public onCallEnd() {
+    if (this.modal && this.modal.authUrl && this.params.userInfo?.iframeUrl) {
+      this.emit('onIframeAuthUrlCallEnd');
     }
   }
 

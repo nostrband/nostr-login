@@ -11,12 +11,13 @@
 | `authMethods`              | --                     |             | `AuthMethod[]`                                             | `[]`                     |
 | `authUrl`                  | `auth-url`             |             | `string`                                                   | `''`                     |
 | `bunkers`                  | `bunkers`              |             | `string`                                                   | `''`                     |
-| `connectionString`         | `connection-string`    |             | `string`                                                   | `""`                     |
+| `connectionString`         | `connection-string`    |             | `string`                                                   | `''`                     |
 | `connectionStringServices` | --                     |             | `ConnectionString[]`                                       | `[]`                     |
 | `darkMode`                 | `dark-mode`            |             | `boolean`                                                  | `false`                  |
 | `error`                    | `error`                |             | `string`                                                   | `''`                     |
 | `hasExtension`             | `has-extension`        |             | `boolean`                                                  | `false`                  |
 | `hasOTP`                   | `has-o-t-p`            |             | `boolean`                                                  | `false`                  |
+| `iframeUrl`                | `iframe-url`           |             | `string`                                                   | `''`                     |
 | `isLoading`                | `is-loading`           |             | `boolean`                                                  | `false`                  |
 | `isLoadingExtension`       | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
 | `isOTP`                    | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
@@ -47,6 +48,7 @@
 - [nl-local-signup](../nl-local-signup)
 - [nl-confirm-logout](../nl-confirm-logout)
 - [nl-import-flow](../nl-import-flow)
+- [nl-otp-migrate](../nl-otp-migrate)
 - [nl-info](../nl-info)
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
@@ -56,6 +58,7 @@
 - [nl-signin-connection-string](../nl-signin-connection-string)
 - [nl-connect](../nl-connect)
 - [nl-previously-logged](../nl-previously-logged)
+- [nl-iframe](../nl-iframe)
 - [nl-loading](../nl-loading)
 
 ### Graph
@@ -68,6 +71,7 @@ graph TD;
   nl-auth --> nl-local-signup
   nl-auth --> nl-confirm-logout
   nl-auth --> nl-import-flow
+  nl-auth --> nl-otp-migrate
   nl-auth --> nl-info
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
@@ -77,6 +81,7 @@ graph TD;
   nl-auth --> nl-signin-connection-string
   nl-auth --> nl-connect
   nl-auth --> nl-previously-logged
+  nl-auth --> nl-iframe
   nl-auth --> nl-loading
   nl-signin-otp --> button-base
   nl-welcome --> button-base
@@ -87,6 +92,8 @@ graph TD;
   nl-confirm-logout --> button-base
   nl-import-flow --> button-base
   nl-import-flow --> nl-select
+  nl-otp-migrate --> nl-select
+  nl-otp-migrate --> button-base
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
   nl-welcome-signin --> button-base

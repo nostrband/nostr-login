@@ -18,6 +18,7 @@ export class NlAuth {
   @Prop() isLoadingExtension: boolean = false;
   @Prop() isOTP: boolean = false;
   @Prop() authUrl: string = '';
+  @Prop() iframeUrl: string = '';
   @Prop() error: string = '';
   @Prop() localSignup: boolean = false;
   @Prop({ mutable: true }) accounts: Info[] = [];
@@ -25,7 +26,7 @@ export class NlAuth {
   @Prop({ mutable: true }) darkMode: boolean = false;
   @Prop() welcomeTitle: string = '';
   @Prop() welcomeDescription: string = '';
-  @Prop() connectionString: string = "";
+  @Prop() connectionString: string = '';
   @Prop() connectionStringServices: ConnectionString[] = [];
 
   @Event() nlCloseModal: EventEmitter;
@@ -56,6 +57,11 @@ export class NlAuth {
     state.authUrl = newValue;
   }
 
+  @Watch('iframeUrl')
+  watchIframeUrlHandler(newValue: string) {
+    state.iframeUrl = newValue;
+  }
+
   @Watch('error')
   watchErrorHandler(newValue: string) {
     state.error = newValue;
@@ -70,13 +76,17 @@ export class NlAuth {
   }
 
   componentWillLoad() {
+    // init state
     state.path = [this.startScreen as CURRENT_MODULE];
     state.localSignup = this.localSignup;
-
-    console.log("path", state.path);
-
-    // reset
+    state.error = '';
+    state.iframeUrl = '';
+    state.authUrl = '';
+    state.isLoading = false;
+    state.isLoadingExtension = false;
     state.isOTP = false;
+
+    console.log('path', state.path);
   }
 
   handleClickToBack() {
@@ -122,7 +132,9 @@ export class NlAuth {
         case CURRENT_MODULE.CONFIRM_LOGOUT:
           return <nl-confirm-logout />;
         case CURRENT_MODULE.IMPORT_FLOW:
-          return <nl-import-flow services={this.connectionStringServices.filter(s => s.canImport)} />;
+          return <nl-import-flow services={this.connectionStringServices} />;
+        case CURRENT_MODULE.IMPORT_OTP:
+          return <nl-otp-migrate services={this.connectionStringServices} />;
         case CURRENT_MODULE.INFO:
           return <nl-info />;
         case CURRENT_MODULE.EXTENSION:
@@ -138,17 +150,31 @@ export class NlAuth {
         case CURRENT_MODULE.WELCOME_SIGNUP:
           return <nl-welcome-signup />;
         case CURRENT_MODULE.CONNECTION_STRING:
-          return <nl-signin-connection-string connectionString={this.connectionString}/>;
+          return <nl-signin-connection-string connectionString={this.connectionString} />;
         case CURRENT_MODULE.CONNECT:
           return <nl-connect connectionStringServices={this.connectionStringServices} authMethods={this.authMethods} />;
         case CURRENT_MODULE.PREVIOUSLY_LOGGED:
           return <nl-previously-logged accounts={this.accounts} recents={this.recents} />;
+        case CURRENT_MODULE.IFRAME:
+          return <nl-iframe iframeUrl={this.authUrl} />;
         default:
           return <nl-welcome />;
       }
     };
 
-    const signup = !this.authMethods.length || (!this.localSignup && this.authMethods.includes('connect')) || (this.localSignup && this.authMethods.includes('local'));
+    const showLogin =
+      state.isOTP ||
+      (lastValuePath !== CURRENT_MODULE.INFO &&
+        lastValuePath !== CURRENT_MODULE.CONFIRM_LOGOUT &&
+        lastValuePath !== CURRENT_MODULE.IMPORT_FLOW &&
+        lastValuePath !== CURRENT_MODULE.WELCOME &&
+        lastValuePath !== CURRENT_MODULE.EXTENSION &&
+        lastValuePath !== CURRENT_MODULE.IFRAME &&
+        lastValuePath !== CURRENT_MODULE.PREVIOUSLY_LOGGED);
+
+    const showSignup =
+      lastValuePath !== CURRENT_MODULE.IFRAME &&
+      (!this.authMethods.length || (!this.localSignup && this.authMethods.includes('connect')) || (this.localSignup && this.authMethods.includes('local')));
 
     return (
       <div class={`theme-${this.theme}`}>
@@ -255,13 +281,7 @@ export class NlAuth {
             ) : (
               <Fragment>
                 {renderModule()}
-                {(state.isOTP ||
-                  (lastValuePath !== CURRENT_MODULE.INFO &&
-                    lastValuePath !== CURRENT_MODULE.CONFIRM_LOGOUT &&
-                    lastValuePath !== CURRENT_MODULE.IMPORT_FLOW &&
-                    lastValuePath !== CURRENT_MODULE.WELCOME &&
-                    lastValuePath !== CURRENT_MODULE.EXTENSION &&
-                    lastValuePath !== CURRENT_MODULE.PREVIOUSLY_LOGGED)) && (
+                {showLogin && (
                   <Fragment>
                     {lastValuePath === CURRENT_MODULE.WELCOME_SIGNUP || lastValuePath === CURRENT_MODULE.SIGNUP || lastValuePath === CURRENT_MODULE.LOCAL_SIGNUP ? (
                       <div class="p-4 overflow-y-auto">
@@ -274,7 +294,7 @@ export class NlAuth {
                         </p>
                       </div>
                     ) : (
-                      signup && (
+                      showSignup && (
                         <div class="p-4 overflow-y-auto">
                           <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
                             If you don't have a profile please{' '}

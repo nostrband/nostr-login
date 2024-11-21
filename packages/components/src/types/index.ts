@@ -7,6 +7,7 @@ export enum CURRENT_MODULE {
   LOGIN_READ_ONLY = 'login-read-only',
   CONFIRM_LOGOUT = 'confirm-logout',
   IMPORT_FLOW = 'import',
+  IMPORT_OTP = 'import-otp',
   LOGIN = 'login',
   SIGNUP = 'signup',
   LOCAL_SIGNUP = 'local-signup',
@@ -16,6 +17,7 @@ export enum CURRENT_MODULE {
   LOGIN_OTP = 'otp',
   CONNECT = 'connect',
   CONNECTION_STRING = 'connection-string',
+  IFRAME = 'iframe',
 }
 
 export enum METHOD_MODULE {
@@ -39,6 +41,7 @@ export interface Info {
 
   // connect/readOnly
   nip05?: string;
+  domain?: string;
 
   // connect w/ bunkerUrl
   bunkerUrl?: string;
@@ -57,9 +60,12 @@ export interface Info {
   // may be empty if cookies are used, or may contain session
   // token to be used for future api calls
   otpData?: string;
+
+  // for iframe comms
+  iframeUrl?: string;
 }
 
-export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod'>;
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod' | 'domain'>;
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple' | 'crab';
 
@@ -70,4 +76,12 @@ export interface ConnectionString {
   relay: string;
   domain?: string;
   canImport?: boolean;
+  iframeUrl?: string;
+}
+
+export type BannerNotifyMode = '' | 'timeout' | 'authUrl' | 'iframeAuthUrl' | 'rebind';
+
+export interface BannerNotify {
+  mode: BannerNotifyMode;
+  url?: string;
 }
