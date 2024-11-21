@@ -450,9 +450,10 @@ class AuthNostrService extends EventEmitter implements Signer {
     console.log('iframe', id, iframe);
     if (!iframe) {
       iframe = document.createElement('iframe');
-      iframe.setAttribute('width', '0'); // this.params.optionsModal.dev ? '300' : '0');
-      iframe.setAttribute('height', '0'); // this.params.optionsModal.dev ? '600' : '0');
-      iframe.style.display = 'block';
+      iframe.setAttribute('width', '0');
+      iframe.setAttribute('height', '0');
+      iframe.setAttribute('border', '0');
+      iframe.style.display = 'none';
       // iframe.setAttribute('sandbox', 'allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts');
       iframe.id = id;
       document.body.append(iframe);

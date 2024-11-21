@@ -121,16 +121,21 @@ class ModalManager extends EventEmitter {
         ok();
       };
 
-      const exec = async (body: () => Promise<void>) => {
-        console.log("exec")
+      const exec = async (
+        body: () => Promise<void>,
+        options?: {
+          start?: boolean;
+          end?: boolean;
+        },
+      ) => {
         if (this.modal) {
           this.modal.isLoading = true;
         }
 
         try {
-          await this.authNostrService.startAuth();
+          if (!options || options.start) await this.authNostrService.startAuth();
           await body();
-          await done(ok);
+          if (!options || options.end) await done(ok);
         } catch (e: any) {
           console.log('error', e);
           if (this.modal) {
@@ -267,7 +272,7 @@ class ModalManager extends EventEmitter {
 
         // FIXME this calls resetAuth which then prevents
         // endAuth from getting properly called. 300 is not
-        // enough to init iframe, so there should be a 
+        // enough to init iframe, so there should be a
         // feedback from switchAccount here
         setTimeout(() => dialog.close(), 300);
       });
@@ -342,42 +347,51 @@ class ModalManager extends EventEmitter {
       });
 
       this.modal.addEventListener('nlLoginOTPUser', async (event: any) => {
-        await exec(async () => {
-          if (!this.modal) return;
+        await exec(
+          async () => {
+            if (!this.modal) return;
 
-          const nameNpub = event.detail;
-          const pubkey = await nameToPubkey(nameNpub);
-          const url = this.opt!.otpRequestUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + pubkey;
-          const r = await fetch(url);
-          if (r.status !== 200) {
-            console.warn('nostr-login: bad otp reply', r);
-            throw new Error('Failed to send DM');
-          }
+            const nameNpub = event.detail;
+            const pubkey = await nameToPubkey(nameNpub);
+            const url = this.opt!.otpRequestUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + pubkey;
+            const r = await fetch(url);
+            if (r.status !== 200) {
+              console.warn('nostr-login: bad otp reply', r);
+              throw new Error('Failed to send DM');
+            }
 
-          // switch to 'enter code' mode
-          this.modal.isOTP = true;
+            // switch to 'enter code' mode
+            this.modal.isOTP = true;
 
-          // remember for code handler below
-          otpPubkey = pubkey;
-        });
+            // remember for code handler below
+            otpPubkey = pubkey;
+
+            // spinner off
+            this.modal.isLoading = false;
+          },
+          { start: true },
+        );
       });
 
       this.modal.addEventListener('nlLoginOTPCode', async (event: any) => {
-        await exec(async () => {
-          if (!this.modal) return;
-          const code = event.detail;
-          const url = this.opt!.otpReplyUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + otpPubkey + '&code=' + code;
-          const r = await fetch(url);
-          if (r.status !== 200) {
-            console.warn('nostr-login: bad otp reply', r);
-            throw new Error('Invalid code');
-          }
+        await exec(
+          async () => {
+            if (!this.modal) return;
+            const code = event.detail;
+            const url = this.opt!.otpReplyUrl! + (this.opt!.otpRequestUrl!.includes('?') ? '&' : '?') + 'pubkey=' + otpPubkey + '&code=' + code;
+            const r = await fetch(url);
+            if (r.status !== 200) {
+              console.warn('nostr-login: bad otp reply', r);
+              throw new Error('Invalid code');
+            }
 
-          const data = await r.text();
-          this.authNostrService.setOTP(otpPubkey, data);
+            const data = await r.text();
+            this.authNostrService.setOTP(otpPubkey, data);
 
-          this.modal.isOTP = false;
-        });
+            this.modal.isOTP = false;
+          },
+          { end: true },
+        );
       });
 
       this.modal.addEventListener('nlCheckSignup', async (event: any) => {
