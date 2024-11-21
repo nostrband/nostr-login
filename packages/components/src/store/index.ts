@@ -1,5 +1,5 @@
 import { createStore } from '@stencil/store';
-import { CURRENT_MODULE } from '@/types';
+import { CURRENT_MODULE, ConnectionString } from '@/types';
 
 const { state, onChange, reset } = createStore({
   screen: CURRENT_MODULE.WELCOME,
@@ -10,6 +10,7 @@ const { state, onChange, reset } = createStore({
   isLoadingExtension: false,
   isOTP: false,
   authUrl: '',
+  iframeUrl: '',
   localSignup: false,
 
   // State NlSignin
@@ -43,10 +44,7 @@ const { state, onChange, reset } = createStore({
     code: '',
   },
 
-  nlImport: {
-    nostrConnect: '',
-    relay: '',
-  }
+  nlImport: null as (ConnectionString | null),
 });
 
 // control show screens & manage history (like as router)

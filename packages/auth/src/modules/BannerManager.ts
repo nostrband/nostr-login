@@ -1,12 +1,13 @@
 import { NostrLoginOptions, TypeBanner } from '../types';
 import { NostrParams } from '.';
-import { CURRENT_MODULE, Info } from 'nostr-login-components/dist/types/types';
+import { Info } from 'nostr-login-components/dist/types/types';
 import { EventEmitter } from 'tseep';
 import { getDarkMode } from '../utils';
+import { ReadyListener } from './Nip46';
 
 class BannerManager extends EventEmitter {
   private banner: TypeBanner | null = null;
-  private listNotifies: string[] = [];
+  private iframeReady?: ReadyListener;
 
   private params: NostrParams;
 
@@ -15,12 +16,26 @@ class BannerManager extends EventEmitter {
     this.params = params;
   }
 
-  public onAuthUrl(url: string) {
+  public onAuthUrl(url: string, iframeUrl: string) {
     if (this.banner) {
-      // banner.isLoading = false;
+      if (url)
+        this.banner.notify = {
+          mode: iframeUrl ? 'iframeAuthUrl' : 'authUrl',
+          url,
+        };
+      else
+        this.banner.notify = {
+          mode: '',
+        };
+    }
+  }
+
+  public onIframeRestart(iframeUrl: string) {
+    if (this.banner) {
+      this.iframeReady = new ReadyListener(['rebinderDone', 'rebinderError'], new URL(iframeUrl).origin);
       this.banner.notify = {
-        confirm: Date.now(),
-        url,
+        mode: 'rebind',
+        url: iframeUrl,
       };
     }
   }
@@ -28,19 +43,13 @@ class BannerManager extends EventEmitter {
   public onUserInfo(info: Info | null) {
     if (this.banner) {
       this.banner.userInfo = info;
-      // if (info) {
-      //   this.banner.titleBanner = info.extension ? 'You are using extension' : info.sk ? 'You are logged in' : 'You are read only';
-      // } else {
-      //   this.banner.titleBanner = '';
-      // } // 'Use with Nostr';
     }
   }
 
   public onCallTimeout() {
     if (this.banner) {
       this.banner.notify = {
-        confirm: Date.now(),
-        timeOut: { domain: this.params.userInfo?.nip05?.split('@')[1] },
+        mode: 'timeout',
       };
     }
   }
@@ -51,9 +60,14 @@ class BannerManager extends EventEmitter {
     }
   }
 
-  public onCallEnd() {
+  public async onCallEnd() {
     if (this.banner) {
+      if (this.iframeReady) {
+        await this.iframeReady.wait();
+        this.iframeReady = undefined;
+      }
       this.banner.isLoading = false;
+      this.banner.notify = { mode: '' };
     }
   }
 
@@ -95,12 +109,8 @@ class BannerManager extends EventEmitter {
       this.emit('onAuthUrlClick', event.detail);
     });
 
-    this.banner.addEventListener('handleSetConfirmBanner', (event: any) => {
-      this.listNotifies.push(event.detail);
-
-      if (this.banner) {
-        this.banner.listNotifies = this.listNotifies;
-      }
+    this.banner.addEventListener('handleNotifyConfirmBannerIframe', (event: any) => {
+      this.emit('onIframeAuthUrlClick', event.detail);
     });
 
     this.banner.addEventListener('handleSwitchAccount', (event: any) => {
@@ -115,19 +125,19 @@ class BannerManager extends EventEmitter {
       }
     });
 
-    this.banner.addEventListener('handleRetryConfirmBanner', () => {
-      const url = this.listNotifies.pop();
-      // FIXME go to nip05 domain?
-      if (!url) {
-        return;
-      }
+    // this.banner.addEventListener('handleRetryConfirmBanner', () => {
+    //   const url = this.listNotifies.pop();
+    //   // FIXME go to nip05 domain?
+    //   if (!url) {
+    //     return;
+    //   }
 
-      if (this.banner) {
-        this.banner.listNotifies = this.listNotifies;
-      }
+    //   if (this.banner) {
+    //     this.banner.listNotifies = this.listNotifies;
+    //   }
 
-      this.emit('onAuthUrlClick', url);
-    });
+    //   this.emit('onAuthUrlClick', url);
+    // });
 
     document.body.appendChild(this.banner);
   }

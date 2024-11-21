@@ -15,11 +15,11 @@
 
 ## Events
 
-| Event                  | Description | Type                                                                                                                            |
-| ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `nlLoginRecentAccount` |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }>` |
-| `nlRemoveRecent`       |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; }>` |
-| `nlSwitchAccount`      |             | `CustomEvent<Info>`                                                                                                             |
+| Event                  | Description | Type                                                                                                                                             |
+| ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `nlLoginRecentAccount` |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; domain?: string; }>` |
+| `nlRemoveRecent`       |             | `CustomEvent<{ name?: string; picture?: string; nip05?: string; pubkey: string; bunkerUrl?: string; authMethod: AuthMethod; domain?: string; }>` |
+| `nlSwitchAccount`      |             | `CustomEvent<Info>`                                                                                                                              |
 
 
 ## Dependencies

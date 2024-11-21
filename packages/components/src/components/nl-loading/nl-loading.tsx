@@ -39,7 +39,9 @@ export class NlLoading {
       }
     }
 
-    const canCancel = this.path !== CURRENT_MODULE.LOCAL_SIGNUP;
+    const showButton = this.path !== CURRENT_MODULE.LOCAL_SIGNUP;
+    const showIframe = !state.isLoading && state.iframeUrl && state.authUrl;
+    const iframeUrl = `${state.iframeUrl}?connect=${encodeURIComponent(state.authUrl)}`;
 
     return (
       <div class="p-4 overflow-y-auto">
@@ -58,7 +60,12 @@ export class NlLoading {
         <div class="ps-4 pe-4 overflow-y-auto">
           <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
         </div>
-        {canCancel && (
+        {iframeUrl && (
+          <div class="mt-3 ml-auto mr-auto w-72 flex justify-center">
+            <iframe src={iframeUrl} width="180px" height="80px" style={{ display: showIframe ? 'block' : 'none' }}></iframe>
+          </div>
+        )}
+        {!showIframe && showButton && (
           <div class="mt-3 ml-auto mr-auto w-72">
             <button-base
               onClick={e => {

@@ -15,10 +15,10 @@
 
 ## Events
 
-| Event             | Description | Type                  |
-| ----------------- | ----------- | --------------------- |
-| `nlExportKeys`    |             | `CustomEvent<void>`   |
-| `nlImportAccount` |             | `CustomEvent<string>` |
+| Event             | Description | Type                            |
+| ----------------- | ----------- | ------------------------------- |
+| `nlExportKeys`    |             | `CustomEvent<void>`             |
+| `nlImportAccount` |             | `CustomEvent<ConnectionString>` |
 
 
 ## Dependencies
