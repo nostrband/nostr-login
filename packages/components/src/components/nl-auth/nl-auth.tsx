@@ -132,7 +132,9 @@ export class NlAuth {
         case CURRENT_MODULE.CONFIRM_LOGOUT:
           return <nl-confirm-logout />;
         case CURRENT_MODULE.IMPORT_FLOW:
-          return <nl-import-flow services={this.connectionStringServices.filter(s => s.canImport)} />;
+          return <nl-import-flow services={this.connectionStringServices} />;
+        case CURRENT_MODULE.IMPORT_OTP:
+          return <nl-otp-migrate services={this.connectionStringServices} />;
         case CURRENT_MODULE.INFO:
           return <nl-info />;
         case CURRENT_MODULE.EXTENSION:

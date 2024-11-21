@@ -7,6 +7,7 @@ export enum CURRENT_MODULE {
   LOGIN_READ_ONLY = 'login-read-only',
   CONFIRM_LOGOUT = 'confirm-logout',
   IMPORT_FLOW = 'import',
+  IMPORT_OTP = 'import-otp',
   LOGIN = 'login',
   SIGNUP = 'signup',
   LOCAL_SIGNUP = 'local-signup',

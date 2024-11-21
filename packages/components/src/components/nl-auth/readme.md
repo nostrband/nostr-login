@@ -48,6 +48,7 @@
 - [nl-local-signup](../nl-local-signup)
 - [nl-confirm-logout](../nl-confirm-logout)
 - [nl-import-flow](../nl-import-flow)
+- [nl-otp-migrate](../nl-otp-migrate)
 - [nl-info](../nl-info)
 - [nl-info-extension](../nl-info-extension)
 - [nl-signin-read-only](../nl-signin-read-only)
@@ -70,6 +71,7 @@ graph TD;
   nl-auth --> nl-local-signup
   nl-auth --> nl-confirm-logout
   nl-auth --> nl-import-flow
+  nl-auth --> nl-otp-migrate
   nl-auth --> nl-info
   nl-auth --> nl-info-extension
   nl-auth --> nl-signin-read-only
@@ -90,6 +92,8 @@ graph TD;
   nl-confirm-logout --> button-base
   nl-import-flow --> button-base
   nl-import-flow --> nl-select
+  nl-otp-migrate --> nl-select
+  nl-otp-migrate --> button-base
   nl-signin-read-only --> button-base
   nl-signin-bunker-url --> button-base
   nl-welcome-signin --> button-base

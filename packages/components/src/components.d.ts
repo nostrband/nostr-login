@@ -78,7 +78,6 @@ export namespace Components {
     }
     interface NlImportFlow {
         "services": ConnectionString[];
-        "textImport": string;
         "titleImport": string;
         "titleInfo": string;
     }
@@ -95,6 +94,12 @@ export namespace Components {
     }
     interface NlLoginStatus {
         "info": RecentType | Info | undefined;
+    }
+    interface NlOtpMigrate {
+        "services": ConnectionString[];
+        "textImport": string;
+        "titleImport": string;
+        "titleInfo": string;
     }
     interface NlPreviouslyLogged {
         "accounts": Info[];
@@ -186,6 +191,10 @@ export interface NlLoadingCustomEvent<T> extends CustomEvent<T> {
 export interface NlLocalSignupCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNlLocalSignupElement;
+}
+export interface NlOtpMigrateCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNlOtpMigrateElement;
 }
 export interface NlPreviouslyLoggedCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -417,6 +426,23 @@ declare global {
         prototype: HTMLNlLoginStatusElement;
         new (): HTMLNlLoginStatusElement;
     };
+    interface HTMLNlOtpMigrateElementEventMap {
+        "nlImportAccount": ConnectionString;
+    }
+    interface HTMLNlOtpMigrateElement extends Components.NlOtpMigrate, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNlOtpMigrateElementEventMap>(type: K, listener: (this: HTMLNlOtpMigrateElement, ev: NlOtpMigrateCustomEvent<HTMLNlOtpMigrateElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNlOtpMigrateElementEventMap>(type: K, listener: (this: HTMLNlOtpMigrateElement, ev: NlOtpMigrateCustomEvent<HTMLNlOtpMigrateElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNlOtpMigrateElement: {
+        prototype: HTMLNlOtpMigrateElement;
+        new (): HTMLNlOtpMigrateElement;
+    };
     interface HTMLNlPreviouslyLoggedElementEventMap {
         "nlSwitchAccount": Info;
         "nlLoginRecentAccount": RecentType;
@@ -595,6 +621,7 @@ declare global {
         "nl-loading": HTMLNlLoadingElement;
         "nl-local-signup": HTMLNlLocalSignupElement;
         "nl-login-status": HTMLNlLoginStatusElement;
+        "nl-otp-migrate": HTMLNlOtpMigrateElement;
         "nl-previously-logged": HTMLNlPreviouslyLoggedElement;
         "nl-select": HTMLNlSelectElement;
         "nl-signin": HTMLNlSigninElement;
@@ -696,7 +723,6 @@ declare namespace LocalJSX {
         "onNlExportKeys"?: (event: NlImportFlowCustomEvent<void>) => void;
         "onNlImportAccount"?: (event: NlImportFlowCustomEvent<ConnectionString>) => void;
         "services"?: ConnectionString[];
-        "textImport"?: string;
         "titleImport"?: string;
         "titleInfo"?: string;
     }
@@ -717,6 +743,13 @@ declare namespace LocalJSX {
     }
     interface NlLoginStatus {
         "info"?: RecentType | Info | undefined;
+    }
+    interface NlOtpMigrate {
+        "onNlImportAccount"?: (event: NlOtpMigrateCustomEvent<ConnectionString>) => void;
+        "services"?: ConnectionString[];
+        "textImport"?: string;
+        "titleImport"?: string;
+        "titleInfo"?: string;
     }
     interface NlPreviouslyLogged {
         "accounts"?: Info[];
@@ -804,6 +837,7 @@ declare namespace LocalJSX {
         "nl-loading": NlLoading;
         "nl-local-signup": NlLocalSignup;
         "nl-login-status": NlLoginStatus;
+        "nl-otp-migrate": NlOtpMigrate;
         "nl-previously-logged": NlPreviouslyLogged;
         "nl-select": NlSelect;
         "nl-signin": NlSignin;
@@ -835,6 +869,7 @@ declare module "@stencil/core" {
             "nl-loading": LocalJSX.NlLoading & JSXBase.HTMLAttributes<HTMLNlLoadingElement>;
             "nl-local-signup": LocalJSX.NlLocalSignup & JSXBase.HTMLAttributes<HTMLNlLocalSignupElement>;
             "nl-login-status": LocalJSX.NlLoginStatus & JSXBase.HTMLAttributes<HTMLNlLoginStatusElement>;
+            "nl-otp-migrate": LocalJSX.NlOtpMigrate & JSXBase.HTMLAttributes<HTMLNlOtpMigrateElement>;
             "nl-previously-logged": LocalJSX.NlPreviouslyLogged & JSXBase.HTMLAttributes<HTMLNlPreviouslyLoggedElement>;
             "nl-select": LocalJSX.NlSelect & JSXBase.HTMLAttributes<HTMLNlSelectElement>;
             "nl-signin": LocalJSX.NlSignin & JSXBase.HTMLAttributes<HTMLNlSigninElement>;

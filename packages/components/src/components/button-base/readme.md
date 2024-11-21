@@ -24,6 +24,7 @@
  - [nl-import-flow](../nl-import-flow)
  - [nl-loading](../nl-loading)
  - [nl-local-signup](../nl-local-signup)
+ - [nl-otp-migrate](../nl-otp-migrate)
  - [nl-signin](../nl-signin)
  - [nl-signin-bunker-url](../nl-signin-bunker-url)
  - [nl-signin-otp](../nl-signin-otp)
@@ -43,6 +44,7 @@ graph TD;
   nl-import-flow --> button-base
   nl-loading --> button-base
   nl-local-signup --> button-base
+  nl-otp-migrate --> button-base
   nl-signin --> button-base
   nl-signin-bunker-url --> button-base
   nl-signin-otp --> button-base
