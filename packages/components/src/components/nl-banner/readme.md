@@ -38,6 +38,7 @@
 - [nl-login-status](../nl-login-status)
 - [button-base](../button-base)
 - [nl-change-account](../nl-change-account)
+- [nl-dialog](../nl-dialog)
 
 ### Graph
 ```mermaid
@@ -45,6 +46,7 @@ graph TD;
   nl-banner --> nl-login-status
   nl-banner --> button-base
   nl-banner --> nl-change-account
+  nl-banner --> nl-dialog
   nl-change-account --> nl-login-status
   style nl-banner fill:#f9f,stroke:#333,stroke-width:4px
 ```
