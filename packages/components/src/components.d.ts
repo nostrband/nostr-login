@@ -71,6 +71,8 @@ export namespace Components {
         "hasOTP": boolean;
         "titleWelcome": string;
     }
+    interface NlDialog {
+    }
     interface NlImportFlow {
         "services": ConnectionString[];
         "textImport": string;
@@ -322,6 +324,12 @@ declare global {
     var HTMLNlConnectElement: {
         prototype: HTMLNlConnectElement;
         new (): HTMLNlConnectElement;
+    };
+    interface HTMLNlDialogElement extends Components.NlDialog, HTMLStencilElement {
+    }
+    var HTMLNlDialogElement: {
+        prototype: HTMLNlDialogElement;
+        new (): HTMLNlDialogElement;
     };
     interface HTMLNlImportFlowElementEventMap {
         "nlImportAccount": string;
@@ -577,6 +585,7 @@ declare global {
         "nl-change-account": HTMLNlChangeAccountElement;
         "nl-confirm-logout": HTMLNlConfirmLogoutElement;
         "nl-connect": HTMLNlConnectElement;
+        "nl-dialog": HTMLNlDialogElement;
         "nl-import-flow": HTMLNlImportFlowElement;
         "nl-info": HTMLNlInfoElement;
         "nl-info-extension": HTMLNlInfoExtensionElement;
@@ -673,6 +682,8 @@ declare namespace LocalJSX {
         "hasOTP"?: boolean;
         "onNlNostrConnect"?: (event: NlConnectCustomEvent<string>) => void;
         "titleWelcome"?: string;
+    }
+    interface NlDialog {
     }
     interface NlImportFlow {
         "onNlExportKeys"?: (event: NlImportFlowCustomEvent<void>) => void;
@@ -780,6 +791,7 @@ declare namespace LocalJSX {
         "nl-change-account": NlChangeAccount;
         "nl-confirm-logout": NlConfirmLogout;
         "nl-connect": NlConnect;
+        "nl-dialog": NlDialog;
         "nl-import-flow": NlImportFlow;
         "nl-info": NlInfo;
         "nl-info-extension": NlInfoExtension;
@@ -810,6 +822,7 @@ declare module "@stencil/core" {
             "nl-change-account": LocalJSX.NlChangeAccount & JSXBase.HTMLAttributes<HTMLNlChangeAccountElement>;
             "nl-confirm-logout": LocalJSX.NlConfirmLogout & JSXBase.HTMLAttributes<HTMLNlConfirmLogoutElement>;
             "nl-connect": LocalJSX.NlConnect & JSXBase.HTMLAttributes<HTMLNlConnectElement>;
+            "nl-dialog": LocalJSX.NlDialog & JSXBase.HTMLAttributes<HTMLNlDialogElement>;
             "nl-import-flow": LocalJSX.NlImportFlow & JSXBase.HTMLAttributes<HTMLNlImportFlowElement>;
             "nl-info": LocalJSX.NlInfo & JSXBase.HTMLAttributes<HTMLNlInfoElement>;
             "nl-info-extension": LocalJSX.NlInfoExtension & JSXBase.HTMLAttributes<HTMLNlInfoExtensionElement>;
