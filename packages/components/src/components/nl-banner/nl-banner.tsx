@@ -295,12 +295,36 @@ export class NlBanner {
       </Fragment>
     );
 
-    const isConfirmState = (this.isOpen && this.isOpenConfirm) || this.isLoading;
+    // https://gist.github.com/Haprog/848fc451c25da00b540e6d34c301e96a
+    function deepQuerySelectorAll(selector: string, root?: Element) {
+      root = root || document.body;
+      const results = Array.from(root.querySelectorAll(selector));
+      const pushNestedResults = function (root) {
+        deepQuerySelectorAll(selector, root).forEach(elem => {
+          if (!results.includes(elem)) {
+            results.push(elem);
+          }
+        });
+      };
+      if (root.shadowRoot) {
+        pushNestedResults(root.shadowRoot);
+      }
+      for (const elem of Array.from(root.querySelectorAll('*'))) {
+        if (elem.shadowRoot) {
+          pushNestedResults(elem.shadowRoot);
+        }
+      }
+      return results;
+    }
+
+    const dialogs = deepQuerySelectorAll('dialog');
+    const needDialog = !!dialogs.find(d => (d as HTMLDialogElement).open && !d.classList.contains('nl-banner-dialog'));
+    console.log('nostr-login need dialog', needDialog);
 
     return (
       <div class={`theme-${this.theme} ${!this.isOpen && this.hiddenMode ? 'hidden' : ''}`}>
         <div class={this.darkMode && 'dark'}>
-          {isConfirmState ? (
+          {needDialog ? (
             <nl-dialog>
               <div
                 class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}

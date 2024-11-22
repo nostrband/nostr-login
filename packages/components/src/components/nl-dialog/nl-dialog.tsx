@@ -9,11 +9,7 @@ export class NlDialog {
   private dialogElement?: HTMLDialogElement;
 
   componentDidLoad() {
-    const pos = window.scrollY;
-    this.dialogElement?.show();
-    // for some reason window is scrolled to where the dialog is,
-    // this way we cancel that misbehavior
-    setTimeout(() => (window.scroll(window.scrollX, pos)), 0);
+    this.dialogElement?.showModal();
   }
 
   disconnectedCallback() {
@@ -22,7 +18,7 @@ export class NlDialog {
 
   render() {
     return (
-      <dialog ref={el => (this.dialogElement = el as HTMLDialogElement)} class={'m-auto'}>
+      <dialog ref={el => (this.dialogElement = el as HTMLDialogElement)} class={'m-auto nl-banner-dialog'}>
         <slot></slot>
       </dialog>
     );
