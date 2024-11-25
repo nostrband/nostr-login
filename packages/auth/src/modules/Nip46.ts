@@ -87,7 +87,7 @@ class NostrRpc extends NDKNostrRpc {
       sub.on('event', async (event: NDKEvent) => {
         try {
           const parsedEvent = await this.parseEvent(event);
-          console.log('ack parsedEvent', parsedEvent);
+          // console.log('ack parsedEvent', parsedEvent);
           if (!(parsedEvent as NDKRpcRequest).method) {
             const response = parsedEvent as NDKRpcResponse;
 
