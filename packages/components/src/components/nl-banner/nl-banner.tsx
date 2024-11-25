@@ -324,7 +324,7 @@ export class NlBanner {
     return (
       <div class={`theme-${this.theme} ${!this.isOpen && this.hiddenMode ? 'hidden' : ''}`}>
         <div class={this.darkMode && 'dark'}>
-          {needDialog ? (
+          {this.isOpenConfirm && needDialog ? (
             <nl-dialog>
               <div
                 class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}
