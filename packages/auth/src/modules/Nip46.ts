@@ -1,4 +1,4 @@
-import NDK, { NDKEvent, NDKFilter, NDKNostrRpc, NDKRpcRequest, NDKRpcResponse, NDKSubscription, NostrEvent } from '@nostr-dev-kit/ndk';
+import NDK, { NDKEvent, NDKFilter, NDKNostrRpc, NDKRpcRequest, NDKRpcResponse, NDKSubscription, NDKSubscriptionCacheUsage, NostrEvent } from '@nostr-dev-kit/ndk';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { validateEvent, verifySignature } from 'nostr-tools';
 import { PrivateKeySigner } from './Signer';
@@ -211,7 +211,11 @@ export class IframeNostrRpc extends NostrRpc {
 
   public async subscribe(filter: NDKFilter): Promise<NDKSubscription> {
     if (!this.peerOrigin) return super.subscribe(filter);
-    return new NDKSubscription(this._ndk, {});
+    return new NDKSubscription(this._ndk, filter, {
+      closeOnEose: true,
+      // don't send to relay
+      cacheUsage: NDKSubscriptionCacheUsage.ONLY_CACHE
+    });
   }
 
   public setWorkerIframePort(port: MessagePort) {
