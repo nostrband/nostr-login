@@ -126,7 +126,7 @@ export class NlBanner {
     const content = (
       <Fragment>
         <div class="block w-[48px] h-[46px] relative z-10">
-          <div onClick={() => this.handleOpen()} class="flex w-52 h-[46px] items-center pl-[11px]">
+          <div onClick={() => this.handleOpen()} class={`flex w-52 h-[46px] items-center pl-[11px]`}>
             <span
               class={`${this.isLoading ? 'w-5 h-5 border-[2px] mr-3.5 ml-[2px] opacity-1' : 'w-0 h-0 border-[0px] mr-0 opacity-0 ml-0'} animate-spin transition-all duration-300 ease-in-out inline-block border-current border-t-transparent text-slate-900 dark:text-gray-300 rounded-full`}
               role="status"
@@ -134,7 +134,7 @@ export class NlBanner {
             ></span>
 
             {this.userInfo ? (
-              <div class="uppercase font-bold w-6 h-6 mr-2 rounded-full border border-gray-200 flex justify-center items-center">
+              <div class={`uppercase font-bold w-6 h-6 mr-2 rounded-full border border-gray-200 flex justify-center items-center`}>
                 {isShowImg ? (
                   this.isUserImgError ? (
                     defaultUserAvatar
@@ -323,11 +323,11 @@ export class NlBanner {
 
     return (
       <div class={`theme-${this.theme} ${!this.isOpen && this.hiddenMode ? 'hidden' : ''}`}>
-        <div class={this.darkMode && 'dark'}>
+        <div class={this.darkMode && 'dark'} dir="ltr">
           {this.isOpenConfirm && needDialog ? (
             <nl-dialog>
               <div
-                class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}
+                class={`nl-banner ${this.isOpen ? 'w-52 h-auto right-2 rounded-r-lg isOpen ' : 'rounded-r-none hover:rounded-r-lg cursor-pointer'} z-50 w-12 h-12 fixed top-52 right-0 inline-block gap-x-2 text-sm font-medium  rounded-lg hover:right-2  transition-all duration-300 ease-in-out`}
               >
                 {content}
               </div>
