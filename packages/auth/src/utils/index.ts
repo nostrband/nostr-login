@@ -37,7 +37,7 @@ export const fetchProfile = async (info: Info, profileNdk: NDK) => {
   return await user.fetchProfile();
 };
 
-export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSigner, signupRelays?: string) => {
+export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSigner, signupRelays?: string, outboxRelays?: string[]) => {
   const meta = {
     name: info.name,
   };
@@ -73,9 +73,11 @@ export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSign
   await relaysEvent.sign(signer);
   console.log('signed relays', relaysEvent);
 
-  await profileEvent.publish(NDKRelaySet.fromRelayUrls(OUTBOX_RELAYS, profileNdk));
+  const outboxRelaysFinal = outboxRelays && outboxRelays.length ? outboxRelays : OUTBOX_RELAYS;
+
+  await profileEvent.publish(NDKRelaySet.fromRelayUrls(outboxRelaysFinal, profileNdk));
   console.log('published profile', profileEvent);
-  await relaysEvent.publish(NDKRelaySet.fromRelayUrls(OUTBOX_RELAYS, profileNdk));
+  await relaysEvent.publish(NDKRelaySet.fromRelayUrls(outboxRelaysFinal, profileNdk));
   console.log('published relays', relaysEvent);
 };
 
