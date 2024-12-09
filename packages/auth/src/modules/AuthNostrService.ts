@@ -23,7 +23,7 @@ const NOSTRCONNECT_APPS: ConnectionString[] = [
   },
   {
     name: 'Amber',
-    img: 'https://raw.githubusercontent.com/greenart7c3/Amber/master/app/src/main/res/mipmap-hdpi/ic_launcher.webp',
+    img: 'https://raw.githubusercontent.com/greenart7c3/Amber/refs/heads/master/assets/android-icon.svg',
     link: '<nostrconnect>',
     relay: 'wss://relay.nsec.app/',
   },
@@ -157,13 +157,13 @@ class AuthNostrService extends EventEmitter implements Signer {
 
     const pubkey = getPublicKey(this.nostrConnectKey);
     const meta = {
-      name: document.location.host,
-      url: document.location.href,
-      icon: await getIcon(),
-      perms: this.params.optionsModal.perms,
+      name: encodeURIComponent(document.location.host),
+      url: encodeURIComponent(document.location.href),
+      icon: encodeURIComponent(await getIcon()),
+      perms: encodeURIComponent(this.params.optionsModal.perms || ''),
     };
 
-    return `nostrconnect://${pubkey}?metadata=${encodeURIComponent(JSON.stringify(meta))}&secret=${this.nostrConnectSecret}${relay ? `&relay=${relay}` : ''}`;
+    return `nostrconnect://${pubkey}?image=${meta.icon}&url=${meta.url}&name=${meta.name}&perms=${meta.perms}&secret=${this.nostrConnectSecret}${relay ? `&relay=${relay}` : ''}`;
   }
 
   public async getNostrConnectServices(): Promise<[string, ConnectionString[]]> {
@@ -226,7 +226,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     this.releaseSigner();
     this.localSigner = new PrivateKeySigner(info.sk);
 
-    if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays);
+    if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays, this.params.optionsModal.outboxRelays);
 
     this.onAuth('login', info);
   }

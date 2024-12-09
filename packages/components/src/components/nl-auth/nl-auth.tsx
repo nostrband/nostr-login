@@ -177,12 +177,12 @@ export class NlAuth {
       (!this.authMethods.length || (!this.localSignup && this.authMethods.includes('connect')) || (this.localSignup && this.authMethods.includes('local')));
 
     return (
-      <div class={`theme-${this.theme}`}>
+      <div class={`theme-${this.theme}`} dir="ltr">
         <div class={classWrapper}>
           <div onClick={() => this.handleClose()} class="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-75 z-[80]" />
 
           <div class="nl-bg relative z-[81] w-full flex flex-col rounded-xl sm:max-w-lg sm:w-full sm:mx-auto">
-            <div class="flex justify-between items-center py-3 px-4">
+            <div class={`flex justify-between items-center py-3 px-4`}>
               <div class="flex gap-2 items-center">
                 <svg class="w-7 h-7" width="225" height="224" viewBox="0 0 225 224" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="224.047" height="224" rx="64" fill="#6951FA" />

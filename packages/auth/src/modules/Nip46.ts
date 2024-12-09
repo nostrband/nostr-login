@@ -211,9 +211,9 @@ export class IframeNostrRpc extends NostrRpc {
 
   public async subscribe(filter: NDKFilter): Promise<NDKSubscription> {
     if (!this.peerOrigin) return super.subscribe(filter);
-    return new NDKSubscription(this._ndk, filter, {
-      closeOnEose: true,
+    return new NDKSubscription(this._ndk, {}, {
       // don't send to relay
+      closeOnEose: true,
       cacheUsage: NDKSubscriptionCacheUsage.ONLY_CACHE
     });
   }
