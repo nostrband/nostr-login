@@ -226,7 +226,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     this.releaseSigner();
     this.localSigner = new PrivateKeySigner(info.sk);
 
-    if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays);
+    if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays, this.params.optionsModal.outboxRelays);
 
     this.onAuth('login', info);
   }

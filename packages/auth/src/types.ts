@@ -58,6 +58,9 @@ export interface NostrLoginOptions {
   // to relay list of new profiles created with local signup
   signupRelays?: string;
 
+  // relay list to override hardcoded `OUTBOX_RELAYS` constant
+  outboxRelays?: string[];
+
   // dev mode
   dev?: boolean;
 }
