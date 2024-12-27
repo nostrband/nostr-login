@@ -29,6 +29,7 @@ You can set these attributes to the `script` tag to customize the behavior:
 - `data-start-screen` - screen shown by default (banner click, window.nostr.* call), options: `welcome`, `welcome-login`, `welcome-signup`, `signup`, `local-signup`, `login`, `otp`, `connect`, `login-bunker-url`, `login-read-only`, `connection-string`, `switch-account`, `import`
 - `data-signup-relays` - comma-separated list of relays where nip65 event will be published on local signup
 - `data-outbox-relays` - comma-separated list of relays that will be added to nip65 event on local signup
+- `data-skip-if-logged-in` - if "true", won't show login popup if user is already logged in
 
 Example:
 ```
@@ -140,6 +141,7 @@ Options:
 - `darkMode` - same as `data-dark-mode` above
 - `noBanner` - same as `data-no-banner` above
 - `isSignInWithExtension` - `true` to bring the *Sign in with exception* button into main list of options, `false` to hide to the *Advanced*, default will behave as `true` if extension is detected.
+- `skipIfLoggedIn` - if true, won't show login popup if user is already logged in
 
 ## OTP login
 
