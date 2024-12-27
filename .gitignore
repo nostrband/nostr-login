@@ -27,3 +27,7 @@ packages/components/.DS_Store
 packages/components/Thumbs.db
 packages/components/UserInterfaceState.xcuserstate
 packages/components/.env
+# Aider files
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v3/
