@@ -63,6 +63,9 @@ export interface NostrLoginOptions {
 
   // dev mode
   dev?: boolean;
+
+  // skip showing login popup if user is already logged in
+  skipIfLoggedIn?: boolean;
 }
 
 export interface IBanner {

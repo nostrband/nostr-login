@@ -18,6 +18,7 @@ export interface NostrObjectParams {
   launch(): Promise<void>;
   getSigner(): Signer;
   wait<T>(cb: () => Promise<T>): Promise<T>;
+  skipIfLoggedIn?: boolean;
 }
 
 class Nostr {
@@ -51,14 +52,19 @@ class Nostr {
     await this.#params.waitReady();
 
     // authed?
-    if (this.#params.getUserInfo()) return;
+    const userInfo = this.#params.getUserInfo();
+    if (userInfo) return;
 
-    // launch auth flow
-    await this.#params.launch();
+    // launch auth flow if not configured to skip
+    if (!this.#params.skipIfLoggedIn) {
+      await this.#params.launch();
 
-    // give up
-    if (!this.#params.getUserInfo()) {
-      throw new Error('Rejected by user');
+      // give up
+      if (!this.#params.getUserInfo()) {
+        throw new Error('Rejected by user');
+      }
+    } else {
+      throw new Error('Not logged in');
     }
   }
 

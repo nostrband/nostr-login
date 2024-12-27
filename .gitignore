@@ -27,3 +27,5 @@ packages/components/.DS_Store
 packages/components/Thumbs.db
 packages/components/UserInterfaceState.xcuserstate
 packages/components/.env
+.aider*
+.env

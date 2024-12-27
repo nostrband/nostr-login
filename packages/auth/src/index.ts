@@ -38,6 +38,7 @@ export class NostrLoginInitializer {
         return this.launch();
       },
       wait: cb => this.processManager.wait(cb),
+      skipIfLoggedIn: this.params.optionsModal.skipIfLoggedIn,
     };
 
     this.nostr = new Nostr(nostrApi);
