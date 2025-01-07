@@ -223,6 +223,12 @@ export class IframeNostrRpc extends NostrRpc {
 
     this.iframePort = port;
 
+    // to make sure Chrome doesn't terminate the channel
+    setInterval(() => {
+      console.log("iframe-nip46 ping");
+      this.iframePort!.postMessage("ping");
+    }, 5000);
+
     port.onmessage = async ev => {
       console.log('iframe-nip46 got response', ev.data);
       if (typeof ev.data === 'string' && ev.data.startsWith('errorNoKey')) {
