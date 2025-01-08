@@ -41,7 +41,7 @@ export class NlLoading {
 
     const showButton = this.path !== CURRENT_MODULE.LOCAL_SIGNUP;
     const showIframe = !state.isLoading && state.iframeUrl && state.authUrl;
-    const iframeUrl = `${state.iframeUrl}?connect=${encodeURIComponent(state.authUrl)}`;
+    const iframeUrl = state.iframeUrl ? `${state.iframeUrl}?connect=${encodeURIComponent(state.authUrl)}` : '';
 
     return (
       <div class="p-4 overflow-y-auto">
@@ -62,7 +62,7 @@ export class NlLoading {
         </div>
         {iframeUrl && (
           <div class="mt-3 ml-auto mr-auto w-72 flex justify-center">
-            <iframe src={iframeUrl} width="180px" height="80px" style={{ display: showIframe ? 'block' : 'none' }}></iframe>
+            <iframe src={iframeUrl} width="180px" height="80px" style={{ display: showIframe ? 'block' : 'none', border: '0' }}></iframe>
           </div>
         )}
         {!showIframe && showButton && (

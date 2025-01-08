@@ -218,7 +218,7 @@ export class NlBanner {
                   Go to {this.domain}
                 </a>
               ) : this.mode === 'rebind' ? (
-                <iframe src={this.url} width={'180'} height={'80'}></iframe>
+                <iframe src={this.url} width={'180'} height={'80'} frameBorder={'0'}></iframe>
               ) : (
                 <button-base onClick={() => this.handleConfirm()} titleBtn="Confirm" />
               )}

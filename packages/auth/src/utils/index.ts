@@ -85,7 +85,8 @@ export const bunkerUrlToInfo = (bunkerUrl: string, sk = ''): Info => {
   const url = new URL(bunkerUrl);
 
   return {
-    pubkey: url.hostname || url.pathname.split('//')[1],
+    pubkey: '',
+    signerPubkey: url.hostname || url.pathname.split('//')[1],
     sk: sk || generatePrivateKey(),
     relays: url.searchParams.getAll('relay'),
     token: url.searchParams.get('secret') || '',
@@ -184,6 +185,10 @@ const upgradeInfo = (info: Info | RecentType) => {
   if (info.nip05 && isBunkerUrl(info.nip05)) {
     info.bunkerUrl = info.nip05;
     info.nip05 = '';
+  }
+
+  if (info.authMethod === 'connect' && !info.signerPubkey) {
+    info.signerPubkey = info.pubkey;
   }
 };
 

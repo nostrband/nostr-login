@@ -18,7 +18,7 @@ export class NlDialog {
 
   render() {
     return (
-      <dialog ref={el => (this.dialogElement = el as HTMLDialogElement)} class={'m-auto nl-banner-dialog'}>
+      <dialog ref={el => (this.dialogElement = el as HTMLDialogElement)} class={'m-auto nl-banner-dialog'} style={{ border: '0', backgroundColor: 'transparent' }}>
         <slot></slot>
       </dialog>
     );

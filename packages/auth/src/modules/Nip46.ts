@@ -1,24 +1,23 @@
-import NDK, { NDKEvent, NDKFilter, NDKNostrRpc, NDKRpcRequest, NDKRpcResponse, NDKSubscription, NDKSubscriptionCacheUsage, NostrEvent } from '@nostr-dev-kit/ndk';
-import { Info } from 'nostr-login-components/dist/types/types';
+import NDK, { NDKEvent, NDKFilter, NDKNip46Signer, NDKNostrRpc, NDKRpcRequest, NDKRpcResponse, NDKSubscription, NDKSubscriptionCacheUsage, NostrEvent } from '@nostr-dev-kit/ndk';
 import { validateEvent, verifySignature } from 'nostr-tools';
 import { PrivateKeySigner } from './Signer';
 
 class NostrRpc extends NDKNostrRpc {
-  private pubkey: string;
   protected _ndk: NDK;
   protected _signer: PrivateKeySigner;
   protected requests: Set<string> = new Set();
   private sub?: NDKSubscription;
   protected _useNip44: boolean = false;
 
-  public constructor(ndk: NDK, localPubkey: string, signer: PrivateKeySigner) {
+  public constructor(ndk: NDK, signer: PrivateKeySigner) {
     super(ndk, signer, ndk.debug.extend('nip46:signer:rpc'));
     this._ndk = ndk;
     this._signer = signer;
-    this.pubkey = localPubkey;
   }
 
   public async subscribe(filter: NDKFilter): Promise<NDKSubscription> {
+    // NOTE: fixing ndk
+    filter.kinds = filter.kinds?.filter(k => k === 24133);
     this.sub = await super.subscribe(filter);
     return this.sub;
   }
@@ -63,11 +62,8 @@ class NostrRpc extends NDKNostrRpc {
     console.log('nostr connect parsedEvent', parsedEvent);
     if (!(parsedEvent as NDKRpcRequest).method) {
       const response = parsedEvent as NDKRpcResponse;
-      if (response.result === secret) {
-        return event.pubkey;
-      } else {
-        throw new Error(response.error);
-      }
+      if (response.result !== secret) throw new Error(response.error);
+      return event.pubkey;
     } else {
       throw new Error('Bad nostr connect reply');
     }
@@ -77,13 +73,13 @@ class NostrRpc extends NDKNostrRpc {
   // we just listed to an unsolicited reply to
   // our pubkey and if it's ack/secret - we're fine
   public async listen(nostrConnectSecret: string): Promise<string> {
-    const pubkey = this.pubkey;
+    const pubkey = this._signer.pubkey;
     console.log('nostr-login listening for conn to', pubkey);
     const sub = await this.subscribe({
       'kinds': [24133],
       '#p': [pubkey],
     });
-    return new Promise((ok, err) => {
+    return new Promise<string>((ok, err) => {
       sub.on('event', async (event: NDKEvent) => {
         try {
           const parsedEvent = await this.parseEvent(event);
@@ -114,10 +110,10 @@ class NostrRpc extends NDKNostrRpc {
   // since ndk doesn't yet support perms param
   // we reimplement the 'connect' call here
   // instead of await signer.blockUntilReady();
-  public async connect(info: Info, perms?: string) {
+  public async connect(pubkey: string, token?: string, perms?: string) {
     return new Promise<void>((ok, err) => {
-      const connectParams = [info.pubkey!, info.token || '', perms || ''];
-      this.sendRequest(info.pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
+      const connectParams = [pubkey!, token || '', perms || ''];
+      this.sendRequest(pubkey!, 'connect', connectParams, 24133, (response: NDKRpcResponse) => {
         if (response.result === 'ack') {
           ok();
         } else {
@@ -139,6 +135,7 @@ class NostrRpc extends NDKNostrRpc {
 
     // create and sign request
     const event = await this.createRequestEvent(id, remotePubkey, method, params, kind);
+    console.log("sendRequest", { event, method, remotePubkey, params });
 
     // send to relays
     await event.publish();
@@ -203,19 +200,23 @@ export class IframeNostrRpc extends NostrRpc {
   private iframePort?: MessagePort;
   private iframeRequests = new Map<string, { id: string; pubkey: string }>();
 
-  public constructor(ndk: NDK, localPubkey: string, signer: PrivateKeySigner, iframePeerOrigin?: string) {
-    super(ndk, localPubkey, signer);
+  public constructor(ndk: NDK, localSigner: PrivateKeySigner, iframePeerOrigin?: string) {
+    super(ndk, localSigner);
     this._ndk = ndk;
     this.peerOrigin = iframePeerOrigin;
   }
 
   public async subscribe(filter: NDKFilter): Promise<NDKSubscription> {
     if (!this.peerOrigin) return super.subscribe(filter);
-    return new NDKSubscription(this._ndk, {}, {
-      // don't send to relay
-      closeOnEose: true,
-      cacheUsage: NDKSubscriptionCacheUsage.ONLY_CACHE
-    });
+    return new NDKSubscription(
+      this._ndk,
+      {},
+      {
+        // don't send to relay
+        closeOnEose: true,
+        cacheUsage: NDKSubscriptionCacheUsage.ONLY_CACHE,
+      },
+    );
   }
 
   public setWorkerIframePort(port: MessagePort) {
@@ -225,8 +226,8 @@ export class IframeNostrRpc extends NostrRpc {
 
     // to make sure Chrome doesn't terminate the channel
     setInterval(() => {
-      console.log("iframe-nip46 ping");
-      this.iframePort!.postMessage("ping");
+      console.log('iframe-nip46 ping');
+      this.iframePort!.postMessage('ping');
     }, 5000);
 
     port.onmessage = async ev => {
@@ -334,5 +335,96 @@ export class ReadyListener {
 
     console.log(new Date(), 'finished waiting for', this.messages, r);
     return r;
+  }
+}
+
+export class Nip46Signer extends NDKNip46Signer {
+  private _userPubkey: string = '';
+  private _rpc: IframeNostrRpc;
+
+  constructor(ndk: NDK, localSigner: PrivateKeySigner, signerPubkey: string, iframeOrigin?: string) {
+    super(ndk, signerPubkey, localSigner);
+
+    // override with our own rpc implementation
+    this._rpc = new IframeNostrRpc(ndk, localSigner, iframeOrigin);
+    this._rpc.setUseNip44(true); // !!this.params.optionsModal.dev);
+    this._rpc.on('authUrl', (url: string) => {
+      this.emit('authUrl', url);
+    });
+
+    this.rpc = this._rpc;
+  }
+
+  get userPubkey() {
+    return this._userPubkey;
+  }
+
+  private async setSignerPubkey(signerPubkey: string, sameAsUser: boolean = false) {
+    console.log("setSignerPubkey", signerPubkey);
+
+    // ensure it's set
+    this.remotePubkey = signerPubkey;
+
+    // when we're sure it's known
+    this._rpc.on(`iframeRestart-${signerPubkey}`, () => {
+      this.emit('iframeRestart');
+    });
+
+    // now call getPublicKey and swap remotePubkey w/ that
+    await this.initUserPubkey(sameAsUser ? signerPubkey : '');
+  }
+
+  public async initUserPubkey(hintPubkey?: string) {
+    if (this._userPubkey) throw new Error('Already called initUserPubkey');
+
+    if (hintPubkey) {
+      this._userPubkey = hintPubkey;
+      return;
+    }
+
+    this._userPubkey = await new Promise<string>((ok, err) => {
+      if (!this.remotePubkey) throw new Error('Signer pubkey not set');
+
+      console.log("get_public_key", this.remotePubkey);
+      this._rpc.sendRequest(this.remotePubkey, 'get_public_key', [], 24133, (response: NDKRpcResponse) => {
+        ok(response.result);
+      });
+    });
+  }
+
+  public async listen(nostrConnectSecret: string) {
+    const signerPubkey = await (this.rpc as IframeNostrRpc).listen(nostrConnectSecret);
+    await this.setSignerPubkey(signerPubkey);
+  }
+
+  public async connect(token?: string, perms?: string) {
+    if (!this.remotePubkey) throw new Error('No signer pubkey');
+    await this._rpc.connect(this.remotePubkey, token, perms);
+    await this.setSignerPubkey(this.remotePubkey);
+  }
+
+  public async setListenReply(reply: any, nostrConnectSecret: string) {
+    const signerPubkey = await this._rpc.parseNostrConnectReply(reply, nostrConnectSecret);
+    await this.setSignerPubkey(signerPubkey, true);
+  }
+
+  public async createAccount2({ bunkerPubkey, name, domain, perms = '' }: { bunkerPubkey: string; name: string; domain: string; perms?: string }) {
+    const params = [
+      name,
+      domain,
+      '', // email
+      perms,
+    ];
+
+    const r = await new Promise<NDKRpcResponse>(ok => {
+      this.rpc.sendRequest(bunkerPubkey, 'create_account', params, undefined, ok);
+    });
+
+    console.log('create_account pubkey', r);
+    if (r.result === 'error') {
+      throw new Error(r.error);
+    }
+
+    return r.result;
   }
 }
