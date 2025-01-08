@@ -33,6 +33,9 @@ export interface Info {
   // must be present
   pubkey: string;
 
+  // new nip46
+  signerPubkey?: string;
+
   // connect or local methods
   sk?: string;
 
@@ -65,7 +68,7 @@ export interface Info {
   iframeUrl?: string;
 }
 
-export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod' | 'domain'>;
+export type RecentType = Pick<Info, 'nip05' | 'picture' | 'pubkey' | 'name' | 'bunkerUrl' | 'authMethod' | 'domain' | 'signerPubkey'>;
 
 export type NlTheme = 'default' | 'ocean' | 'lemonade' | 'purple' | 'crab';
 
