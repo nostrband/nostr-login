@@ -40,6 +40,7 @@ export interface NostrLoginOptions {
   // forward reqs to this bunker origin for testing
   devOverrideBunkerOrigin?: string;
 
+  // deprecated, use methods=['local']
   // use local signup instead of nostr connect
   localSignup?: boolean;
 
@@ -54,7 +55,7 @@ export interface NostrLoginOptions {
   title?: string;
   description?: string;
 
-  // comma-separated list of relays added 
+  // comma-separated list of relays added
   // to relay list of new profiles created with local signup
   signupRelays?: string;
 
@@ -63,6 +64,12 @@ export interface NostrLoginOptions {
 
   // dev mode
   dev?: boolean;
+
+  // use start.njump.me instead of local signup
+  signupNjump?: boolean;
+
+  // list of npubs to auto/suggest-follow on signup
+  followNpubs?: string;
 }
 
 export interface IBanner {
@@ -85,6 +92,7 @@ export interface IModal {
   isOTP?: boolean;
   isLoadingExtension?: boolean;
   localSignup?: boolean;
+  signupNjump?: boolean;
   authMethods?: AuthMethod[];
   hasExtension?: boolean;
   hasOTP?: boolean;

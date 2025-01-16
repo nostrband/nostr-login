@@ -30,6 +30,12 @@ import { NostrLoginOptions, StartScreens } from './types';
       const localSignup = cs.getAttribute('data-local-signup');
       if (localSignup) options.localSignup = localSignup === 'true';
 
+      const signupNjump = cs.getAttribute('data-signup-njump');
+      if (signupNjump) options.signupNjump = signupNjump === 'true';
+
+      const followNpubs = cs.getAttribute('data-follow-npubs');
+      if (followNpubs) options.followNpubs = followNpubs;
+
       const otpRequestUrl = cs.getAttribute('data-otp-request-url');
       if (otpRequestUrl) options.otpRequestUrl = otpRequestUrl;
 

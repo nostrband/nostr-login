@@ -33,6 +33,7 @@ export namespace Components {
         "isOTP": boolean;
         "localSignup": boolean;
         "recents": RecentType[];
+        "signupNjump": boolean;
         "startScreen": string;
         "theme": NlTheme;
         "welcomeDescription": string;
@@ -92,6 +93,8 @@ export namespace Components {
     }
     interface NlLocalSignup {
         "description": string;
+        "descriptionNjump": string;
+        "signupNjump": boolean;
         "titleSignup": string;
     }
     interface NlLoginStatus {
@@ -412,6 +415,7 @@ declare global {
     };
     interface HTMLNlLocalSignupElementEventMap {
         "nlLocalSignup": string;
+        "nlSignupNjump": void;
         "fetchHandler": boolean;
     }
     interface HTMLNlLocalSignupElement extends Components.NlLocalSignup, HTMLStencilElement {
@@ -670,6 +674,7 @@ declare namespace LocalJSX {
         "onNlChangeDarkMode"?: (event: NlAuthCustomEvent<boolean>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
         "recents"?: RecentType[];
+        "signupNjump"?: boolean;
         "startScreen"?: string;
         "theme"?: NlTheme;
         "welcomeDescription"?: string;
@@ -748,8 +753,11 @@ declare namespace LocalJSX {
     }
     interface NlLocalSignup {
         "description"?: string;
+        "descriptionNjump"?: string;
         "onFetchHandler"?: (event: NlLocalSignupCustomEvent<boolean>) => void;
         "onNlLocalSignup"?: (event: NlLocalSignupCustomEvent<string>) => void;
+        "onNlSignupNjump"?: (event: NlLocalSignupCustomEvent<void>) => void;
+        "signupNjump"?: boolean;
         "titleSignup"?: string;
     }
     interface NlLoginStatus {
