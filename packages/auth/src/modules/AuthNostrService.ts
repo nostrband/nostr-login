@@ -210,8 +210,9 @@ class AuthNostrService extends EventEmitter implements Signer {
     return [nostrconnect, apps];
   }
 
-  public async localSignup(name: string) {
-    const sk = generatePrivateKey();
+  public async localSignup(name: string, sk?: string) {
+    const create = !sk;
+    sk = sk || generatePrivateKey();
     const pubkey = getPublicKey(sk);
     const info: Info = {
       pubkey,
@@ -220,7 +221,7 @@ class AuthNostrService extends EventEmitter implements Signer {
       authMethod: 'local',
     };
     console.log(`localSignup name: ${name}`);
-    await this.setLocal(info, true);
+    await this.setLocal(info, create);
   }
 
   public async setLocal(info: Info, create?: boolean) {

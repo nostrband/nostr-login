@@ -9,10 +9,13 @@ import { state } from '@/store';
 export class NlLocalSignup {
   @Prop() titleSignup = 'Create Nostr profile';
   @Prop() description = 'Choose any username, you can always change it later.';
+  @Prop() descriptionNjump = 'Proceed to creating your Nostr profile in a new tab.';
+  @Prop() signupNjump = false;
 
   @State() isAvailable = false;
 
   @Event() nlLocalSignup: EventEmitter<string>;
+  @Event() nlSignupNjump: EventEmitter<void>;
   // @Event() nlCheckSignup: EventEmitter<string>;
   @Event() fetchHandler: EventEmitter<boolean>;
 
@@ -24,7 +27,11 @@ export class NlLocalSignup {
   handleCreateAccount(e: MouseEvent) {
     e.preventDefault();
 
-    this.nlLocalSignup.emit(`${state.nlSignup.signupName}`);
+    if (this.signupNjump) {
+      this.nlSignupNjump.emit();
+    } else {
+      this.nlLocalSignup.emit(`${state.nlSignup.signupName}`);
+    }
   }
 
   render() {
@@ -32,41 +39,43 @@ export class NlLocalSignup {
       <Fragment>
         <div class="p-4 overflow-y-auto">
           <h1 class="nl-title font-bold text-center text-2xl">{this.titleSignup}</h1>
-          <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">{this.description}</p>
+          <p class="nl-description font-light text-center text-sm pt-2 max-w-96 mx-auto">{this.signupNjump ? this.descriptionNjump : this.description}</p>
         </div>
 
         <div class="max-w-72 mx-auto">
-          <div class="relative mb-2">
-            <input
-              onInput={e => this.handleInputChange(e)}
-              type="text"
-              class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
-              placeholder="Enter username"
-              value={state.nlSignup.signupName}
-            />
-            <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke={this.isAvailable ? '#00cc00' : 'currentColor'}
-                class="flex-shrink-0 w-4 h-4 text-gray-500"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                />
-              </svg>
+          {!this.signupNjump && (
+            <div class="relative mb-2">
+              <input
+                onInput={e => this.handleInputChange(e)}
+                type="text"
+                class="nl-input peer py-3 px-4 ps-11 block w-full border-transparent rounded-lg text-sm disabled:opacity-50 disabled:pointer-events-none dark:border-transparent"
+                placeholder="Enter username"
+                value={state.nlSignup.signupName}
+              />
+              <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4 peer-disabled:opacity-50 peer-disabled:pointer-events-none">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke={this.isAvailable ? '#00cc00' : 'currentColor'}
+                  class="flex-shrink-0 w-4 h-4 text-gray-500"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                  />
+                </svg>
+              </div>
             </div>
-          </div>
+          )}
 
           <div class="ps-4 pe-4 overflow-y-auto">
             <p class="nl-error font-light text-center text-sm max-w-96 mx-auto">{state.error}</p>
           </div>
 
-          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn="Create profile">
+          <button-base disabled={state.isLoading} onClick={e => this.handleCreateAccount(e)} titleBtn={this.signupNjump ? 'Get started' : 'Create profile'}>
             {state.isLoading ? (
               <span
                 slot="icon-start"

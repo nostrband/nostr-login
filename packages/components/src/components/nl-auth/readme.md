@@ -23,6 +23,7 @@
 | `isOTP`                    | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
 | `localSignup`              | `local-signup`         |             | `boolean`                                                  | `false`                  |
 | `recents`                  | --                     |             | `RecentType[]`                                             | `[]`                     |
+| `signupNjump`              | `signup-njump`         |             | `boolean`                                                  | `false`                  |
 | `startScreen`              | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
 | `theme`                    | `theme`                |             | `"crab" \| "default" \| "lemonade" \| "ocean" \| "purple"` | `'default'`              |
 | `welcomeDescription`       | `welcome-description`  |             | `string`                                                   | `''`                     |

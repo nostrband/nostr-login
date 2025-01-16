@@ -21,6 +21,7 @@ export class NlAuth {
   @Prop() iframeUrl: string = '';
   @Prop() error: string = '';
   @Prop() localSignup: boolean = false;
+  @Prop() signupNjump: boolean = false;
   @Prop({ mutable: true }) accounts: Info[] = [];
   @Prop({ mutable: true }) recents: RecentType[] = [];
   @Prop({ mutable: true }) darkMode: boolean = false;
@@ -31,11 +32,6 @@ export class NlAuth {
 
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
-
-  @Watch('localSignup')
-  watchLocalSignupHandler(newValue: boolean) {
-    state.localSignup = newValue;
-  }
 
   @Watch('isLoading')
   watchLoadingHandler(newValue: boolean) {
@@ -78,7 +74,6 @@ export class NlAuth {
   componentWillLoad() {
     // init state
     state.path = [this.startScreen as CURRENT_MODULE];
-    state.localSignup = this.localSignup;
     state.error = '';
     state.iframeUrl = '';
     state.authUrl = '';
@@ -128,7 +123,7 @@ export class NlAuth {
         case CURRENT_MODULE.SIGNUP:
           return <nl-signup bunkers={this.bunkers} />;
         case CURRENT_MODULE.LOCAL_SIGNUP:
-          return <nl-local-signup />;
+          return <nl-local-signup signupNjump={this.signupNjump} />;
         case CURRENT_MODULE.CONFIRM_LOGOUT:
           return <nl-confirm-logout />;
         case CURRENT_MODULE.IMPORT_FLOW:

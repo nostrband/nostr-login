@@ -55,14 +55,14 @@ export class NostrLoginInitializer {
       this.bannerManager.onCallStart();
     });
 
-    this.authNostrService.on('onIframeUrl', (url) => {
+    this.authNostrService.on('onIframeUrl', url => {
       this.modalManager.onIframeUrl(url);
-    })
+    });
 
     this.authNostrService.on('iframeRestart', ({ iframeUrl }) => {
       this.processManager.onIframeUrl();
       this.bannerManager.onIframeRestart(iframeUrl);
-    })
+    });
 
     this.authNostrService.on('onAuthUrl', ({ url, iframeUrl, eventToAddAccount }) => {
       this.processManager.onAuthUrl();
@@ -108,7 +108,6 @@ export class NostrLoginInitializer {
     });
 
     this.bannerManager.on('onConfirmLogout', async () => {
-      console.log(4)
       // @ts-ignore
       this.launch('confirm-logout');
     });
@@ -146,7 +145,7 @@ export class NostrLoginInitializer {
     });
   }
 
-  private openPopup (url: string) {
+  private openPopup(url: string) {
     this.popupManager.openPopup(url);
   }
 
@@ -184,13 +183,9 @@ export class NostrLoginInitializer {
     const recent = localStorageGetRecents();
     const accounts = localStorageGetAccounts();
 
-    const options = startScreen
-      ? {
-          startScreen,
-        }
-      : this.params.optionsModal;
-
-    if (!startScreen && (Boolean(recent?.length) || Boolean(accounts?.length))) {
+    const options = { ...this.params.optionsModal };
+    if (startScreen) options.startScreen = startScreen;
+    else if (Boolean(recent?.length) || Boolean(accounts?.length)) {
       options.startScreen = 'switch-account';
     }
 
