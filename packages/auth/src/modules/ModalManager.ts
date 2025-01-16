@@ -1,5 +1,5 @@
 import { NostrLoginOptions, StartScreens, TypeModal } from '../types';
-import { checkNip05, getBunkerUrl, getDarkMode, localStorageRemoveRecent, localStorageSetItem } from '../utils';
+import { checkNip05, getBunkerUrl, getDarkMode, localStorageRemoveRecent, localStorageSetItem, prepareSignupRelays } from '../utils';
 import { AuthNostrService, NostrExtensionService, NostrParams } from '.';
 import { EventEmitter } from 'tseep';
 import { ConnectionString, Info, RecentType } from 'nostr-login-components/dist/types/types';
@@ -229,8 +229,14 @@ class ModalManager extends EventEmitter {
       const signupNjump = async () => {
         await exec(async () => {
           const self = new URL(window.location.href);
-          const name = self.hostname.charAt(0).toUpperCase() + self.hostname.slice(1);
-          const url = `https://start.njump.me/?an=${name}&at=popup&ac=${window.location.href}&s=${this.opt!.followNpubs || ''}`;
+          const name =
+            self.hostname
+              .toLocaleLowerCase()
+              .replace(/^www\./i, '')
+              .charAt(0)
+              .toUpperCase() + self.hostname.slice(1);
+          const relays = prepareSignupRelays(this.params.optionsModal.signupRelays);
+          const url = `https://start.njump.me/?an=${name}&at=popup&ac=${window.location.href}&s=${this.opt!.followNpubs || ''}&arr=${relays}&awr=${relays}`;
           console.log('njump url', url);
 
           return new Promise((ok, err) => {
