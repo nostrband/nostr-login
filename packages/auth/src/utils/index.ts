@@ -37,6 +37,15 @@ export const fetchProfile = async (info: Info, profileNdk: NDK) => {
   return await user.fetchProfile();
 };
 
+export const prepareSignupRelays = (signupRelays?: string) => {
+  const relays = (signupRelays || '')
+    .split(',')
+    .map(r => r.trim())
+    .filter(r => r.startsWith('ws'));
+  if (!relays.length) relays.push(...DEFAULT_SIGNUP_RELAYS);
+  return relays;
+};
+
 export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSigner, signupRelays?: string, outboxRelays?: string[]) => {
   const meta = {
     name: info.name,
@@ -59,11 +68,7 @@ export const createProfile = async (info: Info, profileNdk: NDK, signer: NDKSign
     tags: [],
   });
 
-  const relays = (signupRelays || '')
-    .split(',')
-    .map(r => r.trim())
-    .filter(r => r.startsWith('ws'));
-  if (!relays.length) relays.push(...DEFAULT_SIGNUP_RELAYS);
+  const relays = prepareSignupRelays(signupRelays)
   for (const r of relays) {
     relaysEvent.tags.push(['r', r]);
   }
