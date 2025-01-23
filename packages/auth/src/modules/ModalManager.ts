@@ -70,8 +70,8 @@ class ModalManager extends EventEmitter {
       this.modal.localSignup = opt.localSignup;
     }
 
-    if (opt.signupNjump !== undefined) {
-      this.modal.signupNjump = opt.signupNjump;
+    if (opt.signupNstart !== undefined) {
+      this.modal.signupNjump = opt.signupNstart;
     }
 
     if (opt.title) {

@@ -29,7 +29,7 @@ You can set these attributes to the `script` tag to customize the behavior:
 - `data-start-screen` - screen shown by default (banner click, window.nostr.* call), options: `welcome`, `welcome-login`, `welcome-signup`, `signup`, `local-signup`, `login`, `otp`, `connect`, `login-bunker-url`, `login-read-only`, `connection-string`, `switch-account`, `import`
 - `data-signup-relays` - comma-separated list of relays where nip65 event will be published on local signup
 - `data-outbox-relays` - comma-separated list of relays that will be added to nip65 event on local signup
-- `data-signup-njump` - "true" to use start.njump.me instead of local signup
+- `data-signup-nstart` - "true" to use start.njump.me instead of local signup
 - `data-follow-npubs` - comma-separated list of npubs to follow if njump.me signup is used
 
 Example:
