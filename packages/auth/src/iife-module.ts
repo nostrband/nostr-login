@@ -30,8 +30,8 @@ import { NostrLoginOptions, StartScreens } from './types';
       const localSignup = cs.getAttribute('data-local-signup');
       if (localSignup) options.localSignup = localSignup === 'true';
 
-      const signupNjump = cs.getAttribute('data-signup-njump');
-      if (signupNjump) options.signupNjump = signupNjump === 'true';
+      const signupNjump = cs.getAttribute('data-signup-nstart') || cs.getAttribute('data-signup-njump');
+      if (signupNjump) options.signupNstart = signupNjump === 'true';
 
       const followNpubs = cs.getAttribute('data-follow-npubs');
       if (followNpubs) options.followNpubs = followNpubs;
@@ -42,8 +42,7 @@ import { NostrLoginOptions, StartScreens } from './types';
       const otpReplyUrl = cs.getAttribute('data-otp-reply-url');
       if (otpReplyUrl) options.otpReplyUrl = otpReplyUrl;
 
-      if (!!otpRequestUrl !== !!otpReplyUrl)
-        console.warn("nostr-login: need request and reply urls for OTP auth");
+      if (!!otpRequestUrl !== !!otpReplyUrl) console.warn('nostr-login: need request and reply urls for OTP auth');
 
       const methods = cs.getAttribute('data-methods');
       if (methods) {
@@ -69,7 +68,7 @@ import { NostrLoginOptions, StartScreens } from './types';
       const dev = cs.getAttribute('data-dev') === 'true';
       if (dev) options.dev = dev;
 
-      console.log("nostr-login options", options);
+      console.log('nostr-login options', options);
     }
 
     init(options);

@@ -66,7 +66,7 @@ export interface NostrLoginOptions {
   dev?: boolean;
 
   // use start.njump.me instead of local signup
-  signupNjump?: boolean;
+  signupNstart?: boolean;
 
   // list of npubs to auto/suggest-follow on signup
   followNpubs?: string;
