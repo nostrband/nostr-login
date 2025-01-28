@@ -93,6 +93,7 @@ export interface IModal {
   isLoadingExtension?: boolean;
   localSignup?: boolean;
   signupNjump?: boolean;
+  njumpIframe?: string;
   authMethods?: AuthMethod[];
   hasExtension?: boolean;
   hasOTP?: boolean;

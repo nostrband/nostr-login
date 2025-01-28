@@ -22,6 +22,7 @@ export class NlAuth {
   @Prop() error: string = '';
   @Prop() localSignup: boolean = false;
   @Prop() signupNjump: boolean = false;
+  @Prop() njumpIframe: string = '';
   @Prop({ mutable: true }) accounts: Info[] = [];
   @Prop({ mutable: true }) recents: RecentType[] = [];
   @Prop({ mutable: true }) darkMode: boolean = false;
@@ -56,6 +57,11 @@ export class NlAuth {
   @Watch('iframeUrl')
   watchIframeUrlHandler(newValue: string) {
     state.iframeUrl = newValue;
+  }
+
+  @Watch('njumpIframe')
+  watchNjumpIframeHandler(newValue: string) {
+    state.njumpIframe = newValue;
   }
 
   @Watch('error')

@@ -22,6 +22,7 @@
 | `isLoadingExtension`       | `is-loading-extension` |             | `boolean`                                                  | `false`                  |
 | `isOTP`                    | `is-o-t-p`             |             | `boolean`                                                  | `false`                  |
 | `localSignup`              | `local-signup`         |             | `boolean`                                                  | `false`                  |
+| `njumpIframe`              | `njump-iframe`         |             | `string`                                                   | `''`                     |
 | `recents`                  | --                     |             | `RecentType[]`                                             | `[]`                     |
 | `signupNjump`              | `signup-njump`         |             | `boolean`                                                  | `false`                  |
 | `startScreen`              | `start-screen`         |             | `string`                                                   | `CURRENT_MODULE.WELCOME` |
