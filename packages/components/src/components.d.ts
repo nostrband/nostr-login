@@ -32,6 +32,7 @@ export namespace Components {
         "isLoadingExtension": boolean;
         "isOTP": boolean;
         "localSignup": boolean;
+        "njumpIframe": string;
         "recents": RecentType[];
         "signupNjump": boolean;
         "startScreen": string;
@@ -671,6 +672,7 @@ declare namespace LocalJSX {
         "isLoadingExtension"?: boolean;
         "isOTP"?: boolean;
         "localSignup"?: boolean;
+        "njumpIframe"?: string;
         "onNlChangeDarkMode"?: (event: NlAuthCustomEvent<boolean>) => void;
         "onNlCloseModal"?: (event: NlAuthCustomEvent<any>) => void;
         "recents"?: RecentType[];

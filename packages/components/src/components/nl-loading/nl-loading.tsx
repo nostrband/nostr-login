@@ -26,7 +26,10 @@ export class NlLoading {
   render() {
     let title = 'Connecting...';
     let text = 'Establishing connection to your key storage.';
-    if (this.path === CURRENT_MODULE.LOCAL_SIGNUP) {
+    if (state.njumpIframe) {
+      title = '';
+      text = '';
+    } else if (this.path === CURRENT_MODULE.LOCAL_SIGNUP) {
       title = 'Creating...';
       text = 'Publishing your profile on Nostr.';
     } else if (state.authUrl) {
@@ -45,9 +48,9 @@ export class NlLoading {
 
     return (
       <div class="p-4 overflow-y-auto">
-        <h1 class="nl-title font-bold text-center text-4xl">{title}</h1>
-        <p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{text}</p>
-        {!state.authUrl && state.isLoading && (
+        {title && (<h1 class="nl-title font-bold text-center text-4xl">{title}</h1>)}
+        {text && (<p class="nl-description font-light text-center text-lg pt-2 max-w-96 mx-auto">{text}</p>)}
+        {!state.njumpIframe && !state.authUrl && state.isLoading && (
           <div class="mt-10 mb-10 ml-auto mr-auto w-20">
             <span
               slot="icon-start"
@@ -63,6 +66,11 @@ export class NlLoading {
         {iframeUrl && (
           <div class="mt-3 ml-auto mr-auto w-72 flex justify-center">
             <iframe src={iframeUrl} width="180px" height="80px" style={{ display: showIframe ? 'block' : 'none', border: '0' }}></iframe>
+          </div>
+        )}
+        {state.njumpIframe && (
+          <div class="mt-3 ml-auto mr-auto flex justify-center">
+            <iframe srcdoc={state.njumpIframe} width="600px" style={{ border: '0', height: "80vh", borderRadius: "8px" }}></iframe>
           </div>
         )}
         {!showIframe && showButton && (

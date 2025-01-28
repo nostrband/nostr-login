@@ -11,6 +11,7 @@ const { state, onChange, reset } = createStore({
   isOTP: false,
   authUrl: '',
   iframeUrl: '',
+  njumpIframe: '',
 
   // State NlSignin
   nlSignin: {

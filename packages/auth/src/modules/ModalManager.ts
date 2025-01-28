@@ -236,10 +236,64 @@ class ModalManager extends EventEmitter {
               .charAt(0)
               .toUpperCase() + self.hostname.slice(1);
           const relays = prepareSignupRelays(this.params.optionsModal.signupRelays);
-          const url = `https://start.njump.me/?an=${name}&at=popup&ac=${window.location.href}&s=${this.opt!.followNpubs || ''}&arr=${relays}&awr=${relays}`;
-          console.log('njump url', url);
+          // const url = `https://start.njump.me/?an=${name}&at=popup&ac=${window.location.href}&s=${this.opt!.followNpubs || ''}&arr=${relays}&awr=${relays}`;
+          // console.log('njump url', url);
+
+          this.modal!.njumpIframe = `
+          <html><body>
+          <script src='https://start.njump.me/modal.js'></script>
+          <script>
+          new NstartModal({
+            baseUrl: 'https://start.njump.me',
+            // Required parameters
+            an: '${name}',
+            // Optional parameters
+            s: [${this.opt!.followNpubs ? `'${this.opt!.followNpubs}'` : ''}],
+            afb: false, // forceBunker
+            asb: false, // skipBunker
+            aan: false, // avoidNsec
+            aac: true, // avoidNcryptsec
+            ahc: true, // hide close button
+            arr: ${JSON.stringify(relays)}, //readRelays
+            awr: ${JSON.stringify(relays)}, //writeRelays
+            // Callbacks
+            onComplete: (result) => {
+              console.log('Login token:', result.nostrLogin);
+              window.parent.location.href='${window.location.href}#nostr-login='+result.nostrLogin;
+            },
+            onCancel: () => {
+              window.parent.location.href='${window.location.href}#nostr-login=null';
+            },
+          }).open();
+          </script>
+          </body></html>
+          `.replaceAll("&", "&amp;"); // needed?
 
           return new Promise((ok, err) => {
+
+            const process = async (nsecOrBunker: string) => {
+              // process the returned value
+              console.log('nsecOrBunker', nsecOrBunker);
+              if (nsecOrBunker.startsWith('nsec1')) {
+                let decoded;
+                try {
+                  decoded = nip19.decode(nsecOrBunker);
+                } catch (e) {
+                  throw new Error('Bad nsec value');
+                }
+                if (decoded.type !== 'nsec') throw new Error('Bad bech32 type');
+                await this.authNostrService.localSignup('', decoded.data);
+                ok();
+              } else if (nsecOrBunker.startsWith('bunker:')) {
+                await this.authNostrService.authNip46('login', { name: '', bunkerUrl: nsecOrBunker });
+                ok();
+              } else if (nsecOrBunker === "null") {
+                err('Cancelled');
+              } else {
+                err('Unknown return value');
+              }
+            };
+
             const onOpen = async () => {
               if (window.location.hash.startsWith('#nostr-login=')) {
                 const nsecOrBunker = window.location.hash.split('#nostr-login=')[1];
@@ -249,30 +303,13 @@ class ModalManager extends EventEmitter {
                 url.hash = '';
                 window.history.replaceState({}, '', url.toString());
 
-                // process the returned value
-                console.log('nsecOrBunker', nsecOrBunker);
-                if (nsecOrBunker.startsWith('nsec1')) {
-                  let decoded;
-                  try {
-                    decoded = nip19.decode(nsecOrBunker);
-                  } catch (e) {
-                    throw new Error('Bad nsec value');
-                  }
-                  if (decoded.type !== 'nsec') throw new Error('Bad bech32 type');
-                  await this.authNostrService.localSignup('', decoded.data);
-                  ok();
-                } else if (nsecOrBunker.startsWith('bunker:')) {
-                  await this.authNostrService.authNip46('login', { name: '', bunkerUrl: nsecOrBunker });
-                  ok();
-                } else {
-                  err('Unknown return value');
-                }
+                process(nsecOrBunker);
               }
             };
 
-            // use random 'target' to make sure window.opener is
-            // accessible to the popup
-            window.open(url, '' + Date.now(), 'popup=true,width=600,height=950');
+            // // use random 'target' to make sure window.opener is
+            // // accessible to the popup
+            // window.open(url, '' + Date.now(), 'popup=true,width=600,height=950');
             window.addEventListener('hashchange', onOpen);
           });
         });
