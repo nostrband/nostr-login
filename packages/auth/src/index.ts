@@ -1,6 +1,6 @@
 import 'nostr-login-components';
 import { AuthNostrService, NostrExtensionService, Popup, NostrParams, Nostr, ProcessManager, BannerManager, ModalManager } from './modules';
-import { NostrLoginOptions, StartScreens } from './types';
+import { NostrLoginAuthOptions, NostrLoginOptions, StartScreens } from './types';
 import { localStorageGetAccounts, localStorageGetCurrent, localStorageGetRecents, localStorageSetItem } from './utils';
 import { Info } from 'nostr-login-components/dist/types/types';
 import { NostrObjectParams } from './modules/Nostr';
@@ -149,7 +149,7 @@ export class NostrLoginInitializer {
     this.popupManager.openPopup(url);
   }
 
-  private async switchAccount(info: Info) {
+  private async switchAccount(info: Info, signup = false) {
     console.log('nostr login switch to info', info);
 
     // make sure extension is unlinked
@@ -160,7 +160,7 @@ export class NostrLoginInitializer {
     } else if (info.authMethod === 'otp') {
       this.authNostrService.setOTP(info.pubkey, info.otpData || '');
     } else if (info.authMethod === 'local' && info.sk) {
-      this.authNostrService.setLocal(info);
+      this.authNostrService.setLocal(info, signup);
     } else if (info.authMethod === 'extension') {
       // trySetExtensionForPubkey will check if
       // we still have the extension and it's the same pubkey
@@ -179,7 +179,7 @@ export class NostrLoginInitializer {
     this.modalManager.onUpdateAccounts(accounts, recents);
   }
 
-  public launch = (startScreen?: StartScreens) => {
+  public launch = async (startScreen?: StartScreens) => {
     const recent = localStorageGetRecents();
     const accounts = localStorageGetAccounts();
 
@@ -246,11 +246,33 @@ export class NostrLoginInitializer {
     this.bannerManager.onDarkMode(dark);
     this.modalManager.onDarkMode(dark);
   };
+
+  public setAuth = async (o: NostrLoginAuthOptions) => {
+    if (!o.type) throw new Error('Invalid auth event');
+    if (o.type !== 'login' && o.type !== 'logout' && o.type !== 'signup') throw new Error('Invalid auth event');
+    if (o.method && o.method !== 'connect' && o.method !== 'extension' && o.method !== 'local' && o.method !== 'otp' && o.method !== 'readOnly')
+      throw new Error('Invalid auth event');
+
+    if (o.type === 'logout')
+      return this.logout();
+
+    if (!o.method || !o.pubkey) throw new Error('Invalid pubkey');
+
+    const info: Info = {
+      authMethod: o.method,
+      pubkey: o.pubkey,
+      relays: o.relays,
+      sk: o.localNsec,
+      otpData: o.otpData,
+      name: o.name,
+    };
+    await this.switchAccount(info, o.type === 'signup');
+  };
 }
 
 const initializer = new NostrLoginInitializer();
 
-export const { init, launch, logout, setDarkMode } = initializer;
+export const { init, launch, logout, setDarkMode, setAuth } = initializer;
 
 document.addEventListener('nlLogout', logout);
 document.addEventListener('nlLaunch', (event: any) => {
@@ -258,4 +280,7 @@ document.addEventListener('nlLaunch', (event: any) => {
 });
 document.addEventListener('nlDarkMode', (event: any) => {
   setDarkMode(!!event.detail);
+});
+document.addEventListener('nlSetAuth', (event: any) => {
+  setAuth(event.detail as NostrLoginAuthOptions);
 });

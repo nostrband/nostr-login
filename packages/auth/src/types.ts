@@ -7,6 +7,7 @@ export interface NostrLoginAuthOptions {
   method?: AuthMethod;
   pubkey?: string;
   otpData?: string;
+  name?: string;
 }
 
 // NOTE: must be a subset of CURRENT_MODULE enum
