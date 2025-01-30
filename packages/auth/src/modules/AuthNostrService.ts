@@ -388,6 +388,7 @@ class AuthNostrService extends EventEmitter implements Signer {
         this.iframe = undefined;
       } else {
         options.pubkey = info!.pubkey;
+        options.name = info!.name;
 
         if (info!.sk) {
           options.localNsec = nip19.nsecEncode(info!.sk);
