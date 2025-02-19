@@ -211,7 +211,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   }
 
   public async localSignup(name: string, sk?: string) {
-    const create = !sk;
+    const signup = !sk;
     sk = sk || generatePrivateKey();
     const pubkey = getPublicKey(sk);
     const info: Info = {
@@ -221,16 +221,16 @@ class AuthNostrService extends EventEmitter implements Signer {
       authMethod: 'local',
     };
     console.log(`localSignup name: ${name}`);
-    await this.setLocal(info, create);
+    await this.setLocal(info, signup);
   }
 
-  public async setLocal(info: Info, create?: boolean) {
+  public async setLocal(info: Info, signup?: boolean) {
     this.releaseSigner();
     this.localSigner = new PrivateKeySigner(info.sk!);
 
-    if (create) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays, this.params.optionsModal.outboxRelays);
+    if (signup) await createProfile(info, this.profileNdk, this.localSigner, this.params.optionsModal.signupRelays, this.params.optionsModal.outboxRelays);
 
-    this.onAuth('login', info);
+    this.onAuth(signup ? 'signup' : 'login', info);
   }
 
   public prepareImportUrl(url: string) {
