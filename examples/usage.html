@@ -48,6 +48,19 @@
         <button onclick="switchOutputInput()">Switch Output Input</button>
     </div>
 
+    <form id="testpw" action="/usage.html" method="POST">
+        <input type="text" name="name" value="npub">
+        <input type="password" name="password" value="a;h123UIFBEKSDBF,SA">
+        <button type="submit">Submit</button>
+    </form>
+    <script>
+        const form = document.querySelector("#testpw");
+        form.onsubmit = (e) => {
+            e.preventDefault();
+        }
+    </script>
+
+
     <script>
         // Example Nostr event as json string
         var ExampleData = `{   "content": "hello world",   "created_at": 1731313613,   "id": "",   "kind": 1,   "pubkey": "568ad8bf00ed530eb44614e4b363271f36f6b645700630470c51f98e7e58fbf0",   "tags": [] }`

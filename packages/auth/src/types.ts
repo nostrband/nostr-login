@@ -71,6 +71,12 @@ export interface NostrLoginOptions {
 
   // list of npubs to auto/suggest-follow on signup
   followNpubs?: string;
+
+  // when method call auth needed, instead of showing
+  // the modal, we start waiting for incoming nip46
+  // connection and send the nostrconnect string using
+  // nlNeedAuth event
+  customNostrConnect?: boolean;
 }
 
 export interface IBanner {

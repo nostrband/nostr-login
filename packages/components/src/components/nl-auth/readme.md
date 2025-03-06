@@ -33,10 +33,11 @@
 
 ## Events
 
-| Event              | Description | Type                   |
-| ------------------ | ----------- | ---------------------- |
-| `nlChangeDarkMode` |             | `CustomEvent<boolean>` |
-| `nlCloseModal`     |             | `CustomEvent<any>`     |
+| Event                         | Description | Type                   |
+| ----------------------------- | ----------- | ---------------------- |
+| `nlChangeDarkMode`            |             | `CustomEvent<boolean>` |
+| `nlCloseModal`                |             | `CustomEvent<any>`     |
+| `nlNostrConnectDefaultCancel` |             | `CustomEvent<void>`    |
 
 
 ## Dependencies

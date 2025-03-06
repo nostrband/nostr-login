@@ -33,6 +33,9 @@ export class NlAuth {
 
   @Event() nlCloseModal: EventEmitter;
   @Event() nlChangeDarkMode: EventEmitter<boolean>;
+  @Event() nlNostrConnectDefaultCancel: EventEmitter<void>;
+
+  prevPath: string = '';
 
   @Watch('isLoading')
   watchLoadingHandler(newValue: boolean) {
@@ -113,7 +116,12 @@ export class NlAuth {
 
   render() {
     const classWrapper = `w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto flex items-center ${this.darkMode ? 'dark' : ''}`;
-    const lastValuePath = state.path.at(-1);
+    const currentModule = state.path.at(-1);
+
+    if (currentModule !== this.prevPath && this.prevPath === CURRENT_MODULE.CONNECTION_STRING) {
+      this.nlNostrConnectDefaultCancel.emit();
+    }
+    this.prevPath = currentModule;
 
     const renderModule = () => {
       if (state.isOTP) return <nl-signin-otp />;
@@ -121,7 +129,7 @@ export class NlAuth {
       // @ts-ignore
       // const t: CURRENT_MODULE = 'import' // lastValuePath
 
-      switch (lastValuePath) {
+      switch (currentModule) {
         case CURRENT_MODULE.WELCOME:
           return <nl-welcome titleWelcome={this.welcomeTitle || undefined} description={this.welcomeDescription || undefined} />;
         case CURRENT_MODULE.LOGIN:
@@ -165,16 +173,16 @@ export class NlAuth {
 
     const showLogin =
       state.isOTP ||
-      (lastValuePath !== CURRENT_MODULE.INFO &&
-        lastValuePath !== CURRENT_MODULE.CONFIRM_LOGOUT &&
-        lastValuePath !== CURRENT_MODULE.IMPORT_FLOW &&
-        lastValuePath !== CURRENT_MODULE.WELCOME &&
-        lastValuePath !== CURRENT_MODULE.EXTENSION &&
-        lastValuePath !== CURRENT_MODULE.IFRAME &&
-        lastValuePath !== CURRENT_MODULE.PREVIOUSLY_LOGGED);
+      (currentModule !== CURRENT_MODULE.INFO &&
+        currentModule !== CURRENT_MODULE.CONFIRM_LOGOUT &&
+        currentModule !== CURRENT_MODULE.IMPORT_FLOW &&
+        currentModule !== CURRENT_MODULE.WELCOME &&
+        currentModule !== CURRENT_MODULE.EXTENSION &&
+        currentModule !== CURRENT_MODULE.IFRAME &&
+        currentModule !== CURRENT_MODULE.PREVIOUSLY_LOGGED);
 
     const showSignup =
-      lastValuePath !== CURRENT_MODULE.IFRAME &&
+      currentModule !== CURRENT_MODULE.IFRAME &&
       (!this.authMethods.length || (!this.localSignup && this.authMethods.includes('connect')) || (this.localSignup && this.authMethods.includes('local')));
 
     return (
@@ -278,13 +286,13 @@ export class NlAuth {
               </div>
             )}
             {state.isLoading || state.authUrl ? (
-              <nl-loading path={lastValuePath} />
+              <nl-loading path={currentModule} />
             ) : (
               <Fragment>
                 {renderModule()}
                 {showLogin && (
                   <Fragment>
-                    {lastValuePath === CURRENT_MODULE.WELCOME_SIGNUP || lastValuePath === CURRENT_MODULE.SIGNUP || lastValuePath === CURRENT_MODULE.LOCAL_SIGNUP ? (
+                    {currentModule === CURRENT_MODULE.WELCOME_SIGNUP || currentModule === CURRENT_MODULE.SIGNUP || currentModule === CURRENT_MODULE.LOCAL_SIGNUP ? (
                       <div class="p-4 overflow-y-auto">
                         <p class="nl-footer font-light text-center text-sm pt-3 max-w-96 mx-auto">
                           If you already have a profile please{' '}

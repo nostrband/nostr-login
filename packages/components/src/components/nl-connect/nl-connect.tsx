@@ -15,7 +15,6 @@ export class NlConnect {
 
   @State() isOpenAdvancedLogin: boolean = false;
   @Event() nlNostrConnect: EventEmitter<ConnectionString>;
-  @Event() nlNostrConnectDefault: EventEmitter<void>;
 
   handleChangeScreen(screen) {
     state.path = [...state.path, screen];
@@ -37,7 +36,6 @@ export class NlConnect {
   }
 
   handleConnectionString() {
-    this.nlNostrConnectDefault.emit();
     this.handleChangeScreen(CURRENT_MODULE.CONNECTION_STRING)
   }
 

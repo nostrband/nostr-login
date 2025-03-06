@@ -319,7 +319,6 @@ export class NlBanner {
 
     const dialogs = deepQuerySelectorAll('dialog');
     const needDialog = !!dialogs.find(d => (d as HTMLDialogElement).open && !d.classList.contains('nl-banner-dialog'));
-    console.log('nostr-login need dialog', needDialog);
 
     return (
       <div class={`theme-${this.theme} ${!this.isOpen && this.hiddenMode ? 'hidden' : ''}`}>
