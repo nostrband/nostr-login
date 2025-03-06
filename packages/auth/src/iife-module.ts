@@ -68,6 +68,9 @@ import { NostrLoginOptions, StartScreens } from './types';
       const dev = cs.getAttribute('data-dev') === 'true';
       if (dev) options.dev = dev;
 
+      const custom = cs.getAttribute('data-custom-nostr-connect') === 'true';
+      if (custom) options.customNostrConnect = custom;
+
       console.log('nostr-login options', options);
     }
 

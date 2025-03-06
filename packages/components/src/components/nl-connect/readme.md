@@ -15,10 +15,9 @@
 
 ## Events
 
-| Event                   | Description | Type                            |
-| ----------------------- | ----------- | ------------------------------- |
-| `nlNostrConnect`        |             | `CustomEvent<ConnectionString>` |
-| `nlNostrConnectDefault` |             | `CustomEvent<void>`             |
+| Event            | Description | Type                            |
+| ---------------- | ----------- | ------------------------------- |
+| `nlNostrConnect` |             | `CustomEvent<ConnectionString>` |
 
 
 ## Dependencies

@@ -42,7 +42,7 @@ class AuthNostrService extends EventEmitter implements Signer {
   private localSigner: PrivateKeySigner | null = null;
   private params: NostrParams;
   private signerPromise?: Promise<void>;
-  // private launcherPromise?: Promise<void>;
+  private signerErrCallback?: (err: string) => void;
   private readyPromise?: Promise<void>;
   private readyCallback?: () => void;
   private nip44Codec = new Nip44();
@@ -94,17 +94,16 @@ class AuthNostrService extends EventEmitter implements Signer {
       } catch {}
     }
 
-    // if (this.launcherPromise) {
-    //   try {
-    //     await this.launcherPromise;
-    //   } catch {}
-    // }
-
     if (this.readyPromise) {
       try {
         await this.readyPromise;
       } catch {}
     }
+  }
+
+  public cancelNostrConnect() {
+    this.releaseSigner();
+    this.resetAuth();
   }
 
   public async nostrConnect(
@@ -308,6 +307,7 @@ class AuthNostrService extends EventEmitter implements Signer {
 
   private releaseSigner() {
     this.signer = null;
+    this.signerErrCallback?.('cancelled');
     this.localSigner = null;
 
     // disconnect from signer relays
@@ -351,7 +351,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     if (info && this.params.userInfo && (info.pubkey !== this.params.userInfo.pubkey || info.authMethod !== this.params.userInfo.authMethod)) {
       const event = new CustomEvent('nlAuth', { detail: { type: 'logout' } });
       console.log('nostr-login auth', event.detail);
-      document.dispatchEvent(event);
+      document.dispatchEvent(event)
     }
 
     this.setUserInfo(info);
@@ -476,6 +476,10 @@ class AuthNostrService extends EventEmitter implements Signer {
   //   }
   // }
 
+  public isAuthing() {
+    return !!this.readyCallback;
+  }
+
   public async startAuth() {
     if (this.readyCallback) throw new Error('Already started');
 
@@ -537,6 +541,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     this.emit('onIframeUrl', info.iframeUrl);
 
     this.signerPromise = new Promise<void>(async (ok, err) => {
+      this.signerErrCallback = err;
       try {
         // pre-connect if we're creating the connection (listen|connect) or
         // not iframe mode

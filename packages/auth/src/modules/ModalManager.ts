@@ -37,6 +37,9 @@ class ModalManager extends EventEmitter {
     // mutex
     if (this.launcherPromise) await this.waitReady();
 
+    // hmm?!
+    if (this.authNostrService.isAuthing()) this.authNostrService.resetAuth();
+
     this.opt = opt;
 
     const dialog = document.createElement('dialog');
@@ -147,7 +150,7 @@ class ModalManager extends EventEmitter {
             this.modal.isLoading = false;
             this.modal.authUrl = '';
             this.modal.iframeUrl = '';
-            this.modal.error = e.toString();
+            if (e !== 'cancelled') this.modal.error = e.toString();
           }
         }
       };
@@ -184,11 +187,11 @@ class ModalManager extends EventEmitter {
       const importKeys = async (cs: ConnectionString) => {
         await exec(async () => {
           const { iframeUrl } = cs;
-          const link = this.authNostrService.prepareImportUrl(cs.link);
+          cs.link = this.authNostrService.prepareImportUrl(cs.link);
 
           if (this.modal && iframeUrl) {
             // we pass the link down to iframe so it could open it
-            this.modal.authUrl = link;
+            this.modal.authUrl = cs.link;
             this.modal.iframeUrl = iframeUrl;
             this.modal.isLoading = false;
             console.log('nostrconnect authUrl', this.modal.authUrl, this.modal.iframeUrl);
@@ -267,10 +270,9 @@ class ModalManager extends EventEmitter {
           }).open();
           </script>
           </body></html>
-          `.replaceAll("&", "&amp;"); // needed?
+          `.replaceAll('&', '&amp;'); // needed?
 
           return new Promise((ok, err) => {
-
             const process = async (nsecOrBunker: string) => {
               // process the returned value
               console.log('nsecOrBunker', nsecOrBunker);
@@ -287,7 +289,7 @@ class ModalManager extends EventEmitter {
               } else if (nsecOrBunker.startsWith('bunker:')) {
                 await this.authNostrService.authNip46('login', { name: '', bunkerUrl: nsecOrBunker });
                 ok();
-              } else if (nsecOrBunker === "null") {
+              } else if (nsecOrBunker === 'null') {
                 err('Cancelled');
               } else {
                 err('Unknown return value');
@@ -357,7 +359,13 @@ class ModalManager extends EventEmitter {
       });
 
       this.modal.addEventListener('nlNostrConnectDefault', () => {
-        nostrConnect();
+        // dedup the calls
+        if (!this.authNostrService.isAuthing()) nostrConnect();
+      });
+
+      this.modal.addEventListener('nlNostrConnectDefaultCancel', () => {
+        console.log('nlNostrConnectDefaultCancel');
+        this.authNostrService.cancelNostrConnect();
       });
 
       this.modal.addEventListener('nlSwitchAccount', (event: any) => {

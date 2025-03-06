@@ -12,6 +12,13 @@
 | `titleLogin`       | `title-login`       |             | `string` | `'Connection string'`                                     |
 
 
+## Events
+
+| Event                   | Description | Type                |
+| ----------------------- | ----------- | ------------------- |
+| `nlNostrConnectDefault` |             | `CustomEvent<void>` |
+
+
 ## Dependencies
 
 ### Used by

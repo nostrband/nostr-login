@@ -15,6 +15,8 @@ export class NostrLoginInitializer {
   public bannerManager: BannerManager;
   public modalManager: ModalManager;
 
+  private customLaunchCallback?: () => void;
+
   constructor() {
     this.params = new NostrParams();
     this.processManager = new ProcessManager();
@@ -35,7 +37,11 @@ export class NostrLoginInitializer {
         return this.params.userInfo!.authMethod === 'extension' ? this.extensionService.getExtension() : this.authNostrService;
       },
       launch: () => {
-        return this.launch();
+        if (this.params.optionsModal.customNostrConnect) {
+          return this.launchCustomNostrConnect();
+        } else {
+          return this.launch();
+        }
       },
       wait: cb => this.processManager.wait(cb),
     };
@@ -179,6 +185,43 @@ export class NostrLoginInitializer {
     this.modalManager.onUpdateAccounts(accounts, recents);
   }
 
+  public async launchCustomNostrConnect() {
+    try {
+      const customLaunchPromise = new Promise<void>(ok => (this.customLaunchCallback = ok));
+      await this.authNostrService.startAuth();
+
+      const [nostrconnect] = await this.authNostrService.getNostrConnectServices();
+      const event = new CustomEvent('nlNeedAuth', { detail: { nostrconnect } });
+      console.log('nostr-login need auth', nostrconnect);
+      document.dispatchEvent(event);
+
+      try {
+        await this.authNostrService.nostrConnect();
+        await this.authNostrService.endAuth();
+      } catch (e) {
+        // if client manually launches the UI we'll
+        // have cancelled error from the nostrConnect call,
+        // and that's when we should block on the customLaunchPromise
+        if (e === 'cancelled') await customLaunchPromise;
+      }
+
+      // in parallel, we should wait for the other auth mode
+      // // that could be manually launched using nlLaunch
+      // const connect = async () => {
+      //   await this.authNostrService.nostrConnect();
+      //   await this.authNostrService.endAuth();
+      // };
+
+      // // try custom connect, but also wait for custom
+      // // launch that might be created with nlLaunch,
+      // // use 'any' instead of 'race' bcs connect will throw
+      // // if
+      // await Promise.any([customLaunchPromise, connect()]);
+    } catch (e) {
+      console.error('launchCustomNostrConnect', e);
+    }
+  }
+
   public launch = async (startScreen?: StartScreens) => {
     const recent = localStorageGetRecents();
     const accounts = localStorageGetAccounts();
@@ -189,7 +232,22 @@ export class NostrLoginInitializer {
       options.startScreen = 'switch-account';
     }
 
-    return this.modalManager.launch(options).catch(() => {}); // don't throw if cancelled
+    // if we're being manually called in the middle of customNostrConnect
+    // flow then we'll reset the current auth session and launch
+    // our manual flow and then release the customNostrConnect session
+    // as if it finished properly
+    if (this.customLaunchCallback) this.authNostrService.resetAuth();
+    try {
+      await this.modalManager.launch(options);
+      if (this.customLaunchCallback) {
+        const cb = this.customLaunchCallback;
+        this.customLaunchCallback = undefined;
+        cb();
+      }
+    } catch (e) {
+      // don't throw if cancelled
+      console.log('nostr-login failed', e);
+    }
   };
 
   public init = async (opt: NostrLoginOptions) => {
@@ -253,8 +311,7 @@ export class NostrLoginInitializer {
     if (o.method && o.method !== 'connect' && o.method !== 'extension' && o.method !== 'local' && o.method !== 'otp' && o.method !== 'readOnly')
       throw new Error('Invalid auth event');
 
-    if (o.type === 'logout')
-      return this.logout();
+    if (o.type === 'logout') return this.logout();
 
     if (!o.method || !o.pubkey) throw new Error('Invalid pubkey');
 
