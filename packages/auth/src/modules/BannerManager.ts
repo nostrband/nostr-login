@@ -118,7 +118,7 @@ class BannerManager extends EventEmitter {
     });
 
     this.banner.addEventListener('handleOpenWelcomeModal', () => {
-      this.emit('launch', this.params.optionsModal.startScreen);
+      this.emit('launch');
 
       if (this.banner) {
         this.banner.isOpen = false;
