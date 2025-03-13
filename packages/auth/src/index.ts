@@ -37,11 +37,7 @@ export class NostrLoginInitializer {
         return this.params.userInfo!.authMethod === 'extension' ? this.extensionService.getExtension() : this.authNostrService;
       },
       launch: () => {
-        if (this.params.optionsModal.customNostrConnect) {
-          return this.launchCustomNostrConnect();
-        } else {
-          return this.launch();
-        }
+        return this.launch();
       },
       wait: cb => this.processManager.wait(cb),
     };
@@ -146,7 +142,7 @@ export class NostrLoginInitializer {
       logout();
     });
 
-    this.bannerManager.on('launch', startScreen => {
+    this.bannerManager.on('launch', (startScreen?: StartScreens) => {
       this.launch(startScreen);
     });
   }
@@ -187,13 +183,11 @@ export class NostrLoginInitializer {
 
   public async launchCustomNostrConnect() {
     try {
+      if (this.authNostrService.isAuthing()) this.authNostrService.cancelNostrConnect();
+
       const customLaunchPromise = new Promise<void>(ok => (this.customLaunchCallback = ok));
       await this.authNostrService.startAuth();
-
-      const [nostrconnect] = await this.authNostrService.getNostrConnectServices();
-      const event = new CustomEvent('nlNeedAuth', { detail: { nostrconnect } });
-      console.log('nostr-login need auth', nostrconnect);
-      document.dispatchEvent(event);
+      await this.authNostrService.sendNeedAuth();
 
       try {
         await this.authNostrService.nostrConnect();
@@ -204,30 +198,31 @@ export class NostrLoginInitializer {
         // and that's when we should block on the customLaunchPromise
         if (e === 'cancelled') await customLaunchPromise;
       }
-
-      // in parallel, we should wait for the other auth mode
-      // // that could be manually launched using nlLaunch
-      // const connect = async () => {
-      //   await this.authNostrService.nostrConnect();
-      //   await this.authNostrService.endAuth();
-      // };
-
-      // // try custom connect, but also wait for custom
-      // // launch that might be created with nlLaunch,
-      // // use 'any' instead of 'race' bcs connect will throw
-      // // if
-      // await Promise.any([customLaunchPromise, connect()]);
     } catch (e) {
       console.error('launchCustomNostrConnect', e);
     }
   }
 
-  public launch = async (startScreen?: StartScreens) => {
+  private fulfillCustomLaunchPromise() {
+    if (this.customLaunchCallback) {
+      const cb = this.customLaunchCallback;
+      this.customLaunchCallback = undefined;
+      cb();
+    }
+  }
+
+  public launch = async (startScreen?: StartScreens | 'default') => {
+    if (!startScreen) {
+      if (this.params.optionsModal.customNostrConnect) {
+        return this.launchCustomNostrConnect();
+      }
+    }
+
     const recent = localStorageGetRecents();
     const accounts = localStorageGetAccounts();
 
     const options = { ...this.params.optionsModal };
-    if (startScreen) options.startScreen = startScreen;
+    if (startScreen && startScreen !== 'default') options.startScreen = startScreen;
     else if (Boolean(recent?.length) || Boolean(accounts?.length)) {
       options.startScreen = 'switch-account';
     }
@@ -239,11 +234,11 @@ export class NostrLoginInitializer {
     if (this.customLaunchCallback) this.authNostrService.resetAuth();
     try {
       await this.modalManager.launch(options);
-      if (this.customLaunchCallback) {
-        const cb = this.customLaunchCallback;
-        this.customLaunchCallback = undefined;
-        cb();
-      }
+
+      // if custom launch was interrupted by manual
+      // launch then we unlock the custom launch to make
+      // it proceed
+      this.fulfillCustomLaunchPromise();
     } catch (e) {
       // don't throw if cancelled
       console.log('nostr-login failed', e);
@@ -325,15 +320,24 @@ export class NostrLoginInitializer {
     };
     await this.switchAccount(info, o.type === 'signup');
   };
+
+  public cancelNeedAuth = () => {
+    console.log("cancelNeedAuth");
+    this.fulfillCustomLaunchPromise();
+    this.authNostrService.cancelNostrConnect();
+  };
 }
 
 const initializer = new NostrLoginInitializer();
 
-export const { init, launch, logout, setDarkMode, setAuth } = initializer;
+export const { init, launch, logout, setDarkMode, setAuth, cancelNeedAuth } = initializer;
 
 document.addEventListener('nlLogout', logout);
 document.addEventListener('nlLaunch', (event: any) => {
   launch(event.detail || '');
+});
+document.addEventListener('nlNeedAuthCancel', () => {
+  cancelNeedAuth();
 });
 document.addEventListener('nlDarkMode', (event: any) => {
   setDarkMode(!!event.detail);

@@ -158,7 +158,7 @@ class AuthNostrService extends EventEmitter implements Signer {
     const pubkey = getPublicKey(this.nostrConnectKey);
     const meta = {
       name: encodeURIComponent(document.location.host),
-      url: encodeURIComponent(document.location.href),
+      url: encodeURIComponent(document.location.origin),
       icon: encodeURIComponent(await getIcon()),
       perms: encodeURIComponent(this.params.optionsModal.perms || ''),
     };
@@ -476,11 +476,19 @@ class AuthNostrService extends EventEmitter implements Signer {
   //   }
   // }
 
+  public async sendNeedAuth() {
+    const [nostrconnect] = await this.getNostrConnectServices();
+    const event = new CustomEvent('nlNeedAuth', { detail: { nostrconnect } });
+    console.log('nostr-login need auth', nostrconnect);
+    document.dispatchEvent(event);
+  }
+
   public isAuthing() {
     return !!this.readyCallback;
   }
 
   public async startAuth() {
+    console.log("startAuth");
     if (this.readyCallback) throw new Error('Already started');
 
     // start the new promise

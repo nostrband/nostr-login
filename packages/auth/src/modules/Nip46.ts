@@ -44,7 +44,6 @@ class NostrRpc extends NDKNostrRpc {
     const remoteUser = this._ndk.getUser({ pubkey: event.pubkey });
     remoteUser.ndk = this._ndk;
     const decrypt = this.isNip04(event.content) ? this._signer.decrypt : this._signer.decryptNip44;
-    console.log('client event nip04', this.isNip04(event.content));
     const decryptedContent = await decrypt.call(this._signer, remoteUser, event.content);
     const parsedContent = JSON.parse(decryptedContent);
     const { id, method, params, result, error } = parsedContent;
@@ -163,7 +162,7 @@ class NostrRpc extends NDKNostrRpc {
         } else if (cb) {
           if (this.requests.has(id)) {
             this.requests.delete(id);
-            console.log('nostr-login iframe processed request in', Date.now() - now, 'ms');
+            console.log('nostr-login processed nip46 request in', Date.now() - now, 'ms');
             cb(response);
           }
         }
