@@ -231,7 +231,7 @@ export class NostrLoginInitializer {
     // flow then we'll reset the current auth session and launch
     // our manual flow and then release the customNostrConnect session
     // as if it finished properly
-    if (this.customLaunchCallback) this.authNostrService.resetAuth();
+    if (this.customLaunchCallback) this.authNostrService.cancelNostrConnect();
     try {
       await this.modalManager.launch(options);
 
